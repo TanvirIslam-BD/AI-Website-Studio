@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { BRAND } from '@/lib/brand';
 import './globals.css';
 
 const inter = Inter({
@@ -10,11 +11,18 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AI Website Studio',
-    template: '%s | AI Website Studio',
+    default: `${BRAND.name} - ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name}`,
   },
-  description:
-    'Describe your business and get a real, editable website. Generate with AI, refine in a visual editor, and deploy to Vercel in one click.',
+  description: BRAND.description,
+  applicationName: BRAND.name,
+  openGraph: {
+    type: 'website',
+    siteName: BRAND.name,
+    title: `${BRAND.name} - ${BRAND.tagline}`,
+    description: BRAND.description,
+  },
+  twitter: { card: 'summary_large_image', title: BRAND.name, description: BRAND.description },
   metadataBase: process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL) : undefined,
 };
 

@@ -1,3 +1,4 @@
+import { BRAND } from '@/lib/brand';
 import { FONT_NAMES, THEME_PRESETS } from '@/lib/website/theme';
 import { TOPIC_KEYS } from '@/lib/website/stock';
 import { sectionCatalogText, sectionPropsText, toolCatalogText, type ToolSpec } from './tools';
@@ -27,7 +28,7 @@ Hard rules:
 `.trim();
 
 export function websiteGenerationPrompt(): string {
-  return `You are the website architect inside AI Website Studio. You turn a short business brief into a complete, well-structured marketing website.
+  return `You are the website architect inside ${BRAND.name}. You turn a short business brief into a complete, well-structured marketing website.
 
 ${SHARED_RULES}
 
@@ -74,7 +75,7 @@ Generate the complete website now.`;
 // --- copilot ---------------------------------------------------------------
 
 export function copilotSystemPrompt(tools: ToolSpec[]): string {
-  return `You are the AI copilot inside AI Website Studio. You edit a website by calling operations on its structured document. You never rewrite the whole site.
+  return `You are the AI copilot inside ${BRAND.name}. You edit a website by calling operations on its structured document. You never rewrite the whole site.
 
 ${SHARED_RULES}
 

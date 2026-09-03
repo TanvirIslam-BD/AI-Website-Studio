@@ -1,0 +1,114 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { ArrowRight, Menu, X } from 'lucide-react';
+import { BRAND, NAV_LINKS } from '@/lib/brand';
+import { Logo } from '@/components/ui/misc';
+import { cn } from '@/lib/utils';
+
+/**
+ * Marketing navigation. Sticky, gains a border once the page scrolls so the
+ * hero reads as one uninterrupted surface at the top.
+ */
+export function MarketingNav({ signedIn }: { signedIn: boolean }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close the mobile sheet when the viewport grows past the breakpoint.
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 768px)');
+    const onChange = () => media.matches && setOpen(false);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  return (
+    <header
+      className={cn(
+        'sticky top-0 z-40 transition-colors duration-200',
+        scrolled ? 'border-b border-ink-200/70 bg-white/85 backdrop-blur-md' : 'border-b border-transparent bg-transparent',
+      )}
+    >
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
+        <Link href="/" aria-label={BRAND.name}>
+          <Logo />
+        </Link>
+
+        <nav className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="rounded-lg px-3 py-2 text-[13px] font-medium text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          {signedIn ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-ink-900 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+            >
+              Dashboard <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className="hidden rounded-lg px-3 py-2 text-[13px] font-medium text-ink-600 transition-colors hover:text-ink-900 sm:block"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signin?mode=register"
+                className="inline-flex h-9 items-center rounded-lg bg-ink-900 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+              >
+                Start free
+              </Link>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            className="grid h-9 w-9 place-items-center rounded-lg text-ink-600 hover:bg-ink-100 md:hidden"
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {open ? (
+        <nav className="border-t border-ink-200/70 bg-white px-5 pb-4 pt-2 md:hidden">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-100"
+            >
+              {link.label}
+            </a>
+          ))}
+          {!signedIn ? (
+            <Link href="/signin" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-100">
+              Sign in
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
+    </header>
+  );
+}

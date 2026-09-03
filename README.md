@@ -244,6 +244,28 @@ additive from here.
 
 ---
 
+## The marketing site
+
+The public page at `/` is not a separate copy deck. Several of its sections
+render straight from the product's own registries:
+
+- the section library reads `SECTION_META`, so adding a section type adds a card
+- the copilot section lists `OPERATION_NAMES`, so it cannot advertise a tool
+  that does not exist
+- the brand-kit gallery renders `THEME_PRESETS` with their real palettes and
+  typefaces
+- the examples gallery and the hero showcase call the actual generator, and the
+  hero renders a real generated site through the same section components that
+  build the deployed version
+
+That means the marketing claims cannot drift from the product. There is also no
+fabricated social proof: the numbers shown are product facts (section types,
+operations, bytes shipped) rather than invented customer counts or testimonials.
+
+Pricing mirrors the `WorkspacePlan` enum. Billing is not implemented, so paid
+tiers are labelled "Coming soon" rather than implying a checkout - and the
+prices themselves are placeholders to set before launch.
+
 ## Editor layout
 
 ```
@@ -284,6 +306,8 @@ src/lib/deploy/            static codegen, Vercel client, orchestration
 src/lib/assets/            image providers (Unsplash, built-in library)
 src/components/website/    section component library (shared by canvas, preview and export)
 src/components/editor/     editor shell, canvas, inspector, panels, copilot, deploy dialog
+src/components/marketing/  the public marketing site (renders from the registries above)
+src/lib/brand.ts           product name and public copy, in one place
 src/app/                   routes: landing, auth, dashboard, editor, preview, API
 ```
 

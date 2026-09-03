@@ -57,7 +57,7 @@ export function guessBrand(brief: string): string {
   const quoted = /["'“”']([A-Z][\w&'. -]{1,38})["'“”']/.exec(brief);
   if (quoted?.[1]) return quoted[1].trim();
 
-  const named = /(?:called|named|for)\s+([A-Z][\w&'.-]*(?:\s+[A-Z][\w&'.-]*){0,2})/.exec(brief);
+  const named = /(?:called|named|for)\s+([A-Z][\w'.-]*(?:\s+(?:&|and)?\s*[A-Z][\w'.-]*){0,3})/.exec(brief);
   if (named?.[1] && !/^(A|An|The|My|Our)$/i.test(named[1])) return named[1].trim();
 
   return '';

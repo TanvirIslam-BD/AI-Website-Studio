@@ -68,13 +68,18 @@ export function fontStack(name: string): string {
   return FONTS.find((f) => f.name === name)?.stack ?? FONTS[0].stack;
 }
 
-/** Google Fonts stylesheet URL for the fonts a theme actually uses. */
-export function googleFontsHref(theme: Theme): string {
-  const families = Array.from(new Set([theme.headingFont, theme.bodyFont]))
+/** Google Fonts stylesheet URL for an arbitrary set of families. */
+export function googleFontsHrefFor(names: readonly string[]): string {
+  const families = Array.from(new Set(names))
     .filter((name) => FONT_NAMES.includes(name))
     .map((name) => `family=${name.replace(/ /g, '+')}:wght@400;500;600;700;800`);
   if (families.length === 0) return '';
   return `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
+}
+
+/** Google Fonts stylesheet URL for the fonts a theme actually uses. */
+export function googleFontsHref(theme: Theme): string {
+  return googleFontsHrefFor([theme.headingFont, theme.bodyFont]);
 }
 
 const RADIUS_PX: Record<(typeof RADIUS_SCALE)[number], { sm: string; md: string; lg: string; pill: string }> = {
