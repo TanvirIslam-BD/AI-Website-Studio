@@ -53,6 +53,28 @@ function credentials(): { token: string; teamId?: string } {
   return { token, teamId: process.env.VERCEL_TEAM_ID?.trim() || undefined };
 }
 
+/**
+ * Turns Vercel's own wording into something actionable.
+ *
+ * A permission failure is almost always one of two setup problems rather than
+ * anything about the request, and its message names neither: a token that is
+ * project-scoped or read-only cannot create the project a first deployment
+ * needs, and a token issued under a team is refused in the personal scope
+ * unless VERCEL_TEAM_ID is also set.
+ */
+function explain(message: string, status: number, teamId?: string): string {
+  if (status !== 403 && status !== 401) return message;
+
+  const causes = [
+    'the token is project-scoped or read-only - deploying a new site needs a token that can create projects, from vercel.com/account/tokens',
+    teamId
+      ? `the token may not belong to the team in VERCEL_TEAM_ID (${teamId})`
+      : 'if the token was issued under a team rather than a personal account, VERCEL_TEAM_ID must be set as well',
+  ];
+
+  return `${message} Two things cause this: ${causes.join('; or ')}.`;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const { token, teamId } = credentials();
   const url = new URL(`${API}${path}`);
@@ -80,7 +102,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const error = (payload as { error?: { message?: string; code?: string } } | null)?.error;
-    throw new VercelError(error?.message ?? `Vercel responded ${response.status}`, response.status, error?.code);
+    const message = error?.message ?? `Vercel responded ${response.status}`;
+    throw new VercelError(explain(message, response.status, teamId), response.status, error?.code);
   }
 
   return payload as T;
@@ -170,4 +193,43 @@ export function productionUrlFor(deployment: VercelDeployment): string | null {
     deployment.aliases[0] ??
     deployment.url
   );
+}
+
+export type TokenCheck = { usable: boolean; scope: string | null; reason: string | null };
+
+/**
+ * Preflight for the deploy panel.
+ *
+ * Probing with a project listing was misleading: a project-scoped token can
+ * list projects perfectly well and still be refused when a first deployment
+ * tries to create one, which produced a false all-clear. Reading the account
+ * is the signal that actually separated them - a full-access token returns the
+ * user, a restricted one answers 404 or 403.
+ *
+ * Advisory only, and never throws. The mapping from token type to permission
+ * is not documented exhaustively, so a token that fails this check might still
+ * deploy; the panel warns but does not block, because a wrong refusal is worse
+ * than a wrong warning.
+ */
+export async function checkToken(): Promise<TokenCheck> {
+  if (!isVercelConfigured()) {
+    return { usable: false, scope: null, reason: 'No VERCEL_TOKEN is configured.' };
+  }
+
+  try {
+    await request<{ user: { username: string } }>('/v2/user');
+    const teamId = process.env.VERCEL_TEAM_ID?.trim();
+    return { usable: true, scope: teamId ? `team ${teamId}` : 'personal account', reason: null };
+  } catch (error) {
+    if (error instanceof VercelError && [401, 403, 404].includes(error.status ?? 0)) {
+      return {
+        usable: false,
+        scope: null,
+        reason:
+          'Vercel does not recognise this token as an account token, which usually means it is project-scoped or read-only. Deploying a new site needs a token that can create projects. If the token belongs to a team, VERCEL_TEAM_ID must be set too.',
+      };
+    }
+    // A network blip or Vercel outage is not a token problem.
+    return { usable: true, scope: null, reason: null };
+  }
 }

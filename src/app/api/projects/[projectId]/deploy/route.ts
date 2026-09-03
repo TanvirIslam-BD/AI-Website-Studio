@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { handle } from '@/lib/api';
 import { requireProjectRef, requireUser } from '@/lib/tenancy';
 import { deploymentHistory, isVercelConfigured, latestDeployment, previewDeploymentFiles, refreshDeployment, startDeployment } from '@/lib/deploy/service';
+import { checkToken } from '@/lib/deploy/vercel';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -17,10 +18,17 @@ export const GET = handle(async (_request: Request, { params }: Params) => {
   const latest = await latestDeployment(projectId);
   const refreshed = latest && (latest.status === 'QUEUED' || latest.status === 'BUILDING') ? await refreshDeployment(latest.id) : latest;
 
-  const [history, files] = await Promise.all([deploymentHistory(projectId), previewDeploymentFiles(projectId)]);
+  // The token check runs alongside the rest so the panel can warn about a
+  // restricted token before anyone watches a deployment fail.
+  const [history, files, token] = await Promise.all([
+    deploymentHistory(projectId),
+    previewDeploymentFiles(projectId),
+    checkToken(),
+  ]);
 
   return NextResponse.json({
     configured: isVercelConfigured(),
+    token,
     deployment: refreshed,
     history,
     files,

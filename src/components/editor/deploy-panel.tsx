@@ -19,8 +19,11 @@ export type DeploymentView = {
   readyAt: string | null;
 };
 
+type TokenCheck = { usable: boolean; scope: string | null; reason: string | null };
+
 type DeployState = {
   configured: boolean;
+  token?: TokenCheck;
   deployment: DeploymentView | null;
   history: DeploymentView[];
   files: Array<{ file: string; bytes: number }>;
@@ -112,6 +115,9 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
           ) : (
             <div className="grid gap-4">
               {!state.configured ? <NotConfigured /> : null}
+              {state.configured && state.token && !state.token.usable ? (
+                <TokenProblem reason={state.token.reason} />
+              ) : null}
               {deployment ? <DeploymentCard deployment={deployment} live={live} /> : null}
 
               <div>
@@ -141,7 +147,13 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
           <Button variant="ghost" size="sm" onClick={() => void load()}>
             <RotateCw className="h-3.5 w-3.5" /> Refresh
           </Button>
-          <Button variant="primary" size="md" loading={busy || live} disabled={!state?.configured || live} onClick={() => void deploy()}>
+          <Button
+            variant="primary"
+            size="md"
+            loading={busy || live}
+            disabled={!state?.configured || live}
+            onClick={() => void deploy()}
+          >
             <Rocket className="h-3.5 w-3.5" />
             {live ? 'Deploying…' : deployment?.status === 'READY' ? 'Redeploy' : 'Deploy to production'}
           </Button>
@@ -161,6 +173,29 @@ function NotConfigured() {
         Add <code className="rounded bg-white/70 px-1">VERCEL_TOKEN</code> to your environment (plus{' '}
         <code className="rounded bg-white/70 px-1">VERCEL_TEAM_ID</code> for team accounts), then restart the server.
       </p>
+    </div>
+  );
+}
+
+/** A token that cannot create projects, surfaced before a failed deployment. */
+function TokenProblem({ reason }: { reason: string | null }) {
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+      <p className="flex items-center gap-2 text-[13px] font-semibold text-amber-900">
+        <AlertCircle className="h-3.5 w-3.5" /> This token may not be able to deploy
+      </p>
+      <p className="mt-1 text-[12px] leading-relaxed text-amber-800">
+        {reason ?? 'The token was rejected by Vercel.'}
+      </p>
+      <p className="mt-1.5 text-[12px] text-amber-800">You can still try - this check is advisory.</p>
+      <a
+        href="https://vercel.com/account/tokens"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium text-amber-900 underline underline-offset-2"
+      >
+        Create a token <ExternalLink className="h-3 w-3" />
+      </a>
     </div>
   );
 }
