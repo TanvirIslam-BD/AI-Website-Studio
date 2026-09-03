@@ -107,14 +107,24 @@ otherwise.
 
 This relies on Prisma's JavaScript schema engine, which Prisma still labels
 unstable. If a schema command misbehaves against Turso, emit the SQL and apply
-it yourself instead:
+it yourself. Note the shell differences - PowerShell needs `--silent` (so npm's
+own banner does not end up inside the file), an explicit UTF-8 encoding, and a
+pipe instead of `<`:
+
+bash / zsh:
 
 ```
-npm run db:sql > schema.sql
+npm run --silent db:sql > schema.sql && turso db shell your-db-name < schema.sql
+```
+
+PowerShell:
+
+```
+npm run --silent db:sql | Out-File -Encoding utf8 schema.sql
 ```
 
 ```
-turso db shell ai-website-studio < schema.sql
+Get-Content schema.sql | turso db shell your-db-name
 ```
 
 A connection problem surfaces as a terse `Error describing the database` -
@@ -329,6 +339,30 @@ src/app/                   routes: landing, auth, dashboard, editor, preview, AP
 It is a standard Next.js app. Set the environment variables above - the same
 `TURSO_*` values work from anywhere, since Turso is accessed over HTTP - and
 `npm run build` handles Prisma generation and the website stylesheet.
+
+`TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` are required in production. Without
+them the app refuses to run a query and says so, rather than silently opening an
+empty SQLite file on an ephemeral filesystem and failing later with
+`no such table: main.User`.
+
+To set them with the Vercel CLI, link the project first - `vercel env add` fails
+with "Your codebase isn't linked to a project" otherwise:
+
+```
+vercel link
+```
+
+```
+vercel env add TURSO_DATABASE_URL production
+```
+
+```
+vercel env add TURSO_AUTH_TOKEN production
+```
+
+Then redeploy, since environment variables are read at build and boot time. The
+Vercel dashboard (Project → Settings → Environment Variables) does the same job
+without the CLI.
 
 Two deployment notes:
 
