@@ -1,6 +1,7 @@
 import { ArrowUp, Check } from 'lucide-react';
 import { OPERATION_NAMES } from '@/lib/website/operations';
 import { Container, Section, SectionHeading } from './shell';
+import { MOCK, MockImg } from './mock-content';
 
 /**
  * The copilot section.
@@ -91,42 +92,48 @@ function PreviewPane() {
 
       <div className="overflow-hidden rounded-lg bg-white">
         <div className="flex items-center justify-between border-b border-ink-100 px-4 py-2.5">
-          <span className="text-[10px] font-bold tracking-tight text-ink-950">Aperture &amp; Light</span>
+          <span className="text-[10px] font-bold tracking-tight text-ink-950">{MOCK.brand}</span>
           <span className="hidden gap-3 sm:flex">
-            {['Home', 'Work', 'About', 'Contact'].map((item) => (
-              <span key={item} className="text-[7px] text-ink-400">
+            {MOCK.nav.map((item) => (
+              <span key={item} className="text-[7px] text-ink-500">
                 {item}
               </span>
             ))}
           </span>
-          <span className="rounded bg-ink-950 px-2 py-0.5 text-[7px] text-white">Enquire</span>
+          <span className="rounded bg-ink-950 px-2 py-0.5 text-[7px] text-white">{MOCK.cta}</span>
         </div>
 
         {/* The selected section, outlined as the editor does. */}
         <div className="relative ring-2 ring-inset ring-ink-950">
-          <span className="absolute left-2 top-2 rounded bg-ink-950 px-1.5 py-0.5 text-[7px] font-semibold text-white">
+          <span className="absolute left-2 top-2 z-10 rounded bg-ink-950 px-1.5 py-0.5 text-[7px] font-semibold text-white">
             Hero
           </span>
-          <div className="px-6 py-8 text-center">
-            <span className="mx-auto block h-1 w-14 rounded bg-ink-300" />
-            <p
-              className="mx-auto mt-3 max-w-[200px] text-[15px] font-semibold leading-tight tracking-[-0.02em] text-ink-950"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
-              Photographs that feel like you
-            </p>
-            <span className="mx-auto mt-2.5 block h-1 w-32 rounded bg-ink-200" />
-            <span className="mt-4 inline-flex gap-1.5">
-              <span className="h-4 w-14 rounded bg-ink-950" />
-              <span className="h-4 w-12 rounded border border-ink-300" />
-            </span>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] items-center gap-4 px-5 py-6">
+            <div>
+              <p className="text-[6px] font-semibold uppercase tracking-[0.14em] text-ink-400">{MOCK.eyebrow}</p>
+              <p
+                className="mt-1.5 text-[17px] font-semibold leading-[1.1] tracking-[-0.02em] text-ink-950"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
+                {MOCK.headline}
+              </p>
+              <p className="mt-2 text-[7px] leading-[1.6] text-ink-500">{MOCK.body}</p>
+              <span className="mt-3 inline-flex items-center gap-1.5">
+                <span className="rounded bg-ink-950 px-2 py-1 text-[7px] font-medium text-white">Book a session</span>
+                <span className="rounded border border-ink-300 px-2 py-1 text-[7px] text-ink-600">See our work</span>
+              </span>
+            </div>
+            <MockImg src={MOCK.hero(520)} ratio="4/5" className="w-full rounded" />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-1.5 p-4">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[4/3] rounded bg-ink-100" />
-          ))}
+        <div className="border-t border-ink-100 px-5 py-4">
+          <p className="text-center text-[7px] font-semibold uppercase tracking-[0.14em] text-ink-400">Selected work</p>
+          <div className="mt-2.5 grid grid-cols-3 gap-2">
+            {MOCK.gallery(3, 260).map((src) => (
+              <MockImg key={src} src={src} ratio="1/1" className="w-full rounded" />
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { ArrowRight, Check, CornerDownLeft, Loader2 } from 'lucide-react';
+import { ArrowRight, Check, CornerDownLeft } from 'lucide-react';
+import { MOCK, MockImg } from './mock-content';
 
 /**
  * The workflow, as three panels: prompt, generated structure, deployed site.
@@ -109,7 +110,7 @@ function Panel({ step, title, children }: { step: string; title: string; childre
   );
 }
 
-/** The deployed result, in browser chrome. */
+/** The deployed result, in browser chrome, using real content. */
 function BrowserPreview() {
   return (
     <div className="overflow-hidden rounded-lg border border-ink-200 bg-white">
@@ -121,37 +122,44 @@ function BrowserPreview() {
         </span>
         <span className="mx-auto flex items-center gap-1 font-mono text-[8px] text-ink-500">
           <span className="h-1.5 w-1.5 rounded-full bg-ink-900" />
-          aperture-light.vercel.app
+          {MOCK.domain}
         </span>
       </div>
 
       <div className="px-3 pb-3 pt-2.5">
         <div className="flex items-center justify-between border-b border-ink-100 pb-2">
-          <span className="text-[8px] font-bold tracking-tight text-ink-900">Aperture &amp; Light</span>
+          <span className="text-[8px] font-bold tracking-tight text-ink-900">{MOCK.brand}</span>
           <span className="hidden gap-1.5 sm:flex">
-            {['Home', 'Work', 'About'].map((item) => (
-              <span key={item} className="text-[6px] text-ink-400">
+            {MOCK.nav.slice(0, 3).map((item) => (
+              <span key={item} className="text-[6px] text-ink-500">
                 {item}
               </span>
             ))}
           </span>
-          <span className="rounded bg-ink-950 px-1.5 py-0.5 text-[6px] text-white">Enquire</span>
+          <span className="rounded bg-ink-950 px-1.5 py-0.5 text-[6px] text-white">{MOCK.cta}</span>
         </div>
 
         <div className="grid grid-cols-2 items-center gap-2.5 py-3">
           <div>
-            <span className="block h-1 w-8 rounded bg-ink-300" />
-            <span className="mt-1.5 block h-2 w-full rounded bg-ink-900" />
-            <span className="mt-1 block h-2 w-3/5 rounded bg-ink-900" />
-            <span className="mt-2 block h-1 w-full rounded bg-ink-200" />
-            <span className="mt-2.5 inline-block h-3 w-10 rounded bg-ink-950" />
+            <p className="text-[5px] font-semibold uppercase tracking-[0.12em] text-ink-400">{MOCK.eyebrow}</p>
+            <p
+              className="mt-1 text-[10px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink-950"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              {MOCK.headline}
+            </p>
+            <p className="mt-1 text-[5px] leading-[1.5] text-ink-500">{MOCK.body}</p>
+            <span className="mt-2 inline-flex items-center gap-1">
+              <span className="rounded bg-ink-950 px-1.5 py-[3px] text-[5px] text-white">Book a session</span>
+              <span className="rounded border border-ink-300 px-1.5 py-[3px] text-[5px] text-ink-600">See work</span>
+            </span>
           </div>
-          <div className="aspect-[4/3] rounded bg-gradient-to-br from-ink-200 to-ink-400" />
+          <MockImg src={MOCK.hero(420)} ratio="4/3" className="w-full rounded" />
         </div>
 
         <div className="grid grid-cols-3 gap-1.5">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-square rounded bg-ink-100" />
+          {MOCK.gallery(3, 200).map((src) => (
+            <MockImg key={src} src={src} ratio="1/1" className="w-full rounded" />
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Check, CornerDownLeft, Loader2, Sparkles } from 'lucide-react';
 import { Container, Section, SectionHeading } from './shell';
+import { MOCK, MockImg } from './mock-content';
 
 /**
  * The workflow as a timeline.
@@ -125,10 +126,12 @@ function StepVisual({ kind }: { kind: 'prompt' | 'editor' | 'copilot' | 'deploy'
             ))}
           </ul>
           <div className="rounded-lg border border-ink-200 p-2.5">
-            <div className="mx-auto h-1.5 w-16 rounded bg-ink-300" />
+            <p className="text-center text-[7px] font-semibold uppercase tracking-[0.14em] text-ink-400">
+              Selected work
+            </p>
             <div className="mt-2 grid grid-cols-3 gap-1.5 rounded ring-2 ring-ink-950 ring-offset-2">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="aspect-square rounded bg-ink-100" />
+              {MOCK.gallery(3, 200).concat(MOCK.gallery(3, 200)).map((src, i) => (
+                <MockImg key={i} src={src} ratio="1/1" className="w-full rounded-sm" />
               ))}
             </div>
             <p className="mt-2.5 text-center font-mono text-[9px] text-ink-400">gallery · 6 images · grid</p>
@@ -178,9 +181,21 @@ function StepVisual({ kind }: { kind: 'prompt' | 'editor' | 'copilot' | 'deploy'
           ),
         )}
       </div>
-      <div className="mt-3 rounded-lg bg-ink-950 px-3 py-2.5">
-        <p className="font-mono text-[9px] uppercase tracking-wider text-white/50">Live</p>
-        <p className="mt-0.5 font-mono text-[11px] text-white">halo-studio.vercel.app</p>
+      <div className="mt-3 overflow-hidden rounded-lg bg-ink-950">
+        <div className="flex items-center justify-between px-3 py-2.5">
+          <span>
+            <span className="block font-mono text-[9px] uppercase tracking-wider text-white/50">Live</span>
+            <span className="mt-0.5 block font-mono text-[11px] text-white">{MOCK.domain}</span>
+          </span>
+          <span className="rounded bg-white px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-ink-950">
+            200
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-px bg-white/10">
+          {MOCK.gallery(3, 200).map((src) => (
+            <MockImg key={src} src={src} ratio="16/10" className="w-full" />
+          ))}
+        </div>
       </div>
     </Card>
   );

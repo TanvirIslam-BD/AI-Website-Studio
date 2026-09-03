@@ -35,7 +35,13 @@ const EXAMPLES = BRIEFS.map(({ brief, industry }) => {
     brand: site.brand,
     headline: hero && 'heading' in hero ? hero.heading : site.brand,
     description: site.description,
-    image: (hero && 'image' in hero ? hero.image?.url : undefined) ?? site.document.assets[0]?.url,
+    // The document stores 1600px originals for the deployed site; a card shows
+    // them at around 380px, so narrow the request rather than shipping four
+    // times the pixels needed.
+    image: ((hero && 'image' in hero ? hero.image?.url : undefined) ?? site.document.assets[0]?.url)?.replace(
+      'w=1600',
+      'w=760',
+    ),
     serif: FONTS.find((f) => f.name === site.document.theme.headingFont)?.category === 'serif',
     pages: site.document.pages.length,
     sections: site.document.pages.reduce((sum, p) => sum + p.sections.length, 0),
