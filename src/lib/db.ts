@@ -40,6 +40,21 @@ function createAdapter(): PrismaLibSQL {
     });
   }
 
+  /**
+   * Never fall back to a local file in production.
+   *
+   * A serverless filesystem is ephemeral and starts empty, so the fallback
+   * would happily open a brand new SQLite file and then fail on the first
+   * query with "no such table: main.User" - a baffling error a long way from
+   * its cause. Failing at startup with the actual reason is far cheaper to
+   * diagnose than a missing-table error at request time.
+   */
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'TURSO_DATABASE_URL is not set. Production requires a Turso database: set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in the hosting environment, then apply the schema with `npm run db:push`.',
+    );
+  }
+
   const localUrl = process.env.DATABASE_URL?.trim();
   if (!localUrl) {
     throw new Error(
@@ -58,14 +73,32 @@ function createAdapter(): PrismaLibSQL {
 /** Next.js hot-reloads modules, so cache the client to avoid leaking connections. */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const db =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createClient(): PrismaClient {
+  const client = new PrismaClient({
     adapter: createAdapter(),
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client;
+  return client;
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+/**
+ * Constructed on first use, not at import.
+ *
+ * `next build` evaluates every route module to collect page data, so building
+ * the client at module scope would make a missing TURSO_DATABASE_URL fail the
+ * build rather than the request - and the build machine has no reason to hold
+ * database credentials. Deferring behind a proxy keeps importing this module
+ * free of side effects while callers still see a plain PrismaClient.
+ */
+export const db = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const client = globalForPrisma.prisma ?? createClient();
+    const value = Reflect.get(client, property, client);
+    // Methods must keep the client as their receiver once detached.
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 /** True when the app is pointed at a remote Turso database rather than a file. */
 export function isRemoteDatabase(): boolean {
