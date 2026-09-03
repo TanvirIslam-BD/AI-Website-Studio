@@ -13,11 +13,23 @@ Built for small businesses, freelancers, creators and agencies.
 
 ## Quick start
 
-```bash
+Run these one at a time. They work in bash, PowerShell and cmd - note that
+Windows PowerShell 5.1 does not support `&&`, so do not chain them.
+
+```
 npm install
-cp .env.example .env        # then fill in DATABASE_URL and AUTH_SECRET
-npm run db:push             # create the schema
-npm run db:seed             # optional: a demo account with three websites
+```
+
+Copy the example environment file, then fill in `DATABASE_URL` and
+`AUTH_SECRET` (see [Environment](#environment)):
+
+```
+cp .env.example .env
+```
+
+```
+npm run db:push     # create the schema
+npm run db:seed     # optional: a demo account with three websites
 npm run dev
 ```
 
@@ -33,7 +45,7 @@ generation and copy editing; add a Vercel token to enable deployment.
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | yes | PostgreSQL connection string |
-| `AUTH_SECRET` | yes | Auth.js session signing (`openssl rand -base64 32`) |
+| `AUTH_SECRET` | yes | Auth.js session signing (see below) |
 | `AI_PROVIDER` | no | `anthropic`, `openai` or `mock` (default: whichever key exists) |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | no | Claude generation and copilot |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | no | OpenAI alternative |
@@ -41,11 +53,39 @@ generation and copy editing; add a Vercel token to enable deployment.
 | `UNSPLASH_ACCESS_KEY` | no | Unsplash image search (falls back to a built-in library) |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | no | Adds a "Continue with GitHub" button |
 
-A local database in one command:
+#### Generating `AUTH_SECRET`
 
-```bash
-docker run --name aiws-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+macOS / Linux / Git Bash:
+
 ```
+openssl rand -base64 32
+```
+
+PowerShell (no OpenSSL needed):
+
+```
+$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
+```
+
+#### Getting a PostgreSQL database
+
+Any Postgres 14+ works. Pick whichever is easiest:
+
+- **Hosted, nothing to install** - create a free database at
+  [Neon](https://neon.tech) or [Supabase](https://supabase.com) and paste the
+  connection string into `DATABASE_URL`. Append `?sslmode=require` if the
+  provider asks for it.
+- **Docker**:
+
+  ```
+  docker run --name aiws-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+  ```
+
+- **Local install** - [postgresql.org/download](https://www.postgresql.org/download/),
+  then create a database named `ai_website_studio`.
+
+The default `DATABASE_URL` in `.env.example` assumes a local Postgres on port
+5432 with user/password `postgres`.
 
 The seed script creates `demo@aiwebsitestudio.test` / `demo1234`.
 
