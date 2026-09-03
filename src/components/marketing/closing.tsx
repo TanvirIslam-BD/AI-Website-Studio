@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { ArrowRight, Github } from 'lucide-react';
-import { BRAND, NAV_LINKS } from '@/lib/brand';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { BRAND, COMPANY, NAV_LINKS, SOCIAL_LINKS } from '@/lib/brand';
 import { Container } from './shell';
 import { Logo } from '@/components/brand/logo';
+import { SocialIcon } from '@/components/brand/social-icons';
 
 export function FinalCta({ signedIn }: { signedIn: boolean }) {
   return (
@@ -50,26 +51,69 @@ const FOOTER_COLUMNS = [
   },
 ];
 
+/**
+ * Site footer.
+ *
+ * Dark, so it reads as one surface with the closing call to action above it.
+ * Carries the publishing entity, its registered address and support contact -
+ * the details a visitor needs to know who they are dealing with.
+ */
 export function MarketingFooter() {
+  // Unset profiles are skipped rather than rendered as dead links.
+  const socials = SOCIAL_LINKS.filter((social) => social.href.trim().length > 0);
+
   return (
-    <footer className="border-t border-ink-200/70 bg-white">
-      <Container className="py-14">
-        <div className="grid gap-10 md:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,1fr))]">
+    <footer className="border-t border-white/10 bg-ink-950">
+      <Container className="py-16">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_repeat(2,minmax(0,1fr))]">
           <div>
-            <Logo size={26} />
-            <p className="mt-3.5 font-brand text-[13px] font-medium tracking-[0.01em] text-ink-700">{BRAND.slogan}</p>
-            <p className="mt-2.5 max-w-xs text-[13px] leading-relaxed text-ink-500">
+            <Logo size={26} tone="light" />
+            <p className="mt-4 font-brand text-[13px] font-medium tracking-[0.02em] text-white/70">{BRAND.slogan}</p>
+            <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-ink-400">
               Structured sites, visual editing, and one-click deployment to your own Vercel account.
             </p>
+
+            <address className="mt-8 not-italic">
+              <p className="text-[13px] font-semibold text-white">{COMPANY.legalName}</p>
+              {COMPANY.address.map((line) => (
+                <p key={line} className="text-[13px] leading-relaxed text-ink-400">
+                  {line}
+                </p>
+              ))}
+              <a
+                href={`mailto:${COMPANY.supportEmail}`}
+                className="mt-3 inline-block text-[13px] font-medium text-brand-300 transition-colors hover:text-brand-200"
+              >
+                {COMPANY.supportEmail}
+              </a>
+            </address>
+
+            {socials.length > 0 ? (
+              <ul className="mt-7 flex flex-wrap gap-2.5">
+                {socials.map((social) => (
+                  <li key={social.platform}>
+                    <a
+                      href={social.href}
+                      aria-label={social.label}
+                      title={social.label}
+                      {...(social.platform === 'email' ? {} : { target: '_blank', rel: 'noreferrer noopener' })}
+                      className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-ink-300 transition-colors hover:border-white/25 hover:bg-white/[0.08] hover:text-white"
+                    >
+                      <SocialIcon platform={social.platform} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
 
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.title}>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-400">{column.title}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-500">{column.title}</p>
               <ul className="mt-4 space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-[13px] text-ink-600 transition-colors hover:text-ink-900">
+                    <Link href={link.href} className="text-[13px] text-ink-300 transition-colors hover:text-white">
                       {link.label}
                     </Link>
                   </li>
@@ -79,14 +123,12 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-ink-200/70 pt-7 sm:flex-row">
-          <p className="text-xs text-ink-400">
-            © {new Date().getFullYear()} {BRAND.company}. All rights reserved.
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 sm:flex-row">
+          <p className="flex items-center gap-2 text-xs text-ink-400">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />© {new Date().getFullYear()} {COMPANY.legalName}.
+            All rights reserved.
           </p>
-          <p className="flex items-center gap-1.5 text-xs text-ink-400">
-            <Github className="h-3.5 w-3.5" />
-            Next.js · Prisma on Turso · Auth.js · Vercel API
-          </p>
+          <p className="text-xs text-ink-500">Next.js · Prisma on Turso · Auth.js · Vercel API</p>
         </div>
       </Container>
     </footer>
