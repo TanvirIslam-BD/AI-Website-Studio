@@ -18,12 +18,11 @@ export function Hero({ providerLabel, signedIn }: { providerLabel: string | null
 
       <Container className="relative pb-16 pt-16 sm:pb-24 sm:pt-24">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-ink-600 shadow-sm backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-brand-600" />
-            {providerLabel ? `Powered by ${providerLabel}` : 'Works offline with built-in templates'}
-          </span>
+          <p className="font-brand text-[15px] font-medium uppercase tracking-[0.22em] text-ink-400 sm:text-base">
+            {BRAND.slogan}
+          </p>
 
-          <h1 className="mt-7 text-balance text-[2.75rem] font-bold leading-[1.03] tracking-[-0.04em] text-ink-950 sm:text-6xl lg:text-[4.25rem]">
+          <h1 className="mt-6 text-balance text-[2.75rem] font-bold leading-[1.03] tracking-[-0.04em] text-ink-950 sm:text-6xl lg:text-[4.25rem]">
             From a sentence to a{' '}
             <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
               deployed website
@@ -41,6 +40,10 @@ export function Hero({ providerLabel, signedIn }: { providerLabel: string | null
         </div>
 
         <ul className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <li className="inline-flex items-center gap-1.5 text-[13px] text-ink-500">
+            <Sparkles className="h-3.5 w-3.5 text-brand-600" />
+            {providerLabel ? `Powered by ${providerLabel}` : 'Works offline with built-in templates'}
+          </li>
           {PROOF.map((item) => (
             <li key={item} className="inline-flex items-center gap-1.5 text-[13px] text-ink-500">
               <Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={2.5} />

@@ -1,4 +1,5 @@
 import { Image as ImageIcon, Layers, Monitor, Palette, Rocket, Smartphone, Sparkles, Tablet } from 'lucide-react';
+import { LogoMark } from '@/components/brand/logo';
 
 /**
  * A styled representation of the editor's three-pane layout.
@@ -38,7 +39,7 @@ export function EditorPreview() {
 function TopBar() {
   return (
     <div className="flex items-center gap-3 border-b border-ink-200/80 bg-white px-3 py-2.5">
-      <span className="grid h-6 w-6 place-items-center rounded-md bg-ink-900 text-[10px] font-black text-white">W</span>
+      <LogoMark size={20} />
       <span className="text-[12px] font-semibold text-ink-900">Aperture &amp; Light</span>
       <span className="hidden text-[10px] text-ink-400 sm:inline">Saved</span>
 

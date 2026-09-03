@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Poppins } from 'next/font/google';
 import { BRAND } from '@/lib/brand';
 import './globals.css';
 
@@ -9,9 +9,17 @@ const inter = Inter({
   display: 'swap',
 });
 
+/** The wordmark typeface. Geometric sans, matching the brand lockup. */
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-brand',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: {
-    default: `${BRAND.name} - ${BRAND.tagline}`,
+    default: `${BRAND.name} - ${BRAND.slogan}`,
     template: `%s | ${BRAND.name}`,
   },
   description: BRAND.description,
@@ -19,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: BRAND.name,
-    title: `${BRAND.name} - ${BRAND.tagline}`,
+    title: `${BRAND.name} - ${BRAND.slogan}`,
     description: BRAND.description,
   },
   twitter: { card: 'summary_large_image', title: BRAND.name, description: BRAND.description },
@@ -34,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="min-h-full font-sans antialiased">{children}</body>
     </html>
   );

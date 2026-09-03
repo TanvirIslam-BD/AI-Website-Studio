@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { BRAND } from '@/lib/brand';
 import type { ProjectStatus, DeploymentStatus } from '@prisma/client';
 
 export function Badge({
@@ -103,16 +102,5 @@ export function Spinner({ className }: { className?: string }) {
       className={cn('inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent', className)}
       aria-hidden
     />
-  );
-}
-
-export function Logo({ className }: { className?: string }) {
-  return (
-    <span className={cn('inline-flex items-center gap-2', className)}>
-      <span className="grid h-7 w-7 place-items-center rounded-[9px] bg-ink-900 text-[13px] font-black text-white">
-        {BRAND.name.charAt(0)}
-      </span>
-      <span className="text-[15px] font-semibold tracking-[-0.02em] text-ink-900">{BRAND.name}</span>
-    </span>
   );
 }

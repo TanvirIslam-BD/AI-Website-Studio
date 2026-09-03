@@ -41,6 +41,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-studio-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+        brand: ['var(--font-brand)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         panel: '0 1px 2px rgba(13,15,20,0.04), 0 8px 24px -12px rgba(13,15,20,0.12)',

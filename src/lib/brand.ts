@@ -7,6 +7,9 @@
 export const BRAND = {
   name: 'Web Copilot AI Studio',
   shortName: 'Web Copilot',
+  /** The brand slogan, as it appears in the logo lockup. */
+  slogan: 'Build Smart · Launch Faster',
+  /** Longer descriptive line, used for page titles and link previews. */
   tagline: 'From a sentence to a deployed website',
   description:
     'Describe your business and get a real, editable, multi-page website. Refine it in a visual editor, direct it with an AI copilot, and deploy to Vercel in one click.',

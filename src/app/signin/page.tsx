@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AUTH_PROVIDERS } from '@/lib/auth';
 import { currentUser } from '@/lib/tenancy';
-import { Logo } from '@/components/ui/misc';
+import { Logo, LogoStacked } from '@/components/brand/logo';
 import { AuthForm } from './auth-form';
 
 export const metadata = { title: 'Sign in' };
@@ -44,6 +44,7 @@ export default async function SignInPage({
       <div className="relative hidden overflow-hidden border-l border-ink-200/70 bg-ink-50/60 lg:block">
         <div className="studio-grid absolute inset-0 opacity-70" aria-hidden />
         <div className="relative flex h-full flex-col justify-center px-14">
+          <LogoStacked size={64} className="mb-12 self-start" />
           <blockquote className="max-w-md text-2xl font-semibold leading-snug tracking-[-0.02em] text-ink-900">
             &ldquo;Prompt, edit, deploy. Every site is stored as structured sections, so nothing you build is trapped in
             a blob of generated HTML.&rdquo;

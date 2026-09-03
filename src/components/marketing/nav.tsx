@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Menu, X } from 'lucide-react';
 import { BRAND, NAV_LINKS } from '@/lib/brand';
-import { Logo } from '@/components/ui/misc';
+import { Logo } from '@/components/brand/logo';
 import { cn } from '@/lib/utils';
 
 /**

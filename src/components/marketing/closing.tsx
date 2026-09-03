@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, Github } from 'lucide-react';
 import { BRAND, NAV_LINKS } from '@/lib/brand';
 import { Container } from './shell';
+import { Logo } from '@/components/brand/logo';
 
 export function FinalCta({ signedIn }: { signedIn: boolean }) {
   return (
@@ -55,14 +56,11 @@ export function MarketingFooter() {
       <Container className="py-14">
         <div className="grid gap-10 md:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,1fr))]">
           <div>
-            <span className="inline-flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-[9px] bg-ink-900 text-[13px] font-black text-white">
-                W
-              </span>
-              <span className="text-[15px] font-semibold tracking-[-0.02em] text-ink-900">{BRAND.name}</span>
-            </span>
-            <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-ink-500">{BRAND.tagline}. Structured sites,
-              visual editing, and one-click deployment to your own Vercel account.</p>
+            <Logo size={26} />
+            <p className="mt-3.5 font-brand text-[13px] font-medium tracking-[0.01em] text-ink-700">{BRAND.slogan}</p>
+            <p className="mt-2.5 max-w-xs text-[13px] leading-relaxed text-ink-500">
+              Structured sites, visual editing, and one-click deployment to your own Vercel account.
+            </p>
           </div>
 
           {FOOTER_COLUMNS.map((column) => (

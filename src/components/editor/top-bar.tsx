@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Check, ChevronLeft, CloudOff, ExternalLink, Loader2, Monitor, Redo2, Rocket, Smartphone, Tablet, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { BRAND } from '@/lib/brand';
+import { LogoMark } from '@/components/brand/logo';
 import { DEVICE_WIDTH, useCanRedo, useCanUndo, useEditor, type Device } from './store';
 
 const DEVICES: Array<{ id: Device; icon: typeof Monitor; label: string }> = [
@@ -50,9 +50,7 @@ export function TopBar({ productionUrl, onDeploy }: { productionUrl: string | nu
         <ChevronLeft className="h-4 w-4" />
       </Link>
 
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-ink-900 text-[12px] font-black text-white">
-        {BRAND.name.charAt(0)}
-      </span>
+      <LogoMark size={24} />
 
       {editingName ? (
         <input
