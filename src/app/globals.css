@@ -9,11 +9,11 @@
  */
 :root {
   --studio-bg: #ffffff;
-  --studio-panel: #fbfbfc;
-  --studio-border: #e8e9ee;
-  --studio-fg: #14161c;
-  --studio-muted: #6b7385;
-  --studio-accent: #4f46e5;
+  --studio-panel: #fafafa;
+  --studio-border: #e5e5e5;
+  --studio-fg: #0a0a0a;
+  --studio-muted: #737373;
+  --studio-accent: #0a0a0a;
   color-scheme: light;
 }
 
@@ -41,31 +41,31 @@
   }
   .studio-scroll {
     scrollbar-width: thin;
-    scrollbar-color: #d7dae2 transparent;
+    scrollbar-color: #d4d4d4 transparent;
   }
   .studio-scroll::-webkit-scrollbar {
     width: 9px;
     height: 9px;
   }
   .studio-scroll::-webkit-scrollbar-thumb {
-    background: #d7dae2;
+    background: #d4d4d4;
     border: 3px solid transparent;
     border-radius: 999px;
     background-clip: content-box;
   }
   .studio-scroll:hover::-webkit-scrollbar-thumb {
-    background: #c2c7d2;
+    background: #a3a3a3;
     background-clip: content-box;
   }
   /* Subtle grid used behind the editor canvas and marketing hero. */
   .studio-grid {
     background-image:
-      linear-gradient(to right, rgba(20, 22, 28, 0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(20, 22, 28, 0.045) 1px, transparent 1px);
+      linear-gradient(to right, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(10, 10, 10, 0.05) 1px, transparent 1px);
     background-size: 32px 32px;
   }
   .focus-ring {
-    @apply outline-none ring-offset-0 focus-visible:ring-2 focus-visible:ring-brand-500/40;
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-2;
   }
 }
 
@@ -76,12 +76,10 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Hero atmosphere
+ * Texture
  *
- * A layered background: drifting aurora blobs, a radially masked grid, and a
- * fine grain overlay. Pure CSS - no images and no JavaScript - so it costs
- * nothing at load and cannot shift layout. All motion is disabled under
- * prefers-reduced-motion.
+ * Grain, used behind the hero. Pure CSS, so it costs nothing at load and
+ * cannot shift layout.
  * ------------------------------------------------------------------------ */
 
 /* Film grain. Breaks up the gradients so large soft washes do not band, and
@@ -96,62 +94,30 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
 }
 
-@keyframes aurora-a {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(5%, 4%, 0) scale(1.18);
-  }
+/* ---------------------------------------------------------------------------
+ * Scroll reveal
+ *
+ * Elements start slightly offset and settle once observed. Driven by a single
+ * IntersectionObserver rather than an animation library, and the offset is
+ * removed entirely under prefers-reduced-motion so nothing moves.
+ * ------------------------------------------------------------------------ */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes aurora-b {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1.08);
-  }
-  50% {
-    transform: translate3d(-6%, 5%, 0) scale(1);
-  }
-}
-
-@keyframes aurora-c {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(4%, -6%, 0) scale(1.14);
-  }
-}
-
-/* Deliberately mismatched durations, so the blobs never drift in lockstep. */
-.aurora-a {
-  animation: aurora-a 24s ease-in-out infinite;
-}
-.aurora-b {
-  animation: aurora-b 31s ease-in-out infinite;
-}
-.aurora-c {
-  animation: aurora-c 27s ease-in-out infinite;
+.reveal[data-shown='true'] {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-a,
-  .aurora-b,
-  .aurora-c {
-    animation: none;
-  }
-}
-
-/* Continuously animating several large blurred layers is a real battery cost
- * on a phone, and the drift is barely perceptible at that size. The gradients
- * stay; only the movement stops. */
-@media (max-width: 767px) {
-  .aurora-a,
-  .aurora-b,
-  .aurora-c {
-    animation: none;
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

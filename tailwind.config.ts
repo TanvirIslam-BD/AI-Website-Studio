@@ -12,30 +12,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        /**
+         * Monochrome identity. These are Tailwind's neutral values, which are
+         * exactly the specified brand palette (#fafafa / #e5e5e5 / #737373 /
+         * #171717 / #0a0a0a), so the whole product shares one grayscale ramp.
+         */
         ink: {
-          50: '#f6f7f9',
-          100: '#eceef2',
-          200: '#d5d9e2',
-          300: '#b0b8c9',
-          400: '#8591aa',
-          500: '#66738f',
-          600: '#515c76',
-          700: '#434b60',
-          800: '#3a4051',
-          900: '#181b23',
-          950: '#0d0f14',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
+        /**
+         * `brand` is intentionally also grayscale: the identity has no accent
+         * hue, so emphasis comes from contrast and weight rather than colour.
+         * Keeping the scale means existing markup needs no rewrite to comply.
+         */
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+          50: '#f5f5f5',
+          100: '#e5e5e5',
+          200: '#d4d4d4',
+          300: '#a3a3a3',
+          400: '#737373',
+          500: '#404040',
+          600: '#171717',
+          700: '#0a0a0a',
+          800: '#000000',
+          900: '#000000',
         },
       },
       fontFamily: {
@@ -44,8 +54,10 @@ const config: Config = {
         brand: ['var(--font-brand)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        panel: '0 1px 2px rgba(13,15,20,0.04), 0 8px 24px -12px rgba(13,15,20,0.12)',
-        pop: '0 12px 40px -8px rgba(13,15,20,0.22)',
+        // Tight, low-spread shadows: depth from edges rather than haze.
+        panel: '0 1px 2px rgba(10,10,10,0.04), 0 8px 24px -14px rgba(10,10,10,0.10)',
+        pop: '0 1px 2px rgba(10,10,10,0.05), 0 24px 60px -24px rgba(10,10,10,0.22)',
+        lift: '0 1px 0 rgba(10,10,10,0.04), 0 12px 32px -16px rgba(10,10,10,0.16)',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },

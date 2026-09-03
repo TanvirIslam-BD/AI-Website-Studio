@@ -1,7 +1,7 @@
 import type { SectionOfType } from '@/lib/website/sections';
 import { Button, Container, Eyebrow, Heading, Img, Prose, SectionShell, isInverted, resolveLink, type SectionViewProps } from '../primitives';
 
-export function HeroSection({ section, theme, hrefFor }: SectionViewProps<SectionOfType<'hero'>>) {
+export function HeroSection({ section, theme, hrefFor, decorative }: SectionViewProps<SectionOfType<'hero'>>) {
   const inverted = isInverted(section.background) || section.variant === 'imageBackground';
   const primary = resolveLink(section.primaryCta, hrefFor);
   const secondary = resolveLink(section.secondaryCta, hrefFor);
@@ -10,7 +10,8 @@ export function HeroSection({ section, theme, hrefFor }: SectionViewProps<Sectio
   const copy = (
     <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-xl'}>
       <Eyebrow>{section.eyebrow}</Eyebrow>
-      <Heading level={1}>{section.heading}</Heading>
+      {/* Demoted when embedded as illustration, so the host page keeps a single h1. */}
+      <Heading level={decorative ? 2 : 1}>{section.heading}</Heading>
       {section.subheading ? (
         <Prose size="lg" className="mt-5">
           {section.subheading}

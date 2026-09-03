@@ -1,10 +1,10 @@
 import type { SectionOfType } from '@/lib/website/sections';
-import { Container, GRID_COLUMNS, Heading, Img, Prose, SectionShell, type SectionViewProps } from '../primitives';
+import { anchorId, Container, GRID_COLUMNS, Heading, Img, Prose, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
-export function TeamSection({ section }: SectionViewProps<SectionOfType<'team'>>) {
+export function TeamSection({ section, decorative }: SectionViewProps<SectionOfType<'team'>>) {
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="team">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('team', decorative)}>
       <Container wide>
         <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div className={`mt-14 grid ${GRID_COLUMNS[section.columns] ?? GRID_COLUMNS[3]}`} style={{ gap: 'var(--ws-gap)' }}>

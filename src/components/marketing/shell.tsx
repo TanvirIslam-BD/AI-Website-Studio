@@ -19,25 +19,20 @@ export function Section({
 }) {
   const tones = {
     default: 'bg-white',
-    muted: 'bg-ink-50/60 border-y border-ink-200/70',
+    muted: 'border-y border-ink-200 bg-[#fafafa]',
     dark: 'bg-ink-950 text-white',
   } as const;
 
   return (
-    <section id={id} className={cn('relative scroll-mt-16 py-20 sm:py-24', tones[tone], className)}>
+    <section id={id} className={cn('relative scroll-mt-16 py-20 sm:py-28', tones[tone], className)}>
       {tone === 'dark' ? (
-        <>
-          <div
-            className="absolute inset-0 opacity-70"
-            style={{ background: 'radial-gradient(70% 55% at 15% 0%, rgba(99,102,241,0.30), transparent 70%)' }}
-            aria-hidden
-          />
-          <div
-            className="absolute inset-0 opacity-60"
-            style={{ background: 'radial-gradient(60% 50% at 100% 100%, rgba(14,165,233,0.22), transparent 70%)' }}
-            aria-hidden
-          />
-        </>
+        // A single soft highlight, no hue: enough to stop a large black band
+        // reading as a flat rectangle.
+        <div
+          className="absolute inset-0 opacity-70"
+          style={{ background: 'radial-gradient(70% 55% at 50% 0%, rgba(255,255,255,0.08), transparent 72%)' }}
+          aria-hidden
+        />
       ) : null}
       <div className="relative">{children}</div>
     </section>
@@ -58,22 +53,24 @@ export function SectionHeading({
   dark?: boolean;
 }) {
   return (
-    <div className={cn('max-w-2xl', align === 'center' && 'mx-auto text-center')}>
+    <div className={cn('reveal max-w-2xl', align === 'center' && 'mx-auto text-center')}>
       {eyebrow ? (
-        <p className={cn('text-xs font-semibold uppercase tracking-[0.14em]', dark ? 'text-brand-300' : 'text-brand-600')}>
+        <p className={cn('font-mono text-[11px] uppercase tracking-[0.2em]', dark ? 'text-ink-500' : 'text-ink-400')}>
           {eyebrow}
         </p>
       ) : null}
       <h2
         className={cn(
-          'mt-3 text-balance text-3xl font-bold tracking-[-0.03em] sm:text-4xl',
+          'mt-4 text-balance text-[2rem] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[2.5rem]',
           dark ? 'text-white' : 'text-ink-950',
         )}
       >
         {title}
       </h2>
       {body ? (
-        <p className={cn('mt-4 text-pretty text-[17px] leading-relaxed', dark ? 'text-ink-300' : 'text-ink-500')}>{body}</p>
+        <p className={cn('mt-4 text-pretty text-[16px] leading-relaxed', dark ? 'text-ink-400' : 'text-ink-500')}>
+          {body}
+        </p>
       ) : null}
     </div>
   );

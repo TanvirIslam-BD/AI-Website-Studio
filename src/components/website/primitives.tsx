@@ -268,7 +268,21 @@ export type SectionViewProps<T extends Section = Section> = {
   theme: Theme;
   /** Resolves an internal page path for the current rendering target. */
   hrefFor?: (href: string) => string;
+  /**
+   * Set when the tree is embedded inside another document as illustration -
+   * the marketing site's product showcase, for example.
+   *
+   * Anchor ids and heading levels are page-level concerns. Emitting them from
+   * an embedded copy produces duplicate ids (so "#faq" jumps to the wrong
+   * place) and a second h1 competing with the host page's own.
+   */
+  decorative?: boolean;
 };
+
+/** Anchor id for a section, omitted when the tree is only illustration. */
+export function anchorId(id: string, decorative?: boolean): string | undefined {
+  return decorative ? undefined : id;
+}
 
 export function resolveLink(link: LinkValue | undefined, hrefFor?: (href: string) => string): LinkValue | undefined {
   if (!link) return undefined;

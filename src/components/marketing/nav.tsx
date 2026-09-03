@@ -34,7 +34,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
     <header
       className={cn(
         'sticky top-0 z-40 transition-colors duration-200',
-        scrolled ? 'border-b border-ink-200/70 bg-white/85 backdrop-blur-md' : 'border-b border-transparent bg-transparent',
+        scrolled ? 'border-b border-ink-200 bg-white/80 backdrop-blur-xl' : 'border-b border-transparent bg-transparent',
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
@@ -47,7 +47,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
             <a
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3 py-2 text-[13px] font-medium text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
+              className="focus-ring rounded-md px-2.5 py-2 text-[13px] text-ink-600 transition-colors hover:text-ink-950"
             >
               {link.label}
             </a>
@@ -58,7 +58,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
           {signedIn ? (
             <Link
               href="/dashboard"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-ink-900 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+              className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg bg-ink-950 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
             >
               Dashboard <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -66,15 +66,15 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
             <>
               <Link
                 href="/signin"
-                className="hidden rounded-lg px-3 py-2 text-[13px] font-medium text-ink-600 transition-colors hover:text-ink-900 sm:block"
+                className="focus-ring hidden rounded-md px-3 py-2 text-[13px] text-ink-600 transition-colors hover:text-ink-950 sm:block"
               >
                 Sign in
               </Link>
               <Link
                 href="/signin?mode=register"
-                className="inline-flex h-9 items-center rounded-lg bg-ink-900 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+                className="focus-ring inline-flex h-9 items-center rounded-lg bg-ink-950 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
               >
-                Start free
+                Start building free
               </Link>
             </>
           )}
@@ -83,7 +83,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
             onClick={() => setOpen((value) => !value)}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            className="grid h-9 w-9 place-items-center rounded-lg text-ink-600 hover:bg-ink-100 md:hidden"
+            className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-ink-600 hover:bg-ink-50 md:hidden"
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -97,13 +97,13 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-100"
+              className="focus-ring block rounded-md px-3 py-2.5 text-sm text-ink-700 hover:bg-ink-50"
             >
               {link.label}
             </a>
           ))}
           {!signedIn ? (
-            <Link href="/signin" className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-100">
+            <Link href="/signin" className="focus-ring block rounded-md px-3 py-2.5 text-sm text-ink-700 hover:bg-ink-50">
               Sign in
             </Link>
           ) : null}

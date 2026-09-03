@@ -70,17 +70,17 @@ export function Pricing() {
           body="No credit card to begin, and the free tier is a complete product rather than a trial."
         />
 
-        <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
+        <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-3">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
               className={cn(
-                'relative flex h-full flex-col rounded-2xl border p-7',
-                plan.highlighted ? 'border-brand-300 bg-brand-50/40 shadow-panel' : 'border-ink-200 bg-white',
+                'reveal relative flex h-full flex-col rounded-xl border p-7',
+                plan.highlighted ? 'border-ink-950 bg-white shadow-pop' : 'border-ink-200 bg-white',
               )}
             >
               {plan.highlighted ? (
-                <span className="absolute -top-3 left-7 rounded-full bg-brand-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <span className="absolute -top-2.5 left-7 rounded bg-ink-950 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
                   Most popular
                 </span>
               ) : null}
@@ -96,7 +96,7 @@ export function Pricing() {
               <ul className="mt-7 flex-1 space-y-3">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-[13px] text-ink-600">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" strokeWidth={2.5} />
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-900" strokeWidth={2.5} />
                     {feature}
                   </li>
                 ))}
@@ -107,13 +107,15 @@ export function Pricing() {
                   href={plan.cta.href}
                   className={cn(
                     'mt-8 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold transition-colors',
-                    plan.highlighted ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-ink-900 text-white hover:bg-ink-800',
+                    plan.highlighted
+                      ? 'bg-ink-950 text-white hover:bg-ink-800'
+                      : 'border border-ink-200 bg-white text-ink-900 hover:bg-ink-50',
                   )}
                 >
                   {plan.cta.label}
                 </Link>
               ) : (
-                <span className="mt-8 inline-flex h-11 cursor-default items-center justify-center rounded-lg border border-ink-200 bg-white text-sm font-semibold text-ink-400">
+                <span className="mt-8 inline-flex h-11 cursor-default items-center justify-center gap-2 rounded-lg border border-dashed border-ink-200 text-sm font-medium text-ink-400">
                   {plan.cta.label}
                 </span>
               )}

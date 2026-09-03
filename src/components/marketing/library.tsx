@@ -26,7 +26,7 @@ export function SectionLibrary() {
       <Container>
         <SectionHeading
           eyebrow="Section library"
-          title={`${SECTION_TYPES.length} section types, each with real layout options`}
+          title={`${SECTION_TYPES.length} section types. Real layouts. Fully editable.`}
           body="Sections are typed and validated, so the AI can only ever produce a layout that actually renders - and you can always take over by hand."
         />
 
@@ -63,9 +63,9 @@ export function BrandKits() {
     <Section>
       <Container>
         <SectionHeading
-          eyebrow="Brand kits"
-          title="A palette and typeface that fit the business"
-          body="Generation picks a kit that suits the industry, and you can swap the whole look in one click - or ask the copilot to shift it."
+          eyebrow="Brand kit"
+          title="A complete brand system, generated with your site"
+          body="Typography, colour, spacing, radius and button style - applied consistently across every section, and swappable in one click."
         />
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -77,8 +77,8 @@ export function BrandKits() {
             return (
               <figure
                 key={preset.id}
-                className="overflow-hidden rounded-2xl border border-ink-200"
-                style={{ background: t.background }}
+                className="reveal overflow-hidden rounded-xl border border-ink-200"
+                style={{ background: t.background, filter: 'grayscale(1)' }}
               >
                 <div className="p-6" style={{ color: t.text }}>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: t.primary }}>
@@ -123,7 +123,7 @@ export function BrandKits() {
                     <span
                       key={i}
                       className="h-4 w-4 rounded-full"
-                      style={{ background: colour, border: `1px solid ${t.border}` }}
+                      style={{ background: colour, border: `1px solid ${t.border}`, filter: 'grayscale(1)' }}
                     />
                   ))}
                   <span className="ml-auto font-mono text-[10px] uppercase" style={{ color: t.muted }}>

@@ -1,16 +1,16 @@
 import { Plus } from 'lucide-react';
 import type { SectionOfType } from '@/lib/website/sections';
-import { Container, Heading, Prose, SectionShell, type SectionViewProps } from '../primitives';
+import { anchorId, Container, Heading, Prose, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
 /**
  * Uses native <details>/<summary> so the accordion works with zero JavaScript.
  * That matters for the static export, which ships no runtime.
  */
-export function FaqSection({ section }: SectionViewProps<SectionOfType<'faq'>>) {
+export function FaqSection({ section, decorative }: SectionViewProps<SectionOfType<'faq'>>) {
   if (section.variant === 'twoColumn') {
     return (
-      <SectionShell background={section.background} paddingY={section.paddingY} id="faq">
+      <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('faq', decorative)}>
         <Container>
           <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align="left" />
           <div className="mt-12 grid gap-x-12 gap-y-9 md:grid-cols-2">
@@ -29,7 +29,7 @@ export function FaqSection({ section }: SectionViewProps<SectionOfType<'faq'>>) 
   }
 
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="faq">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('faq', decorative)}>
       <Container>
         <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div className="mx-auto mt-12 max-w-3xl">

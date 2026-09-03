@@ -46,10 +46,21 @@ export function SiteShowcase() {
           resolve against the real viewport, so this is desktop-only; small
           screens get the simpler image collage below instead.
         */}
-        <div className="hidden h-[430px] overflow-hidden md:block lg:h-[520px]">
+        {/*
+          Hidden from assistive tech and from the document outline. It is a real
+          rendered site, which means it also carries its own h1, anchor ids and
+          links - all of which would collide with the host page. `decorative`
+          suppresses the ids; aria-hidden keeps the duplicate headings out of
+          the accessibility tree; inert stops the links taking focus.
+        */}
+        <div
+          className="hidden h-[430px] overflow-hidden md:block lg:h-[520px]"
+          aria-hidden
+          inert
+        >
           <div className="w-[1440px] origin-top-left scale-[0.52] lg:scale-[0.63] xl:scale-[0.72]">
             <ThemeScope theme={SHOWCASE.document.theme}>
-              <PageView page={page} theme={SHOWCASE.document.theme} hrefFor={() => '#'} />
+              <PageView page={page} theme={SHOWCASE.document.theme} hrefFor={() => '#'} decorative />
             </ThemeScope>
           </div>
         </div>
@@ -65,7 +76,7 @@ function MobileCollage() {
   const images = SHOWCASE.document.assets.slice(0, 4);
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden" aria-hidden>
       <div className="px-5 pt-6 text-center">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-600">
           Portrait &amp; editorial photography

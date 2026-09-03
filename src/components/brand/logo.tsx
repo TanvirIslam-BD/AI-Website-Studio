@@ -16,7 +16,8 @@ import { cn } from '@/lib/utils';
 
 export type LogoTone = 'dark' | 'light' | 'brand';
 
-const INK = { dark: '#0d0f14', light: '#ffffff', brand: '#4f46e5' } as const;
+/** No accent hue in the identity: the mark is pure black or pure white. */
+const INK = { dark: '#0a0a0a', light: '#ffffff', brand: '#0a0a0a' } as const;
 
 export function LogoMark({
   size = 32,

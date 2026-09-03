@@ -44,10 +44,10 @@ const REGISTRY: { [K in Section['type']]: (props: SectionViewProps<Extract<Secti
 
 export type HrefResolver = (href: string) => string;
 
-export function SectionView({ section, theme, hrefFor }: SectionViewProps) {
+export function SectionView({ section, theme, hrefFor, decorative }: SectionViewProps) {
   const Component = REGISTRY[section.type] as (props: SectionViewProps) => ReactNode;
   if (!Component) return null;
-  return <Component section={section} theme={theme} hrefFor={hrefFor} />;
+  return <Component section={section} theme={theme} hrefFor={hrefFor} decorative={decorative} />;
 }
 
 /**
@@ -95,17 +95,20 @@ export function PageView({
   theme,
   hrefFor,
   includeHidden = false,
+  decorative = false,
 }: {
   page: Page;
   theme: Theme;
   hrefFor?: HrefResolver;
   includeHidden?: boolean;
+  /** Suppresses page-level anchor ids - see SectionViewProps.decorative. */
+  decorative?: boolean;
 }) {
   const sections = includeHidden ? page.sections : page.sections.filter((s) => !s.hidden);
   return (
     <>
       {sections.map((section) => (
-        <SectionView key={section.id} section={section} theme={theme} hrefFor={hrefFor} />
+        <SectionView key={section.id} section={section} theme={theme} hrefFor={hrefFor} decorative={decorative} />
       ))}
     </>
   );

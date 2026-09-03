@@ -1,6 +1,6 @@
 import { Clock, Mail, MapPin, Phone } from 'lucide-react';
 import type { SectionOfType } from '@/lib/website/sections';
-import { Container, Heading, Prose, SectionShell, type SectionViewProps } from '../primitives';
+import { anchorId, Container, Heading, Prose, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
 const FIELD_STYLE = {
@@ -39,7 +39,7 @@ function Detail({ icon, value, href }: { icon: React.ReactNode; value: string; h
  * address, and the exported site attaches a tiny handler that composes a
  * mailto: message. No server code is generated or executed for a deployed site.
  */
-export function ContactSection({ section }: SectionViewProps<SectionOfType<'contact'>>) {
+export function ContactSection({ section, decorative }: SectionViewProps<SectionOfType<'contact'>>) {
   const details = (
     <ul className="space-y-4">
       <Detail icon={<Mail className="h-5 w-5" />} value={section.email} href={section.email ? `mailto:${section.email}` : undefined} />
@@ -87,7 +87,7 @@ export function ContactSection({ section }: SectionViewProps<SectionOfType<'cont
 
   if (section.variant === 'centered') {
     return (
-      <SectionShell background={section.background} paddingY={section.paddingY} id="contact">
+      <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('contact', decorative)}>
         <Container>
           <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
           <div className="mx-auto mt-10 max-w-xl">
@@ -100,7 +100,7 @@ export function ContactSection({ section }: SectionViewProps<SectionOfType<'cont
   }
 
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="contact">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('contact', decorative)}>
       <Container>
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
           <div>

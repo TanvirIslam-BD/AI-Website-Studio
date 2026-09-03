@@ -1,16 +1,19 @@
+import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { generateFromTemplate } from '@/lib/ai/template';
 import { homePage } from '@/lib/website/document';
-import { resolveTheme } from '@/lib/website/theme';
 import { FONTS } from '@/lib/website/theme';
 import { Container, Section, SectionHeading } from './shell';
 
 /**
  * Example sites, generated at module scope from real briefs.
  *
- * Every card - brand name, palette, typeface, imagery and headline - is pulled
- * out of an actual generated document, so this gallery is a genuine sample of
- * output rather than art direction that the product cannot deliver.
+ * Brand name, headline, palette, typeface and imagery all come out of an
+ * actual generated document, so this is a genuine sample of output rather than
+ * art direction the product cannot deliver.
+ *
+ * "Generate similar" carries the brief through sign-up into the real generator,
+ * so the card is a working entry point rather than decoration.
  */
 const BRIEFS = [
   { brief: 'a modern website for a photography business', industry: 'Photography' },
@@ -25,87 +28,79 @@ const EXAMPLES = BRIEFS.map(({ brief, industry }) => {
   const site = generateFromTemplate(brief);
   const page = homePage(site.document);
   const hero = page.sections.find((section) => section.type === 'hero');
-  const headline = hero && 'heading' in hero ? hero.heading : site.brand;
-  const image = (hero && 'image' in hero ? hero.image?.url : undefined) ?? site.document.assets[0]?.url;
 
   return {
+    brief,
     industry,
     brand: site.brand,
-    headline,
+    headline: hero && 'heading' in hero ? hero.heading : site.brand,
     description: site.description,
-    image,
-    theme: site.document.theme,
+    image: (hero && 'image' in hero ? hero.image?.url : undefined) ?? site.document.assets[0]?.url,
+    serif: FONTS.find((f) => f.name === site.document.theme.headingFont)?.category === 'serif',
     pages: site.document.pages.length,
     sections: site.document.pages.reduce((sum, p) => sum + p.sections.length, 0),
   };
 });
 
-export function Examples() {
+export function Examples({ signedIn }: { signedIn: boolean }) {
   return (
     <Section id="examples" tone="muted">
       <Container>
         <SectionHeading
           eyebrow="Examples"
-          title="One sentence in, a whole site out"
-          body="Each of these came from a single line of description - brand name, palette, typeface, copy and photography chosen to fit the trade."
+          title="One sentence. A complete website."
+          body="Each of these came from a single line of description. Pick one to start from the same brief."
         />
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {EXAMPLES.map((example) => {
-            const t = resolveTheme(example.theme);
-            const serif = FONTS.find((f) => f.name === example.theme.headingFont)?.category === 'serif';
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {EXAMPLES.map((example, i) => {
+            const target = signedIn ? '/dashboard' : '/signin?mode=register';
 
             return (
               <article
                 key={example.brand}
-                className="group overflow-hidden rounded-2xl border border-ink-200 bg-white transition-shadow hover:shadow-panel"
+                className="reveal group overflow-hidden rounded-xl border border-ink-200 bg-white transition-shadow duration-300 hover:shadow-pop"
+                style={{ transitionDelay: `${i * 50}ms` }}
               >
-                <div className="relative aspect-[16/10] overflow-hidden">
+                <div className="relative aspect-[16/10] overflow-hidden bg-ink-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={example.image}
-                    alt={`${example.brand} website`}
+                    alt={`${example.brand} — generated ${example.industry.toLowerCase()} website`}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    className="h-full w-full object-cover grayscale transition-transform duration-500 ease-out group-hover:scale-[1.05]"
                   />
                   <div
                     className="absolute inset-0"
-                    style={{ background: 'linear-gradient(180deg, rgba(10,12,16,0.05) 30%, rgba(10,12,16,0.82))' }}
+                    style={{ background: 'linear-gradient(180deg, rgba(10,10,10,0.10) 32%, rgba(10,10,10,0.86))' }}
                   />
                   <div className="absolute inset-x-0 bottom-0 p-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
-                      {example.industry}
-                    </p>
+                    <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-white/60">{example.industry}</p>
                     <p
-                      className="mt-1.5 text-xl font-bold leading-tight tracking-[-0.02em] text-white"
-                      style={{ fontFamily: `'${example.theme.headingFont}', ${serif ? 'serif' : 'sans-serif'}` }}
+                      className="mt-1.5 text-lg font-semibold leading-tight tracking-[-0.02em] text-white"
+                      style={{ fontFamily: example.serif ? "'Playfair Display', Georgia, serif" : undefined }}
                     >
                       {example.brand}
                     </p>
                   </div>
-                  <span className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </span>
                 </div>
 
                 <div className="p-5">
-                  <p className="line-clamp-2 min-h-[40px] text-[13px] font-medium leading-relaxed text-ink-800">
+                  <p className="line-clamp-2 min-h-[38px] text-[13px] leading-relaxed text-ink-600">
                     {example.headline}
                   </p>
 
-                  <div className="mt-4 flex items-center gap-3">
-                    <span className="flex gap-1">
-                      {[t.primary, t.secondary, t.surface, t.text].map((colour, i) => (
-                        <span
-                          key={i}
-                          className="h-4 w-4 rounded-full ring-1 ring-inset ring-black/10"
-                          style={{ background: colour }}
-                        />
-                      ))}
-                    </span>
-                    <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-ink-400">
+                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-ink-100 pt-3.5">
+                    <span className="font-mono text-[10px] uppercase tracking-wide text-ink-400">
                       {example.pages} pages · {example.sections} sections
                     </span>
+                    <Link
+                      href={`${target}${target.includes('?') ? '&' : '?'}prompt=${encodeURIComponent(example.brief)}`}
+                      className="focus-ring inline-flex items-center gap-1 rounded text-[12px] font-medium text-ink-900 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                    >
+                      Generate similar
+                      <ArrowUpRight className="h-3 w-3" />
+                    </Link>
                   </div>
                 </div>
               </article>

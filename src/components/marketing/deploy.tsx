@@ -1,77 +1,109 @@
-import { CheckCircle2, FileCode2, Globe, Rocket } from 'lucide-react';
-import { Container, Section, SectionHeading, CodeFrame } from './shell';
+import { Check, Gauge } from 'lucide-react';
+import { Container, Section, SectionHeading } from './shell';
 
-const FILES = [
-  { name: 'index.html', note: 'home' },
-  { name: 'about.html', note: 'about' },
-  { name: 'services.html', note: 'services' },
-  { name: 'contact.html', note: 'contact' },
-  { name: '_site.css', note: 'one precompiled stylesheet' },
-  { name: 'sitemap.xml', note: 'generated' },
-  { name: 'robots.txt', note: 'generated' },
+/**
+ * Deployment and performance.
+ *
+ * Deployment is shown as a console rather than described, because the claim
+ * that matters - static HTML to your own account - is only convincing when you
+ * can see what actually ships. The figures below it are measured from the
+ * generated output, not aspirational.
+ */
+
+const STAGES = ['Editing', 'Building', 'Deploying', 'Live'];
+
+const BUILD_LOG = [
+  'Pages generated',
+  'Assets optimised',
+  'HTML generated',
+  'Sitemap generated',
+  'robots.txt generated',
 ];
 
-const STAGES = ['Queued', 'Building', 'Live'];
+const METRICS = [
+  { value: '0 KB', label: 'JavaScript shipped', detail: 'Nothing to hydrate' },
+  { value: '~110 KB', label: 'Four-page site', detail: 'Including one stylesheet' },
+  { value: '13 KB', label: 'Precompiled CSS', detail: 'One file, every site' },
+  { value: 'Static', label: 'Plain HTML output', detail: 'No framework runtime' },
+];
 
 export function Deploy() {
   return (
-    <Section tone="muted">
+    <Section id="deploy" tone="muted">
       <Container>
-        <div className="grid items-center gap-14 lg:grid-cols-2">
-          <div>
-            <SectionHeading
-              align="left"
-              eyebrow="Deployment"
-              title="One click, and it is on the internet"
-              body="Your site is built into static files and pushed to your own Vercel account. You watch the build, then get the production URL. Redeploy whenever you change something."
-            />
+        <SectionHeading
+          eyebrow="Deployment"
+          title="From editor to live website."
+          body="Your Vercel account. Your website. Your domain."
+        />
 
-            <div className="mt-8 flex items-center gap-2">
-              {STAGES.map((stage, i) => (
-                <span key={stage} className="flex items-center gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold ${
-                      i === 2 ? 'bg-emerald-100 text-emerald-800' : 'bg-white text-ink-600 ring-1 ring-ink-200'
-                    }`}
-                  >
-                    {i === 2 ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
-                    {stage}
-                  </span>
-                  {i < STAGES.length - 1 ? <span className="h-px w-5 bg-ink-300" /> : null}
-                </span>
+        <div className="reveal mt-12 flex flex-wrap items-center justify-center gap-2">
+          {STAGES.map((stage, i) => (
+            <span key={stage} className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] font-medium ${
+                  i === STAGES.length - 1
+                    ? 'bg-ink-950 text-white'
+                    : 'border border-ink-200 bg-white text-ink-600'
+                }`}
+              >
+                {i === STAGES.length - 1 ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+                {stage}
+              </span>
+              {i < STAGES.length - 1 ? <span className="h-px w-5 bg-ink-300" aria-hidden /> : null}
+            </span>
+          ))}
+        </div>
+
+        <div className="reveal mx-auto mt-12 max-w-2xl overflow-hidden rounded-xl border border-ink-900 bg-ink-950 shadow-pop">
+          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
+            <span className="flex gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="h-2.5 w-2.5 rounded-full bg-white/20" />
               ))}
-            </div>
-
-            <div className="mt-8 grid gap-3">
-              <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-600">
-                <Globe className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                Deploys to <strong className="font-semibold text-ink-900">your</strong> Vercel account with your own
-                token, so the site and its domain stay yours.
-              </p>
-              <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-600">
-                <FileCode2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                No server code is generated and nothing the AI produced is ever executed - the output is HTML and CSS.
-              </p>
-              <p className="flex items-start gap-2.5 text-[13px] leading-relaxed text-ink-600">
-                <Rocket className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                A four-page site is around 110 kB total and needs no JavaScript to render.
-              </p>
-            </div>
+            </span>
+            <span className="ml-1 font-mono text-[10px] text-ink-500">deployment</span>
           </div>
 
-          <CodeFrame title="files to ship">
-            <div className="grid gap-1.5">
-              {FILES.map((file) => (
-                <div key={file.name} className="flex items-baseline justify-between gap-6 font-mono text-[12px]">
-                  <span className="text-ink-200">{file.name}</span>
-                  <span className="text-ink-500">{file.note}</span>
-                </div>
+          <div className="p-5 font-mono text-[12px]">
+            <p className="text-white">Build complete</p>
+            <div className="mt-3 space-y-1.5">
+              {BUILD_LOG.map((line) => (
+                <p key={line} className="flex items-center gap-2 text-ink-400">
+                  <Check className="h-3 w-3 shrink-0 text-white" strokeWidth={2.5} />
+                  {line}
+                </p>
               ))}
-              <div className="mt-3 border-t border-ink-800 pt-3 font-mono text-[12px] text-ink-400">
-                7 files · 112.8 kB · 0 kB JavaScript
-              </div>
             </div>
-          </CodeFrame>
+            <p className="mt-4 text-ink-500">Deploying to Vercel...</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+              <span className="rounded bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-950">
+                Live
+              </span>
+              <span className="text-white">https://your-site.vercel.app</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <div className="flex items-center justify-center gap-2">
+            <Gauge className="h-4 w-4 text-ink-500" strokeWidth={1.8} />
+            <h3 className="text-center text-xl font-semibold tracking-[-0.02em] text-ink-950">Fast by default</h3>
+          </div>
+          <p className="mx-auto mt-3 max-w-lg text-center text-[14px] leading-relaxed text-ink-500">
+            Generated sites are plain HTML and CSS. There is no framework runtime to download, nothing to hydrate, and
+            no client-side JavaScript needed to render the page.
+          </p>
+
+          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+            {METRICS.map((metric, i) => (
+              <div key={metric.label} className="reveal text-center" style={{ transitionDelay: `${i * 50}ms` }}>
+                <dd className="text-2xl font-semibold tracking-[-0.03em] text-ink-950 sm:text-3xl">{metric.value}</dd>
+                <dt className="mt-1.5 text-[12px] font-medium text-ink-700">{metric.label}</dt>
+                <p className="mt-0.5 text-[11px] text-ink-400">{metric.detail}</p>
+              </div>
+            ))}
+          </dl>
         </div>
       </Container>
     </Section>

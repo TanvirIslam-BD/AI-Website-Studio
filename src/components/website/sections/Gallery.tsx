@@ -1,12 +1,12 @@
 import type { SectionOfType } from '@/lib/website/sections';
-import { Container, GRID_COLUMNS, Img, Prose, SectionShell, type SectionViewProps } from '../primitives';
+import { anchorId, Container, GRID_COLUMNS, Img, Prose, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
-export function GallerySection({ section }: SectionViewProps<SectionOfType<'gallery'>>) {
+export function GallerySection({ section, decorative }: SectionViewProps<SectionOfType<'gallery'>>) {
   const { images, columns, variant } = section;
 
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="work">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('work', decorative)}>
       <Container wide>
         <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
 

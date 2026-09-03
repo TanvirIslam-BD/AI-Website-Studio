@@ -1,97 +1,177 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowUp, Check } from 'lucide-react';
 import { OPERATION_NAMES } from '@/lib/website/operations';
-import { Container, Section, SectionHeading, CodeFrame } from './shell';
+import { Container, Section, SectionHeading } from './shell';
 
 /**
- * The copilot's differentiator: it calls validated operations instead of
- * rewriting the project. The operation list is imported from the operations
- * layer, so this section cannot advertise a capability that does not exist.
+ * The copilot section.
+ *
+ * The differentiator is narrow and worth stating plainly: it edits the
+ * selected section by calling validated operations, rather than regenerating
+ * the project. The operation list is imported from the operations layer, so
+ * this section cannot advertise a tool that does not exist.
  */
 
-const EXAMPLES = [
-  'Make this section more premium',
-  'Rewrite the copy so it is sharper',
-  'Change the layout',
-  'Make this conversion focused',
-  'Use a darker design',
-  'Add pricing after the gallery',
+const CAPABILITIES = [
+  'Rewrite copy',
+  'Change layout',
+  'Restyle sections',
+  'Add sections',
+  'Move sections',
+  'Change imagery',
+  'Update theme',
+  'Improve conversion',
 ];
-
-const SAMPLE = `{
-  "message": "Rewrote the hero and warmed up the palette.",
-  "operations": [
-    {
-      "name": "update_section",
-      "input": {
-        "sectionId": "sec_9f2a",
-        "props": {
-          "heading": "Photographs that feel like you",
-          "variant": "centered"
-        }
-      }
-    },
-    {
-      "name": "update_theme",
-      "input": { "primaryColor": "#b45309", "radius": "lg" }
-    }
-  ]
-}`;
 
 export function CopilotShowcase() {
   return (
     <Section tone="dark">
       <Container>
-        <div className="grid items-center gap-14 lg:grid-cols-2">
-          <div>
-            <SectionHeading
-              dark
-              align="left"
-              eyebrow="AI copilot"
-              title="It edits your site. It does not rewrite it."
-              body="Ask in plain language and the copilot calls specific, validated operations on the section you have selected. Small, reviewable, reversible changes - never a fresh site you did not ask for."
-            />
+        <SectionHeading
+          dark
+          eyebrow="AI Copilot"
+          title="Your website has a copilot."
+          body="Describe the change. Web Copilot makes it."
+        />
 
-            <ul className="mt-8 flex flex-wrap gap-2">
-              {EXAMPLES.map((example) => (
-                <li
-                  key={example}
-                  className="rounded-full border border-ink-700 bg-ink-900/60 px-3 py-1.5 text-[13px] text-ink-300"
-                >
-                  {example}
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-8 rounded-xl border border-ink-800 bg-ink-900/50 p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                {OPERATION_NAMES.length} operations it can call
-              </p>
-              <p className="mt-2 font-mono text-[11px] leading-relaxed text-ink-300">
-                {OPERATION_NAMES.join('  ·  ')}
-              </p>
-            </div>
+        <div className="reveal mt-14 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
+          <div className="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+            <PreviewPane />
+            <CopilotPane />
           </div>
+        </div>
 
+        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
           <div>
-            <div className="mb-3 flex items-center gap-2.5 text-[13px] text-ink-400">
-              <span className="rounded-lg bg-white px-3 py-1.5 font-medium text-ink-900">
-                &ldquo;Make the hero more premium&rdquo;
-              </span>
-              <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-              <span>becomes</span>
-            </div>
-            <CodeFrame title="copilot response">
-              <pre className="font-mono text-[11.5px] leading-relaxed text-ink-300">
-                <code>{SAMPLE}</code>
-              </pre>
-            </CodeFrame>
-            <p className="mt-3 text-[12px] leading-relaxed text-ink-400">
-              The server validates every call against the same schema your own clicks go through. If the model gets an
-              argument wrong it is told exactly why and corrected - once - rather than guessing.
+            <p className="text-xl font-semibold tracking-[-0.02em] text-white sm:text-2xl">
+              It edits your site. It doesn&rsquo;t regenerate it.
             </p>
+            <p className="mt-3 max-w-md text-[14px] leading-relaxed text-ink-400">
+              Changes arrive as a small list of operations against the document, validated server-side before anything
+              is applied. A rejected call is corrected once, with the exact reason - never guessed at.
+            </p>
+            <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+              {OPERATION_NAMES.length} operations
+            </p>
+            <p className="mt-2 font-mono text-[11px] leading-relaxed text-ink-400">{OPERATION_NAMES.join('  ·  ')}</p>
           </div>
+
+          <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+            {CAPABILITIES.map((capability) => (
+              <li key={capability} className="flex items-center gap-2 text-[13px] text-ink-300">
+                <Check className="h-3.5 w-3.5 shrink-0 text-white" strokeWidth={2.4} />
+                {capability}
+              </li>
+            ))}
+          </ul>
         </div>
       </Container>
     </Section>
+  );
+}
+
+/** The website being edited, mid-change. */
+function PreviewPane() {
+  return (
+    <div className="border-b border-white/10 bg-ink-950/40 p-5 lg:border-b-0 lg:border-r">
+      <div className="flex items-center gap-2 pb-3">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink-500">preview</span>
+        <span className="ml-auto flex gap-1">
+          {['Desktop', 'Tablet', 'Mobile'].map((device, i) => (
+            <span
+              key={device}
+              className={`rounded px-1.5 py-0.5 font-mono text-[9px] ${
+                i === 0 ? 'bg-white/15 text-white' : 'text-ink-500'
+              }`}
+            >
+              {device}
+            </span>
+          ))}
+        </span>
+      </div>
+
+      <div className="overflow-hidden rounded-lg bg-white">
+        <div className="flex items-center justify-between border-b border-ink-100 px-4 py-2.5">
+          <span className="text-[10px] font-bold tracking-tight text-ink-950">Aperture &amp; Light</span>
+          <span className="hidden gap-3 sm:flex">
+            {['Home', 'Work', 'About', 'Contact'].map((item) => (
+              <span key={item} className="text-[7px] text-ink-400">
+                {item}
+              </span>
+            ))}
+          </span>
+          <span className="rounded bg-ink-950 px-2 py-0.5 text-[7px] text-white">Enquire</span>
+        </div>
+
+        {/* The selected section, outlined as the editor does. */}
+        <div className="relative ring-2 ring-inset ring-ink-950">
+          <span className="absolute left-2 top-2 rounded bg-ink-950 px-1.5 py-0.5 text-[7px] font-semibold text-white">
+            Hero
+          </span>
+          <div className="px-6 py-8 text-center">
+            <span className="mx-auto block h-1 w-14 rounded bg-ink-300" />
+            <p
+              className="mx-auto mt-3 max-w-[200px] text-[15px] font-semibold leading-tight tracking-[-0.02em] text-ink-950"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Photographs that feel like you
+            </p>
+            <span className="mx-auto mt-2.5 block h-1 w-32 rounded bg-ink-200" />
+            <span className="mt-4 inline-flex gap-1.5">
+              <span className="h-4 w-14 rounded bg-ink-950" />
+              <span className="h-4 w-12 rounded border border-ink-300" />
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-1.5 p-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="aspect-[4/3] rounded bg-ink-100" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** The copilot exchange that produced it. */
+function CopilotPane() {
+  return (
+    <div className="flex flex-col p-5">
+      <p className="pb-4 font-mono text-[10px] uppercase tracking-wider text-ink-500">ai copilot</p>
+
+      <div className="flex-1 space-y-3">
+        <p className="ml-auto w-fit max-w-[88%] rounded-xl bg-white px-3 py-2 text-[12px] leading-snug text-ink-950">
+          Make the hero more premium and increase the CTA contrast.
+        </p>
+
+        <div className="w-fit max-w-[94%] rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5">
+          <p className="text-[12px] leading-relaxed text-ink-200">
+            Updated the hero layout, typography and CTA styling.
+          </p>
+          <div className="mt-2.5 space-y-1 border-t border-white/10 pt-2.5">
+            {[
+              'update_section — variant, heading',
+              'update_theme — headingFont, density',
+            ].map((op) => (
+              <p key={op} className="flex items-center gap-1.5 font-mono text-[9px] text-ink-400">
+                <Check className="h-2.5 w-2.5 shrink-0 text-white" strokeWidth={3} />
+                {op}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <p className="w-fit rounded-lg bg-white/[0.04] px-2.5 py-1.5 font-mono text-[9px] text-ink-500">
+          1 section changed · undo available
+        </p>
+      </div>
+
+      <div className="mt-5 flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/50 px-3 py-2.5">
+        <span className="flex-1 text-[12px] text-ink-500">Ask for a change...</span>
+        <span className="grid h-6 w-6 place-items-center rounded-md bg-white text-ink-950">
+          <ArrowUp className="h-3 w-3" strokeWidth={2.5} />
+        </span>
+      </div>
+    </div>
   );
 }

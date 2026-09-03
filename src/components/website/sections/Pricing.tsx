@@ -1,11 +1,11 @@
 import { Check } from 'lucide-react';
 import type { SectionOfType } from '@/lib/website/sections';
-import { Button, Container, Heading, Prose, SectionShell, resolveLink, type SectionViewProps } from '../primitives';
+import { anchorId, Button, Container, Heading, Prose, SectionShell, resolveLink, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
-export function PricingSection({ section, theme, hrefFor }: SectionViewProps<SectionOfType<'pricing'>>) {
+export function PricingSection({ section, theme, hrefFor, decorative }: SectionViewProps<SectionOfType<'pricing'>>) {
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="pricing">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('pricing', decorative)}>
       <Container wide>
         <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div

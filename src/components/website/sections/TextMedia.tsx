@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react';
 import type { SectionOfType } from '@/lib/website/sections';
-import { Button, Container, Eyebrow, Heading, Img, Prose, SectionShell, isInverted, resolveLink, type SectionViewProps } from '../primitives';
+import { anchorId, Button, Container, Eyebrow, Heading, Img, Prose, SectionShell, isInverted, resolveLink, type SectionViewProps } from '../primitives';
 
-export function TextMediaSection({ section, theme, hrefFor }: SectionViewProps<SectionOfType<'textMedia'>>) {
+export function TextMediaSection({ section, theme, hrefFor, decorative }: SectionViewProps<SectionOfType<'textMedia'>>) {
   const cta = resolveLink(section.cta, hrefFor);
   const inverted = isInverted(section.background);
 
@@ -42,7 +42,7 @@ export function TextMediaSection({ section, theme, hrefFor }: SectionViewProps<S
 
   if (section.variant === 'stacked' || !section.image?.url) {
     return (
-      <SectionShell background={section.background} paddingY={section.paddingY} id="about">
+      <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('about', decorative)}>
         <Container>
           <div className="max-w-3xl">{copy}</div>
           {section.image?.url ? (
@@ -54,7 +54,7 @@ export function TextMediaSection({ section, theme, hrefFor }: SectionViewProps<S
   }
 
   return (
-    <SectionShell background={section.background} paddingY={section.paddingY} id="about">
+    <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('about', decorative)}>
       <Container>
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className={section.variant === 'imageLeft' ? 'lg:order-2' : ''}>{copy}</div>
