@@ -15,6 +15,16 @@ export const BRAND = {
     'Describe your business and get a real, editable, multi-page website. Refine it in a visual editor, direct it with an AI copilot, and deploy to Vercel in one click.',
 } as const;
 
+/** Anchor navigation for the marketing site, shared by the nav and the footer. */
+export const NAV_LINKS = [
+  { label: 'Examples', href: '#examples' },
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Features', href: '#features' },
+  { label: 'Sections', href: '#sections' },
+  { label: 'Pricing', href: '#pricing' },
+  { label: 'FAQ', href: '#faq' },
+] as const;
+
 /**
  * The legal entity behind the product, used in the footer and structured data.
  * Distinct from BRAND.name: the product is Web Copilot AI Studio, the company
@@ -35,20 +45,17 @@ export const COMPANY = {
 export type SocialPlatform = 'instagram' | 'threads' | 'x' | 'tiktok' | 'linkedin' | 'facebook' | 'email';
 
 export const SOCIAL_LINKS: Array<{ platform: SocialPlatform; label: string; href: string }> = [
-  { platform: 'instagram', label: 'Instagram', href: '' },
-  { platform: 'threads', label: 'Threads', href: '' },
-  { platform: 'x', label: 'X', href: '' },
-  { platform: 'tiktok', label: 'TikTok', href: '' },
-  { platform: 'linkedin', label: 'LinkedIn', href: '' },
-  { platform: 'facebook', label: 'Facebook', href: '' },
-  { platform: 'email', label: 'Email us', href: `mailto:${COMPANY.supportEmail}` },
+  { platform: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/mycopilotai' },
+  { platform: 'threads', label: 'Threads', href: 'https://www.threads.com/@mycopilotai' },
+  { platform: 'x', label: 'X', href: 'https://x.com/MyCopilotAI' },
+  { platform: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@mycopilotai' },
+  { platform: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/company/my-copilot-ai/' },
+  { platform: 'facebook', label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61588721369176' },
+  {
+    platform: 'email',
+    label: 'Email support',
+    // Prefilled subject so enquiries from this product are recognisable in a
+    // shared inbox.
+    href: `mailto:${COMPANY.supportEmail}?subject=${encodeURIComponent(`${BRAND.name} support request`)}`,
+  },
 ];
-
-export const NAV_LINKS = [
-  { label: 'Examples', href: '#examples' },
-  { label: 'How it works', href: '#how-it-works' },
-  { label: 'Features', href: '#features' },
-  { label: 'Sections', href: '#sections' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'FAQ', href: '#faq' },
-] as const;

@@ -94,7 +94,9 @@ export function MarketingFooter() {
                   <li key={social.platform}>
                     <a
                       href={social.href}
-                      aria-label={social.label}
+                      aria-label={
+                        social.platform === 'email' ? social.label : `${COMPANY.legalName} on ${social.label}`
+                      }
                       title={social.label}
                       {...(social.platform === 'email' ? {} : { target: '_blank', rel: 'noreferrer noopener' })}
                       className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-ink-300 transition-colors hover:border-white/25 hover:bg-white/[0.08] hover:text-white"
