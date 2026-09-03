@@ -1,0 +1,323 @@
+// AI Website Studio - data model
+//
+// Multi-tenancy: every tenant-scoped row hangs off a Workspace. Users join
+// workspaces through Membership, so agency / team workspaces, seat-based
+// billing and white-labelling can be layered on later without migrating the
+// core content tables.
+//
+// Content model (deliberately structured, never a blob of HTML):
+//   Workspace -> Project -> Page -> Section
+//                        -> Theme  (1:1, the brand kit)
+//                        -> Asset
+//                        -> Deployment
+//                        -> ChatMessage (AI copilot transcript)
+//                        -> Revision    (snapshots for history / rollback)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships Membership[]
+  projects    Project[]    @relation("ProjectCreator")
+  deployments Deployment[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy
+// ---------------------------------------------------------------------------
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum WorkspacePlan {
+  FREE
+  PRO
+  AGENCY
+}
+
+model Workspace {
+  id        String        @id @default(cuid())
+  name      String
+  slug      String        @unique
+  plan      WorkspacePlan @default(FREE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  members  Membership[]
+  projects Project[]
+}
+
+model Membership {
+  id          String        @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        WorkspaceRole @default(OWNER)
+  createdAt   DateTime      @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+// ---------------------------------------------------------------------------
+// Projects and content
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  DRAFT
+  GENERATING
+  READY
+  DEPLOYING
+  DEPLOYED
+  ERROR
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  createdById   String
+  name          String
+  slug          String
+  description   String?
+  /// The original natural-language brief the site was generated from.
+  prompt        String?       @db.Text
+  status        ProjectStatus @default(DRAFT)
+  /// Denormalised pointer to the latest successful production deployment.
+  productionUrl String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy   User          @relation("ProjectCreator", fields: [createdById], references: [id])
+  theme       Theme?
+  pages       Page[]
+  assets      Asset[]
+  deployments Deployment[]
+  messages    ChatMessage[]
+  revisions   Revision[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+}
+
+/// The brand kit. One per project, mapped 1:1 onto CSS custom properties at
+/// render time so a theme applies identically in the editor canvas, the
+/// preview route and the static export.
+model Theme {
+  id             String @id @default(cuid())
+  projectId      String @unique
+  primaryColor   String @default("#4f46e5")
+  secondaryColor String @default("#0ea5e9")
+  background     String @default("#ffffff")
+  surface        String @default("#f6f7f9")
+  textColor      String @default("#0d0f14")
+  mutedColor     String @default("#5b6478")
+  borderColor    String @default("#e6e8ee")
+  headingFont    String @default("Inter")
+  bodyFont       String @default("Inter")
+  /// none | sm | md | lg | full
+  radius         String @default("md")
+  /// solid | outline | soft | pill
+  buttonStyle    String @default("solid")
+  /// compact | comfortable | spacious
+  density        String @default("comfortable")
+  /// light | dark
+  mode           String @default("light")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  /// Empty string is the home page path.
+  slug      String
+  isHome    Boolean  @default(false)
+  position  Int      @default(0)
+  seoTitle  String?
+  seoDesc   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sections Section[]
+
+  @@unique([projectId, slug])
+  @@index([projectId])
+}
+
+/// A section is a typed, validated content record. `type` selects the React
+/// component; `props` holds data only. Rendering logic never lives in the DB.
+model Section {
+  id        String   @id @default(cuid())
+  pageId    String
+  type      String
+  position  Int      @default(0)
+  props     Json
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  projectId String
+  url       String   @db.Text
+  /// unsplash | upload | ai | url
+  provider  String   @default("url")
+  alt       String?
+  width     Int?
+  height    Int?
+  /// Provider payload (author attribution, generation prompt, etc.)
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Deployment
+// ---------------------------------------------------------------------------
+
+enum DeploymentStatus {
+  QUEUED
+  BUILDING
+  READY
+  ERROR
+  CANCELED
+}
+
+model Deployment {
+  id           String           @id @default(cuid())
+  projectId    String
+  createdById  String?
+  status       DeploymentStatus @default(QUEUED)
+  provider     String           @default("vercel")
+  /// Provider-side id, used to poll build status.
+  externalId   String?
+  url          String?
+  inspectorUrl String?
+  error        String?          @db.Text
+  target       String           @default("production")
+  meta         Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  readyAt      DateTime?
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id])
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// AI
+// ---------------------------------------------------------------------------
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+/// Copilot transcript. `operations` records the structured tool calls the model
+/// made, which keeps every AI change auditable and replayable.
+model ChatMessage {
+  id         String   @id @default(cuid())
+  projectId  String
+  role       ChatRole
+  content    String   @db.Text
+  operations Json?
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+/// Full document snapshot written before every AI mutation, so a change can be
+/// rolled back server-side. Client-side undo/redo is separate and immediate.
+model Revision {
+  id        String   @id @default(cuid())
+  projectId String
+  label     String
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}

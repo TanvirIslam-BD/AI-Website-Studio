@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Studio chrome only. Generated websites are themed separately through the
+ * --ws-* variables emitted by the theme engine, so nothing here can leak into
+ * a user's site.
+ */
+:root {
+  --studio-bg: #ffffff;
+  --studio-panel: #fbfbfc;
+  --studio-border: #e8e9ee;
+  --studio-fg: #14161c;
+  --studio-muted: #6b7385;
+  --studio-accent: #4f46e5;
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    border-color: var(--studio-border);
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    background: var(--studio-bg);
+    color: var(--studio-fg);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--studio-accent) 22%, transparent);
+  }
+}
+
+@layer components {
+  .studio-panel {
+    @apply border-ink-200/70 bg-white;
+  }
+  .studio-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #d7dae2 transparent;
+  }
+  .studio-scroll::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  .studio-scroll::-webkit-scrollbar-thumb {
+    background: #d7dae2;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+  .studio-scroll:hover::-webkit-scrollbar-thumb {
+    background: #c2c7d2;
+    background-clip: content-box;
+  }
+  /* Subtle grid used behind the editor canvas and marketing hero. */
+  .studio-grid {
+    background-image:
+      linear-gradient(to right, rgba(20, 22, 28, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 22, 28, 0.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .focus-ring {
+    @apply outline-none ring-offset-0 focus-visible:ring-2 focus-visible:ring-brand-500/40;
+  }
+}
+
+/* The editor canvas is a scaled viewport; keep its scrollbars out of the way. */
+.canvas-frame {
+  transform-origin: top center;
+  will-change: transform;
+}
