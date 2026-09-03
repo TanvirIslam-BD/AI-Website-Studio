@@ -36,7 +36,10 @@ const githubEnabled = Boolean(process.env.AUTH_GITHUB_ID && process.env.AUTH_GIT
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: 'jwt' },
-  pages: { signIn: '/signin' },
+  // Route Auth.js failures to our own page. Its default error screen says
+  // only "there is a problem with the server configuration", which gives a
+  // visitor nothing and an operator no indication of which variable is missing.
+  pages: { signIn: '/signin', error: '/signin' },
   trustHost: true,
   providers: [
     ...(githubEnabled ? [GitHub] : []),

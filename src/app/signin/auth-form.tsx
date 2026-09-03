@@ -9,6 +9,29 @@ import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { errorMessage } from '@/lib/utils';
 
+/**
+ * Auth.js error codes, translated for a reader.
+ *
+ * `Configuration` is the one that matters operationally: it means the server is
+ * missing something it needs (most often AUTH_SECRET, or database credentials),
+ * not that the visitor did anything wrong - so it should not read as a
+ * rejected password.
+ */
+function describeAuthError(code: string): string {
+  switch (code) {
+    case 'Configuration':
+      return 'Sign-in is temporarily unavailable because of a server configuration problem. This is not a problem with your details - please try again shortly.';
+    case 'CredentialsSignin':
+      return 'Incorrect email or password.';
+    case 'AccessDenied':
+      return 'That account is not allowed to sign in.';
+    case 'Verification':
+      return 'That sign-in link has expired. Please request a new one.';
+    default:
+      return 'That sign-in attempt did not work. Please try again.';
+  }
+}
+
 export function AuthForm({
   mode,
   prompt,
@@ -22,9 +45,7 @@ export function AuthForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(
-    initialError ? 'That sign-in attempt did not work. Please try again.' : null,
-  );
+  const [error, setError] = useState<string | null>(initialError ? describeAuthError(initialError) : null);
 
   const next = prompt ? `/dashboard?prompt=${encodeURIComponent(prompt)}` : '/dashboard';
 
