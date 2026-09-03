@@ -115,15 +115,15 @@ export function heuristicCopilot(
     Object.assign(theme, { radius: 'full', buttonStyle: 'pill', density: 'comfortable' });
     notes.push('bolder shapes');
   }
-  if (/\bround(ed)?\b|\bsofter\b/.test(text)) {
+  if (/\bround(ed|er)?\b|\bsoft(er)?\b/.test(text)) {
     theme.radius = 'lg';
     notes.push('rounder corners');
   }
-  if (/\bsharp\w*|\bsquare\b|\bangular\b/.test(text)) {
+  if (/\bsharp\w*|\bsquare\b|\bangular\b|\bboxy\b/.test(text)) {
     theme.radius = 'none';
     notes.push('sharp corners');
   }
-  if (/\bcompact\b|\btighter\b|\bdense\b/.test(text)) {
+  if (/\bcompact(er)?\b|\btight(er)?\b|\bdens(e|er)\b/.test(text)) {
     theme.density = 'compact';
     notes.push('tighter spacing');
   }

@@ -1,12 +1,26 @@
 import OpenAI from 'openai';
-import { LlmError, type LlmProvider, type LlmRequest, type LlmResponse } from '../types';
+import { LlmError, type LlmProvider, type LlmRequest, type LlmResponse, type ProviderId } from '../types';
 
-/** OpenAI provider. Uses native `response_format: json_object` for JSON mode. */
-export function createOpenAiProvider(apiKey: string, model: string): LlmProvider {
-  const client = new OpenAI({ apiKey });
+export type OpenAiCompatibleOptions = {
+  /** Override for OpenAI-compatible gateways such as CometAPI. */
+  baseURL?: string;
+  id?: ProviderId;
+  label?: string;
+};
+
+/**
+ * OpenAI and OpenAI-compatible providers.
+ *
+ * Uses native `response_format: json_object` for JSON mode. Because the wire
+ * format is shared, any compatible gateway (CometAPI, OpenRouter, a
+ * self-hosted proxy) is just a different base URL - no new transport code.
+ */
+export function createOpenAiProvider(apiKey: string, model: string, options: OpenAiCompatibleOptions = {}): LlmProvider {
+  const client = new OpenAI({ apiKey, baseURL: options.baseURL });
 
   return {
-    id: 'openai',
+    id: options.id ?? 'openai',
+    label: options.label ?? 'OpenAI',
     model,
     async complete(request: LlmRequest): Promise<LlmResponse> {
       try {

@@ -66,7 +66,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           </div>
           <div className="flex items-center gap-2 text-xs text-ink-500">
             <Badge tone={ai.configured ? 'brand' : 'neutral'}>
-              <Sparkles className="h-3 w-3" /> {ai.configured ? ai.provider : 'templates'}
+              <Sparkles className="h-3 w-3" /> {ai.configured ? ai.label : 'templates'}
             </Badge>
             <Badge tone={isVercelConfigured() ? 'success' : 'neutral'}>
               {isVercelConfigured() ? 'Vercel ready' : 'Vercel off'}

@@ -9,6 +9,10 @@ Prompt -> AI generates a structured site -> Visual editor -> AI section edits ->
 
 Built for small businesses, freelancers, creators and agencies.
 
+**Stack:** Next.js 15 · React 19 · TypeScript · Tailwind · Prisma on
+**Turso** (libSQL) · Auth.js · **CometAPI** (or Claude/OpenAI direct) · Vercel
+deployment API.
+
 ---
 
 ## Quick start
@@ -44,14 +48,20 @@ generation and copy editing; add a Vercel token to enable deployment.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | yes | PostgreSQL connection string |
+| `TURSO_DATABASE_URL` | yes* | Turso database URL (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | yes* | Turso database token |
+| `DATABASE_URL` | yes* | Local SQLite file used when `TURSO_DATABASE_URL` is unset, and by the Prisma CLI |
 | `AUTH_SECRET` | yes | Auth.js session signing (see below) |
-| `AI_PROVIDER` | no | `anthropic`, `openai` or `mock` (default: whichever key exists) |
-| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | no | Claude generation and copilot |
-| `OPENAI_API_KEY` / `OPENAI_MODEL` | no | OpenAI alternative |
+| `AI_PROVIDER` | no | `comet`, `anthropic`, `openai` or `mock` (default: first key found, CometAPI first) |
+| `COMETAPI_API_KEY` / `COMETAPI_MODEL` | no | CometAPI gateway - one key, many upstream models |
+| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | no | Claude direct |
+| `OPENAI_API_KEY` / `OPENAI_MODEL` | no | OpenAI direct (`OPENAI_BASE_URL` for other compatible gateways) |
 | `VERCEL_TOKEN` / `VERCEL_TEAM_ID` | no | One-click deployment |
 | `UNSPLASH_ACCESS_KEY` | no | Unsplash image search (falls back to a built-in library) |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | no | Adds a "Continue with GitHub" button |
+
+\* Either the two `TURSO_*` variables (remote) or `DATABASE_URL` (local file).
+Both go through the same libSQL driver adapter, so the code path is identical.
 
 #### Generating `AUTH_SECRET`
 
@@ -67,25 +77,51 @@ PowerShell (no OpenSSL needed):
 $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
 ```
 
-#### Getting a PostgreSQL database
+#### Setting up Turso
 
-Any Postgres 14+ works. Pick whichever is easiest:
+Install the [Turso CLI](https://docs.turso.tech/cli/installation), then:
 
-- **Hosted, nothing to install** - create a free database at
-  [Neon](https://neon.tech) or [Supabase](https://supabase.com) and paste the
-  connection string into `DATABASE_URL`. Append `?sslmode=require` if the
-  provider asks for it.
-- **Docker**:
+```
+turso db create ai-website-studio
+```
 
-  ```
-  docker run --name aiws-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
-  ```
+```
+turso db show ai-website-studio --url
+```
 
-- **Local install** - [postgresql.org/download](https://www.postgresql.org/download/),
-  then create a database named `ai_website_studio`.
+```
+turso db tokens create ai-website-studio
+```
 
-The default `DATABASE_URL` in `.env.example` assumes a local Postgres on port
-5432 with user/password `postgres`.
+Put those two values in `.env` as `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`,
+then create the tables:
+
+```
+npm run db:push
+```
+
+`prisma.config.ts` hands the Prisma CLI the same libSQL adapter the app uses,
+so `db:push`, `migrate` and `studio` all act on whichever database is
+configured - remote Turso when `TURSO_DATABASE_URL` is set, the local file
+otherwise.
+
+This relies on Prisma's JavaScript schema engine, which Prisma still labels
+unstable. If a schema command misbehaves against Turso, emit the SQL and apply
+it yourself instead:
+
+```
+npm run db:sql > schema.sql
+```
+
+```
+turso db shell ai-website-studio < schema.sql
+```
+
+A connection problem surfaces as a terse `Error describing the database` -
+check the URL and token before looking anywhere else.
+
+**Working offline:** leave `TURSO_DATABASE_URL` blank and everything runs
+against the local SQLite file in `DATABASE_URL` (`prisma/dev.db` by default).
 
 The seed script creates `demo@aiwebsitestudio.test` / `demo1234`.
 
@@ -171,8 +207,12 @@ Partial success is kept and reported honestly rather than rolled back.
 
 Providers sit behind a thin interface
 ([`src/lib/ai/types.ts`](src/lib/ai/types.ts)); adding one is a single file plus
-a line in the registry. Claude and OpenAI are both implemented, and a
-deterministic offline path covers the no-key case.
+a line in the registry. Three are implemented: **CometAPI** (an
+OpenAI-compatible gateway, so one key fronts Claude, GPT, Gemini and others),
+Anthropic direct, and OpenAI direct. Because CometAPI shares OpenAI's wire
+format it needs no transport code of its own - just a different base URL, which
+is also how any other compatible gateway would be added. A deterministic
+offline path covers the no-key case.
 
 ### Deployment is isolated
 
@@ -237,6 +277,7 @@ strip shows one at a time.
 
 ```
 prisma/schema.prisma       data model (workspaces, projects, pages, sections, theme, deployments)
+prisma.config.ts           gives the Prisma CLI the same libSQL adapter the app uses
 src/lib/website/           the document: schemas, theme engine, operations, persistence
 src/lib/ai/                provider abstraction, prompts, tools, generation, copilot, offline paths
 src/lib/deploy/            static codegen, Vercel client, orchestration
@@ -255,14 +296,25 @@ src/app/                   routes: landing, auth, dashboard, editor, preview, AP
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:push` | Sync the schema to the database |
 | `npm run db:migrate` | Create a migration |
+| `npm run db:sql` | Emit the schema as plain SQL (to apply with the Turso CLI) |
 | `npm run db:seed` | Demo account and three websites |
 | `npm run db:studio` | Prisma Studio |
 
 ## Deploying the studio itself
 
-It is a standard Next.js app. Set the environment variables above (a hosted
-Postgres such as Neon or Supabase works well); `npm run build` handles Prisma
-generation and the website stylesheet.
+It is a standard Next.js app. Set the environment variables above - the same
+`TURSO_*` values work from anywhere, since Turso is accessed over HTTP - and
+`npm run build` handles Prisma generation and the website stylesheet.
+
+Two deployment notes:
+
+- `next.config.mjs` lists the libSQL packages in `serverExternalPackages`. They
+  load a native module and resolve some dependencies dynamically, which webpack
+  cannot bundle, so they must stay external.
+- The adapter's Node build is used, which runs fine on Vercel's Node runtime.
+  For an edge or worker runtime, switch the import in
+  [`src/lib/db.ts`](src/lib/db.ts) to `@prisma/adapter-libsql/web`: HTTP-only,
+  no native module, but no local `file:` support either.
 
 ## Known limits
 

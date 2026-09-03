@@ -54,7 +54,9 @@ export default async function LandingPage() {
           <div className="relative mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1 text-xs font-medium text-ink-600">
               <Sparkles className="h-3.5 w-3.5 text-brand-600" />
-              {ai.configured ? `Running on ${ai.model}` : 'Running on built-in templates - add an API key for AI'}
+              {ai.configured
+                ? `Running on ${ai.model} via ${ai.label}`
+                : 'Running on built-in templates - add an API key for AI'}
             </span>
             <h1 className="mt-6 text-balance text-5xl font-bold leading-[1.05] tracking-[-0.035em] text-ink-950 sm:text-6xl">
               From a sentence to a<span className="text-brand-600"> deployed website</span>

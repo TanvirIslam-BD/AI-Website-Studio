@@ -11,6 +11,7 @@ export function createAnthropicProvider(apiKey: string, model: string): LlmProvi
 
   return {
     id: 'anthropic',
+    label: 'Claude',
     model,
     async complete(request: LlmRequest): Promise<LlmResponse> {
       try {

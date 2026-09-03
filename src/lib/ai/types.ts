@@ -8,6 +8,13 @@
  * construction, tool definition, validation and retry logic lives above them.
  */
 
+/**
+ * Registered providers. `comet` is CometAPI, an OpenAI-compatible gateway that
+ * fronts many upstream models behind one key, so it reuses the OpenAI
+ * transport with a different base URL.
+ */
+export type ProviderId = 'anthropic' | 'openai' | 'comet';
+
 export type LlmRole = 'user' | 'assistant';
 
 export type LlmMessage = {
@@ -36,7 +43,9 @@ export type LlmResponse = {
 };
 
 export interface LlmProvider {
-  readonly id: 'anthropic' | 'openai';
+  readonly id: ProviderId;
+  /** Human-readable name for the UI (e.g. "CometAPI"). */
+  readonly label: string;
   readonly model: string;
   complete(request: LlmRequest): Promise<LlmResponse>;
 }
