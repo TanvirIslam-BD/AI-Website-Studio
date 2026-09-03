@@ -17,76 +17,81 @@ import { DEFAULT_THEME } from './theme';
 export type SaveResult = { document: WebsiteDocument; sectionCount: number };
 
 export async function saveDocument(projectId: string, document: WebsiteDocument): Promise<SaveResult> {
-  const pageIds = document.pages.map((page) => page.id);
+  const pages = document.pages.map((page, position) => ({
+    id: page.id,
+    projectId,
+    name: page.name,
+    slug: page.slug,
+    isHome: page.isHome,
+    position,
+    seoTitle: page.seoTitle ?? null,
+    seoDesc: page.seoDesc ?? null,
+  }));
 
-  await db.$transaction(async (tx) => {
-    // Pages that the user deleted in the editor. Sections cascade.
-    await tx.page.deleteMany({ where: { projectId, id: { notIn: pageIds.length > 0 ? pageIds : ['__none__'] } } });
-
-    for (const [position, page] of document.pages.entries()) {
-      const data = {
-        name: page.name,
-        slug: page.slug,
-        isHome: page.isHome,
-        position,
-        seoTitle: page.seoTitle ?? null,
-        seoDesc: page.seoDesc ?? null,
+  const sections = document.pages.flatMap((page) =>
+    page.sections.map((section, position) => {
+      const row = sectionToDbRow(section, position);
+      return {
+        id: row.id,
+        pageId: page.id,
+        type: row.type,
+        position: row.position,
+        hidden: row.hidden,
+        props: row.props as Prisma.InputJsonValue,
       };
+    }),
+  );
 
-      await tx.page.upsert({
-        where: { id: page.id },
-        create: { id: page.id, projectId, ...data },
-        update: data,
-      });
+  // Assets are additive: removing one from the library is a separate action.
+  // Reading the existing ids up front lets the write be a plain createMany,
+  // rather than one upsert per asset. createdAt is staggered so the library
+  // reads back in document order instead of relying on ties.
+  const existing = await db.asset.findMany({ where: { projectId }, select: { id: true } });
+  const known = new Set(existing.map((asset) => asset.id));
+  const assetBase = Date.now();
+  const newAssets = document.assets
+    .slice(0, 200)
+    .filter((asset) => !known.has(asset.id))
+    .map((asset, index) => ({
+      id: asset.id,
+      createdAt: new Date(assetBase - index * 1000),
+      projectId,
+      url: asset.url,
+      provider: asset.provider,
+      alt: asset.alt,
+      width: asset.width ?? null,
+      height: asset.height ?? null,
+      meta: (asset.meta ?? undefined) as Prisma.InputJsonValue | undefined,
+    }));
 
-      const sectionIds = page.sections.map((section) => section.id);
-      await tx.section.deleteMany({
-        where: { pageId: page.id, id: { notIn: sectionIds.length > 0 ? sectionIds : ['__none__'] } },
-      });
+  const { ...theme } = document.theme;
 
-      for (const [sectionPosition, section] of page.sections.entries()) {
-        const row = sectionToDbRow(section, sectionPosition);
-        await tx.section.upsert({
-          where: { id: row.id },
-          create: { id: row.id, pageId: page.id, type: row.type, position: row.position, hidden: row.hidden, props: row.props as Prisma.InputJsonValue },
-          update: { type: row.type, position: row.position, hidden: row.hidden, props: row.props as Prisma.InputJsonValue },
-        });
-      }
-    }
+  /**
+   * One batch, not a statement per row.
+   *
+   * Turso is reached over HTTP, so every statement in an interactive
+   * transaction is a separate round trip. The previous version issued roughly
+   * one per section - about 43 for a four-page site - which measured 4.7s from
+   * a local machine to ap-south-1 and reliably exceeded Prisma's 5s
+   * interactive-transaction timeout from a Vercel function in another region.
+   * The visible symptom was a project that saved its name but had zero pages.
+   *
+   * Pages and sections are replaced wholesale rather than diffed: ids come from
+   * the document, so identity survives, and `position` carries the ordering -
+   * nothing depends on their createdAt. Deleting the pages cascades to their
+   * sections, and statements in a batch run in order, so the pages exist again
+   * before the sections that reference them are inserted.
+   */
+  await db.$transaction([
+    db.page.deleteMany({ where: { projectId } }),
+    db.page.createMany({ data: pages }),
+    db.section.createMany({ data: sections }),
+    db.theme.upsert({ where: { projectId }, create: { projectId, ...theme }, update: theme }),
+    ...(newAssets.length > 0 ? [db.asset.createMany({ data: newAssets })] : []),
+    db.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } }),
+  ]);
 
-    const { ...theme } = document.theme;
-    await tx.theme.upsert({
-      where: { projectId },
-      create: { projectId, ...theme },
-      update: theme,
-    });
-
-    // Assets are additive - removing one from the library is a separate action.
-    // createdAt is staggered so the library reads back in document order
-    // (newest first) instead of relying on ties within one transaction.
-    const assetBase = Date.now();
-    for (const [index, asset] of document.assets.slice(0, 200).entries()) {
-      await tx.asset.upsert({
-        where: { id: asset.id },
-        create: {
-          id: asset.id,
-          createdAt: new Date(assetBase - index * 1000),
-          projectId,
-          url: asset.url,
-          provider: asset.provider,
-          alt: asset.alt,
-          width: asset.width ?? null,
-          height: asset.height ?? null,
-          meta: (asset.meta ?? undefined) as Prisma.InputJsonValue | undefined,
-        },
-        update: { alt: asset.alt },
-      });
-    }
-
-    await tx.project.update({ where: { id: projectId }, data: { updatedAt: new Date() } });
-  });
-
-  return { document, sectionCount: document.pages.reduce((sum, page) => sum + page.sections.length, 0) };
+  return { document, sectionCount: sections.length };
 }
 
 export async function loadDocument(projectId: string): Promise<WebsiteDocument> {
