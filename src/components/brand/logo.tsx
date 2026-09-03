@@ -91,9 +91,11 @@ export function Logo({
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <LogoMark size={size} tone={tone} title={BRAND.name} />
       {showWordmark ? (
-        <span className="font-brand text-[16px] font-semibold leading-none tracking-[-0.01em]">
-          <span className={onDark ? 'text-white' : 'text-ink-900'}>Web Copilot</span>{' '}
-          <span className={onDark ? 'text-white/55' : 'text-ink-400'}>AI Studio</span>
+        <span className="whitespace-nowrap font-brand text-[16px] font-semibold leading-none tracking-[-0.01em]">
+          <span className={onDark ? 'text-white' : 'text-ink-900'}>Web Copilot</span>
+          {/* Dropped on the narrowest screens, where the full name wraps and
+              crowds the header. The mark plus "Web Copilot" still identifies it. */}
+          <span className={cn('hidden sm:inline', onDark ? 'text-white/55' : 'text-ink-400')}> AI Studio</span>
         </span>
       ) : null}
     </span>

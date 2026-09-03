@@ -3,18 +3,14 @@ import { BRAND } from '@/lib/brand';
 import { PromptStarter } from '@/app/prompt-starter';
 import { Container } from './shell';
 import { SiteShowcase } from './site-showcase';
+import { HeroBackground } from './hero-background';
 
 const PROOF = ['No credit card', 'Deploys to your own Vercel account', 'Your site, plain HTML, no lock-in'];
 
 export function Hero({ providerLabel, signedIn }: { providerLabel: string | null; signedIn: boolean }) {
   return (
-    <section className="relative overflow-hidden">
-      {/* Layered background: soft brand wash, then a grid that fades out. */}
-      <div className="absolute inset-x-0 top-0 h-[620px] bg-gradient-to-b from-brand-50 via-brand-50/30 to-transparent" aria-hidden />
-      <div
-        className="studio-grid absolute inset-x-0 top-0 h-[620px] opacity-[0.55] [mask-image:linear-gradient(to_bottom,black,transparent)]"
-        aria-hidden
-      />
+    <section className="relative isolate overflow-hidden">
+      <HeroBackground />
 
       <Container className="relative pb-16 pt-16 sm:pb-24 sm:pt-24">
         <div className="mx-auto max-w-3xl text-center">
