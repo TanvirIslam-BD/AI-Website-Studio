@@ -6,27 +6,31 @@ import { HeroPipeline } from './hero-pipeline';
 /**
  * The hero.
  *
- * A dark, photographic opening that hands over to the product on white. The
- * order still puts understanding first - eyebrow, two-line headline, one
- * sentence of substance, the actions - but it now reads as a cover rather than
- * a page heading, and the workflow panels below break the fold deliberately so
- * the real UI is the first thing on the light surface.
+ * Type on the left, the actual editor on the right. It opened on a photograph
+ * of a laptop, which was atmospheric and said nothing - the product builds
+ * websites, and the strongest thing available to put above the fold is the
+ * thing doing the building.
  *
- * The photograph is a laptop lit by its own screen. It was chosen over the
- * abstract gradients in the same collection because those are saturated in
- * hues the identity does not have, and would fight a monochrome palette; this
- * one is almost entirely black, so the colour that survives is a rim of light
- * around the subject. That, rather than an accent hue, is where the warmth in
- * this section comes from.
+ * That change forces the layout. A screenshot of a light interface cannot sit
+ * full-bleed behind white text, so the picture moves out of the background and
+ * into a column of its own, and the dark ground becomes a backdrop rather than
+ * an image. The frame is deliberately allowed to run off the right edge: it
+ * reads as a window onto something larger, and it buys the type a full column
+ * on the left rather than half a screen.
  */
 
 /**
- * Unsplash, served through their CDN with the same transform parameters as the
- * product's own stock collection. Sized for a wide hero and left uncropped
- * vertically so the subject keeps its space on tall viewports.
+ * The editor, cropped out of the framed capture in `02-editor.webp`.
+ *
+ * That file is a marketing frame - the interface sitting under a caption and a
+ * logo - which is right for a gallery and wrong here: the caption would land
+ * directly under the h1 as a second, competing headline, and the logo would be
+ * the page's third. This is the interface on its own.
  */
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=2400&q=85';
+const HERO_SHOT = {
+  src: '/product/02-editor-app.webp',
+  alt: 'The Web Copilot editor: a generated photography site on the canvas, with the section list on the left and the AI copilot on the right.',
+};
 
 const TRUST = ['No credit card', 'Your Vercel account', 'Plain HTML', 'No lock-in'];
 
@@ -36,105 +40,124 @@ export function Hero({ providerLabel, signedIn }: { providerLabel: string | null
       {/*
         Pulled up under the sticky bar, which takes layout space rather than
         floating. Without this the dark section starts below it and the page
-        opens on a white strip with an inverted logo invisible inside it. The
-        top padding puts the same distance back.
+        opens on a white strip with an inverted logo invisible inside it.
       */}
       <section className="relative isolate -mt-16 overflow-hidden bg-ink-950">
-        {/* --- the photograph and everything that makes type legible on it --- */}
+        {/* Atmosphere only, now that the photograph is gone from behind. */}
         <div className="absolute inset-0 -z-10" aria-hidden>
-          {/*
-            Deliberately a plain <img>, matching the rest of the product: the
-            marketing page ships no next/image dependency. Eager and
-            high-priority because this is the largest paint on the page.
-          */}
-          <img
-            src={HERO_IMAGE}
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            className="h-full w-full scale-105 object-cover object-center opacity-[0.95] saturate-[0.95] sm:object-[70%_center]"
+          <div
+            className="studio-grid absolute inset-0 opacity-[0.18]"
+            style={{
+              maskImage: 'radial-gradient(70% 60% at 30% 40%, black 5%, transparent 75%)',
+              WebkitMaskImage: 'radial-gradient(70% 60% at 30% 40%, black 5%, transparent 75%)',
+            }}
           />
-
-          {/*
-            Three scrims, each doing one job. Left-to-right so the headline sits
-            on near-solid black however the photo crops; top-down so the nav has
-            a surface; bottom-up so the section resolves into the white below
-            instead of ending on a hard edge.
-          */}
-          <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-950/20 sm:via-ink-950/60 sm:to-transparent" />
-          {/* Holds the left column solid enough for body copy at any crop. */}
-          <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-ink-950 to-transparent sm:w-[62%]" />
-          {/*
-            Narrow screens have no empty column to put type in - the copy sits
-            over the lit part of the screen - so they get a flat wash as well.
-            Wide screens do not need it and are better without it.
-          */}
-          <div className="absolute inset-0 bg-ink-950/45 sm:hidden" />
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink-950/90 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-ink-950 to-transparent" />
-
-          {/* Grain, so the large dark gradients cannot band on a wide screen. */}
-          <div className="grain absolute inset-0 opacity-[0.5]" />
+          {/* A cool lift behind the screenshot, so the frame has something to sit on. */}
+          <div
+            className="absolute inset-y-0 right-0 w-2/3"
+            style={{ background: 'radial-gradient(60% 60% at 70% 45%, rgba(255,255,255,0.10), transparent 70%)' }}
+          />
+          <div className="grain absolute inset-0 opacity-40" />
         </div>
 
-        <Container className="relative pb-40 pt-36 sm:pb-48 sm:pt-44">
-          <div className="max-w-2xl">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
-              AI website builder
-            </p>
+        <Container className="relative pb-32 pt-32 sm:pb-40 sm:pt-40">
+          <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-10">
+            {/* ------------------------------------------------------- type */}
+            <div>
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
+                AI website builder
+              </p>
 
-            <h1 className="mt-6 text-balance text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] text-white sm:text-[4rem] lg:text-[4.75rem]">
-              Build Smarter.
-              <br />
-              Launch Faster.
-            </h1>
+              <h1 className="mt-6 text-balance text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] text-white sm:text-[3.5rem] lg:text-[4rem]">
+                Build Smarter.
+                <br />
+                Launch Faster.
+              </h1>
 
-            <p className="mt-7 max-w-xl text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-white/85 sm:text-[22px]">
-              Turn one sentence into a complete, production-ready website.
-            </p>
+              <p className="mt-7 max-w-xl text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-white/85 sm:text-[21px]">
+                Turn one sentence into a complete, production-ready website.
+              </p>
 
-            <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/55">
-              Web Copilot generates structured multi-page websites, lets you edit them visually or through AI, and
-              deploys the final site to your own Vercel account.
-            </p>
+              <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/55">
+                Web Copilot generates structured multi-page websites, lets you edit them visually or through AI, and
+                deploys the final site to your own Vercel account.
+              </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                href={signedIn ? '/dashboard' : '/signin?mode=register'}
-                className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-7 text-[15px] font-medium text-ink-950 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-white sm:w-auto"
-              >
-                {signedIn ? 'Open your dashboard' : 'Start building free'}
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-              </Link>
-              <a
-                href="#how-it-works"
-                className="focus-ring inline-flex h-12 w-full items-center justify-center rounded-lg border border-white/20 bg-white/5 px-7 text-[15px] font-medium text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10 sm:w-auto"
-              >
-                See how it works
-              </a>
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href={signedIn ? '/dashboard' : '/signin?mode=register'}
+                  className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-7 text-[15px] font-medium text-ink-950 transition-transform duration-200 hover:-translate-y-0.5 sm:w-auto"
+                >
+                  {signedIn ? 'Open your dashboard' : 'Start building free'}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="focus-ring inline-flex h-12 w-full items-center justify-center rounded-lg border border-white/20 bg-white/5 px-7 text-[15px] font-medium text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10 sm:w-auto"
+                >
+                  See how it works
+                </a>
+              </div>
+
+              <ul className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2">
+                {TRUST.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-[12px] text-white/50">
+                    <span className="h-1 w-1 rounded-full bg-white/35" aria-hidden />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <ul className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2">
-              {TRUST.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-[12px] text-white/50">
-                  <span className="h-1 w-1 rounded-full bg-white/35" aria-hidden />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {/* --------------------------------------------------- the editor */}
+            {/*
+              Wider than its column so the frame genuinely runs off the right
+              edge rather than stopping just short of it - a negative margin
+              sized in pixels only lands correctly at one viewport width. The
+              section clips it, so nothing here can widen the document.
+            */}
+            <div className="relative lg:w-[126%] lg:max-w-none xl:w-[132%]">
+              {/* Glow, so the frame lifts off the dark rather than sitting on it. */}
+              <div
+                className="absolute -inset-6 rounded-[2rem] opacity-70 blur-2xl"
+                style={{ background: 'radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.16), transparent 70%)' }}
+                aria-hidden
+              />
+
+              {/*
+                No browser chrome around it: the capture already includes the
+                editor's own toolbar, and a second frame on top of a real one
+                reads as a picture of a picture.
+              */}
+              <figure className="relative overflow-hidden rounded-xl border border-white/12 bg-ink-900 shadow-pop">
+                {/*
+                  The largest paint on the page now, so it loads eagerly and at
+                  high priority. Width and height are the file's real dimensions
+                  so the box is reserved before it arrives.
+                */}
+                <img
+                  src={HERO_SHOT.src}
+                  alt={HERO_SHOT.alt}
+                  width={1167}
+                  height={657}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="block w-full"
+                />
+              </figure>
+            </div>
           </div>
         </Container>
       </section>
 
       {/*
-        The product, breaking the fold. Pulled up over the boundary so the first
-        thing on the white surface is real UI rather than another heading - the
-        page argues for the product only after showing it.
+        The workflow, breaking the fold. The hero now shows where the editing
+        happens; this shows how a site gets there in the first place.
       */}
       <div className="relative bg-white pb-20 sm:pb-24">
         <Container>
-          <div className="reveal -mt-28 sm:-mt-36">
+          <div className="reveal -mt-16 sm:-mt-20">
             <HeroPipeline />
           </div>
           <p className="mt-7 text-center text-[12px] text-ink-400">
