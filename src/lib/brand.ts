@@ -19,27 +19,29 @@ export const BRAND = {
  * Footer navigation.
  *
  * Only entries with an `href` render, same as SOCIAL_LINKS - so a page that
- * does not exist yet cannot ship as a dead link. Documentation, changelog,
- * about, privacy and terms are left blank deliberately: those pages have to be
- * written, and privacy/terms in particular need real legal content rather than
- * placeholder text.
+ * does not exist yet cannot ship as a dead link. Changelog and About are still
+ * blank for that reason.
+ *
+ * The product links are written as `/#anchor` rather than `#anchor` so they
+ * also work from the standalone pages, where those sections are not present.
  */
 export const FOOTER_NAV: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
   {
     title: 'Product',
     links: [
-      { label: 'Examples', href: '#examples' },
-      { label: 'Features', href: '#features' },
-      { label: 'How it works', href: '#how-it-works' },
-      { label: 'Sections', href: '#sections' },
-      { label: 'Pricing', href: '#pricing' },
+      { label: 'Examples', href: '/#examples' },
+      { label: 'Features', href: '/#features' },
+      { label: 'How it works', href: '/#how-it-works' },
+      { label: 'Sections', href: '/#sections' },
+      { label: 'Pricing', href: '/#pricing' },
     ],
   },
   {
     title: 'Resources',
     links: [
-      { label: 'FAQ', href: '#faq' },
-      { label: 'Documentation', href: '' },
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Support', href: '/support' },
+      { label: 'FAQ', href: '/#faq' },
       { label: 'Changelog', href: '' },
     ],
   },
@@ -48,8 +50,8 @@ export const FOOTER_NAV: Array<{ title: string; links: Array<{ label: string; hr
     links: [
       { label: 'Contact', href: 'mailto:support@contact.copilotai.live' },
       { label: 'About', href: '' },
-      { label: 'Privacy', href: '' },
-      { label: 'Terms', href: '' },
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
     ],
   },
 ];

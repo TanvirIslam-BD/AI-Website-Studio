@@ -10,8 +10,12 @@ import { cn } from '@/lib/utils';
 /**
  * Marketing navigation. Sticky, gains a border once the page scrolls so the
  * hero reads as one uninterrupted surface at the top.
+ *
+ * The nav links are anchors on the home page. Pass `anchorPrefix="/"` on any
+ * other page so they navigate home first instead of pointing at sections that
+ * are not there.
  */
-export function MarketingNav({ signedIn }: { signedIn: boolean }) {
+export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolean; anchorPrefix?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -46,7 +50,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
-              href={link.href}
+              href={`${anchorPrefix}${link.href}`}
               className="focus-ring rounded-md px-2.5 py-2 text-[13px] text-ink-600 transition-colors hover:text-ink-950"
             >
               {link.label}
@@ -95,7 +99,7 @@ export function MarketingNav({ signedIn }: { signedIn: boolean }) {
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
-              href={link.href}
+              href={`${anchorPrefix}${link.href}`}
               onClick={() => setOpen(false)}
               className="focus-ring block rounded-md px-3 py-2.5 text-sm text-ink-700 hover:bg-ink-50"
             >
