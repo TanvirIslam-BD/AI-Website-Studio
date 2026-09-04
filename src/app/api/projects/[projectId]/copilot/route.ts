@@ -8,6 +8,7 @@ import { runCopilot } from '@/lib/ai/agent';
 import { parseIncomingDocument } from '@/lib/website/document';
 import { saveDocument, writeRevision } from '@/lib/website/persistence';
 import type { LlmMessage } from '@/lib/ai/types';
+import { recordUsage, requireAllowance } from '@/lib/billing/entitlements';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -33,7 +34,8 @@ const HISTORY_TURNS = 8;
 export const POST = handle(async (request: Request, { params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params;
   const user = await requireUser();
-  await requireProjectRef(projectId, user.id);
+  const project = await requireProjectRef(projectId, user.id);
+  const entitlements = await requireAllowance(project.workspaceId, 'copilot');
 
   const input = schema.parse(await readJson(request));
   const document = parseIncomingDocument(input.document);
@@ -74,6 +76,14 @@ export const POST = handle(async (request: Request, { params }: { params: Promis
       },
     }),
   ]);
+
+  await recordUsage({
+    workspaceId: project.workspaceId,
+    plan: entitlements.plan,
+    kind: 'copilot',
+    userId: user.id,
+    projectId,
+  });
 
   return NextResponse.json({
     message: assistantMessage.content,

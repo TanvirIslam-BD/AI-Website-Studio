@@ -6,6 +6,7 @@ import { requireUser, requireWorkspace } from '@/lib/tenancy';
 import { generateWebsite } from '@/lib/ai/generate';
 import type { GenerationProgress } from '@/lib/ai/progress';
 import { MAX_BRIEF_LENGTH } from '@/lib/limits';
+import { recordUsage, requireAllowance } from '@/lib/billing/entitlements';
 import { emptyDocument } from '@/lib/website/document';
 import { createProjectWithDocument } from '@/lib/website/persistence';
 import { createSection } from '@/lib/website/blueprints';
@@ -53,6 +54,10 @@ export const POST = handle(async (request: Request) => {
   const workspace = await requireWorkspace(user.id);
   const input = createSchema.parse(await readJson(request));
 
+  // Before any work: a blank project still occupies a website slot, so both
+  // paths are checked - just for different things.
+  const entitlements = await requireAllowance(workspace.id, input.mode === 'blank' ? 'createProject' : 'generate');
+
   if (input.mode === 'blank' || !input.prompt?.trim()) {
     const name = input.name?.trim() || 'Untitled website';
     const base = emptyDocument();
@@ -79,6 +84,16 @@ export const POST = handle(async (request: Request) => {
       document,
       status: 'READY',
     });
+    // A blank scaffold costs no credits - nothing was generated - but it is
+    // still recorded, because the console's activity view should show it.
+    await recordUsage({
+      workspaceId: workspace.id,
+      plan: entitlements.plan,
+      kind: 'scaffold',
+      userId: user.id,
+      projectId: project.id,
+    });
+
     return NextResponse.json({ project: { id: project.id, name: project.name }, source: 'blank' }, { status: 201 });
   }
 
@@ -119,6 +134,14 @@ export const POST = handle(async (request: Request) => {
               : `I built a ${result.document.pages.length}-page starter website for ${result.brand} from a template${result.warning ? ` (the AI provider returned an error: ${result.warning})` : ''}. Select any section to edit it.`,
         },
       ],
+    });
+
+    await recordUsage({
+      workspaceId: workspace.id,
+      plan: entitlements.plan,
+      kind: 'generate',
+      userId: user.id,
+      projectId: project.id,
     });
 
     return { project, result };

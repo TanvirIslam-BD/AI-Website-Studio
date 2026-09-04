@@ -61,9 +61,26 @@ generation and copy editing; add a Vercel token to enable deployment.
 | `VERCEL_TOKEN` / `VERCEL_TEAM_ID` | no | Fallback deployment account, used only when a workspace has connected none of its own |
 | `UNSPLASH_ACCESS_KEY` | no | Unsplash image search (falls back to a built-in library) |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | no | Adds a "Continue with GitHub" button |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | no | Adds a "Continue with Google" button |
+| `OWNER_EMAILS` | no | Comma-separated emails that may open the owner console at `/admin` |
+| `BILLING_PROVIDER` | no | Names the checkout upgrades are sent to; blank keeps plans grant-only from `/admin` |
 
 \* Either the two `TURSO_*` variables (remote) or `DATABASE_URL` (local file).
 Both go through the same libSQL driver adapter, so the code path is identical.
+
+#### Sign-in providers
+
+Email and password always work. GitHub and Google each appear on `/signin` only
+when **both** of their variables are set, so a fork can ship with one, both or
+neither and the page still reads as finished rather than showing a dead button.
+Register the callback URLs as:
+
+```
+http://localhost:3000/api/auth/callback/github
+http://localhost:3000/api/auth/callback/google
+```
+
+and the same two paths on your deployed domain.
 
 #### Choosing a model
 
@@ -343,6 +360,55 @@ project reads and writes funnel through
 the caller belongs to - a project in another workspace reports as missing, so
 ids cannot be probed. Team workspaces, seat billing and white-labelling are
 additive from here.
+
+### Plans decide what a workspace may do, not what it may see
+
+Limits live in one table,
+[`src/lib/billing/plans.ts`](src/lib/billing/plans.ts):
+
+| | Free | Pro | Agency |
+| --- | --- | --- | --- |
+| Websites | 1 | 25 | 250 |
+| Credits / month | 1 | 300 | 2000 |
+| AI edits and copilot | no | yes | yes |
+| Publish to Vercel | no | yes | yes |
+
+A free account generates one complete website and can look at all of it. What
+it cannot do is generate a second, change the first, or publish - so the limit
+is felt at the moment someone has decided they want the thing, which is the
+only moment an upgrade prompt is useful rather than an obstacle.
+
+Enforcement is one call,
+[`requireAllowance`](src/lib/billing/entitlements.ts), made **before** any work
+starts, in every route that generates, edits or deploys. It throws a
+`PlanLimitError`, which the shared error mapper turns into **402 Payment
+Required** carrying `reason` and `requiredPlan`, so the client can say what is
+missing and where to go rather than showing a generic failure.
+
+Usage is a **ledger**, not a counter: each chargeable action appends a
+`UsageEvent`, and the balance is summed from the workspace's period start. A
+counter can drift and cannot be audited; rows can be read back, and a period
+reset is a date change rather than a mass update. Recording happens after the
+work succeeds and deliberately swallows its own write failures - losing a
+record is bad, failing a request the user has already paid for is worse.
+
+### The owner console
+
+`/admin` reports platform totals, plan mix, per-workspace usage and recent
+activity, and carries the levers that matter when something is going wrong:
+
+- **Generation mode** - `auto`, force **AI**, or force **templates**. Forcing
+  templates makes the app skip the provider entirely (verified: a generation
+  that took ~35s through the model returns in 0.2s with `source: "template"`),
+  which is the switch to reach for when a provider is down, slow, or expensive.
+- **Pause generation** and **pause signups**, platform-wide.
+- **Grant a plan** to any workspace, optionally resetting its period.
+
+Access is by `OWNER_EMAILS`, an environment variable, not a database column: no
+request the app serves can write to it, so no bug in a signup or profile path
+can escalate anyone into it. Non-owners get **404** rather than 403 - on the
+page and on each API independently - so the console does not confirm its own
+existence to someone probing for it.
 
 ---
 

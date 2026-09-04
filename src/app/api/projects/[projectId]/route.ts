@@ -6,6 +6,7 @@ import { requireProject, requireProjectRef, requireUser } from '@/lib/tenancy';
 import { documentFromDb, parseIncomingDocument } from '@/lib/website/document';
 import { saveDocument } from '@/lib/website/persistence';
 import { latestDeployment } from '@/lib/deploy/service';
+import { requireAllowance } from '@/lib/billing/entitlements';
 
 export const runtime = 'nodejs';
 
@@ -52,7 +53,10 @@ const patchSchema = z.object({
 export const PATCH = handle(async (request: Request, { params }: Params) => {
   const { projectId } = await params;
   const user = await requireUser();
-  await requireProjectRef(projectId, user.id);
+  const project = await requireProjectRef(projectId, user.id);
+  // Editing is a plan capability, and the autosave in the editor comes through
+  // here - so this is the check that actually makes a read-only plan read-only.
+  await requireAllowance(project.workspaceId, 'edit');
   const input = patchSchema.parse(await readJson(request));
 
   if (input.name !== undefined || input.description !== undefined) {

@@ -7,6 +7,7 @@ import { aiStatus } from '@/lib/ai';
 import { isVercelConfigured } from '@/lib/deploy/vercel';
 import { Badge, EmptyState } from '@/components/ui/misc';
 import { Logo } from '@/components/brand/logo';
+import { PlanBanner } from '@/components/billing/plan-banner';
 import { NewProjectPanel } from './new-project';
 import { ProjectGrid } from './project-grid';
 import { UserMenu } from './user-menu';
@@ -76,6 +77,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <div className="mt-8">
+          {/* States the limits before they are hit, not only when refused. */}
+          <div className="mb-4">
+            <PlanBanner />
+          </div>
+
           <NewProjectPanel initialPrompt={params.prompt} />
         </div>
 

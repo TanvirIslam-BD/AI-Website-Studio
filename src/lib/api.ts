@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { AuthError, ForbiddenError } from './tenancy';
+import { PlanLimitError } from './billing/entitlements';
+import { NotOwnerError } from './platform/owner';
 import { OperationError } from './website/operations';
 import { LlmError } from './ai/types';
 import { VercelError } from './deploy/vercel';
@@ -37,7 +39,21 @@ function isInternalError(error: unknown): boolean {
 export function toErrorResponse(error: unknown) {
   if (error instanceof AuthError) return jsonError(error.message, 401);
   if (error instanceof ForbiddenError) return jsonError(error.message, 404);
+  // Deliberately indistinguishable from a route that does not exist.
+  if (error instanceof NotOwnerError) return jsonError(error.message, 404);
   if (error instanceof OperationError) return jsonError(error.message, 422);
+  /**
+   * 402, and the plan that would lift the limit travels with it. The client
+   * needs both to show a useful prompt: a bare "forbidden" cannot say which
+   * upgrade would help, and guessing in the interface would eventually
+   * disagree with what the server actually enforces.
+   */
+  if (error instanceof PlanLimitError) {
+    return jsonError(error.message, error.status, {
+      reason: error.reason,
+      requiredPlan: error.requiredPlan,
+    });
+  }
   if (error instanceof ZodError) {
     /**
      * Name the field that failed, not just the fact that something did.
