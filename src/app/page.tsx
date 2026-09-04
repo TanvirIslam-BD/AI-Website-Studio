@@ -38,8 +38,12 @@ export default async function HomePage() {
   });
   const fontsHref = googleFontsHrefFor(presetFonts);
 
+  // `overflow-x-clip`, not `hidden`. Both stop a wide child widening the page,
+  // but `hidden` makes this a scroll container - and a scroll container becomes
+  // the containing block for sticky descendants, so the sticky nav scrolled away
+  // with the content instead of pinning. `clip` clips without that side effect.
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white">
+    <div className="min-h-screen overflow-x-clip bg-white">
       {fontsHref ? (
         <>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,7 +53,8 @@ export default async function HomePage() {
       ) : null}
 
       <RevealProvider />
-      <MarketingNav signedIn={signedIn} />
+      {/* The home page opens on a dark hero, so the bar starts inverted. */}
+      <MarketingNav signedIn={signedIn} tone="dark" />
 
       <main>
         <Hero providerLabel={ai.configured ? ai.label : null} signedIn={signedIn} />

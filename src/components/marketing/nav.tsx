@@ -15,7 +15,16 @@ import { cn } from '@/lib/utils';
  * other page so they navigate home first instead of pointing at sections that
  * are not there.
  */
-export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolean; anchorPrefix?: string }) {
+export function MarketingNav({
+  signedIn,
+  anchorPrefix = '',
+  /** `dark` for pages that open on a dark hero; the bar inverts until scrolled. */
+  tone = 'light',
+}: {
+  signedIn: boolean;
+  anchorPrefix?: string;
+  tone?: 'light' | 'dark';
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -34,6 +43,13 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
     return () => media.removeEventListener('change', onChange);
   }, []);
 
+  /**
+   * Over a dark hero the un-scrolled bar has to invert, or it is black type on
+   * a black photograph. Once scrolled the bar gains its white surface and the
+   * light treatment is correct again, whatever it started as.
+   */
+  const onDark = tone === 'dark' && !scrolled;
+
   return (
     <header
       className={cn(
@@ -43,7 +59,7 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
         <Link href="/" aria-label={BRAND.name}>
-          <Logo />
+          <Logo tone={onDark ? 'light' : 'dark'} />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -51,7 +67,10 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
             <a
               key={link.href}
               href={`${anchorPrefix}${link.href}`}
-              className="focus-ring rounded-md px-2.5 py-2 text-[13px] text-ink-600 transition-colors hover:text-ink-950"
+              className={cn(
+                'focus-ring rounded-md px-2.5 py-2 text-[13px] transition-colors',
+                onDark ? 'text-white/65 hover:text-white' : 'text-ink-600 hover:text-ink-950',
+              )}
             >
               {link.label}
             </a>
@@ -62,7 +81,10 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
           {signedIn ? (
             <Link
               href="/dashboard"
-              className="focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg bg-ink-950 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+              className={cn(
+                'focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-[13px] font-medium transition-colors',
+                onDark ? 'bg-white text-ink-950 hover:bg-white/90' : 'bg-ink-950 text-white hover:bg-ink-800',
+              )}
             >
               Dashboard <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -70,13 +92,19 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
             <>
               <Link
                 href="/signin"
-                className="focus-ring hidden rounded-md px-3 py-2 text-[13px] text-ink-600 transition-colors hover:text-ink-950 sm:block"
+                className={cn(
+                  'focus-ring hidden rounded-md px-3 py-2 text-[13px] transition-colors sm:block',
+                  onDark ? 'text-white/65 hover:text-white' : 'text-ink-600 hover:text-ink-950',
+                )}
               >
                 Sign in
               </Link>
               <Link
                 href="/signin?mode=register"
-                className="focus-ring inline-flex h-9 items-center rounded-lg bg-ink-950 px-4 text-[13px] font-medium text-white transition-colors hover:bg-ink-800"
+                className={cn(
+                  'focus-ring inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-medium transition-colors',
+                  onDark ? 'bg-white text-ink-950 hover:bg-white/90' : 'bg-ink-950 text-white hover:bg-ink-800',
+                )}
               >
                 Start building free
               </Link>
@@ -87,7 +115,10 @@ export function MarketingNav({ signedIn, anchorPrefix = '' }: { signedIn: boolea
             onClick={() => setOpen((value) => !value)}
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-ink-600 hover:bg-ink-50 md:hidden"
+            className={cn(
+              'focus-ring grid h-9 w-9 place-items-center rounded-lg md:hidden',
+              onDark ? 'text-white/75 hover:bg-white/10' : 'text-ink-600 hover:bg-ink-50',
+            )}
           >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
