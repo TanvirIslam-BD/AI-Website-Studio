@@ -39,7 +39,22 @@ export function toErrorResponse(error: unknown) {
   if (error instanceof ForbiddenError) return jsonError(error.message, 404);
   if (error instanceof OperationError) return jsonError(error.message, 422);
   if (error instanceof ZodError) {
-    return jsonError('That request was not valid.', 400, error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })));
+    /**
+     * Name the field that failed, not just the fact that something did.
+     *
+     * A zod issue describes the request the client itself sent - a length, a
+     * missing key, a bad enum - so it is safe to show and it is the only thing
+     * that tells someone how to fix their input. The bare "That request was not
+     * valid." this used to return sent people hunting through server logs for a
+     * limit the message could simply have named. `details` is still returned for
+     * clients that want to render per-field errors.
+     */
+    const details = error.issues.map((i) => ({ path: i.path.join('.'), message: i.message }));
+    const summary = details
+      .slice(0, 3)
+      .map((d) => (d.path ? `${d.path}: ${d.message}` : d.message))
+      .join('; ');
+    return jsonError(summary ? `That request was not valid. ${summary}` : 'That request was not valid.', 400, details);
   }
   if (error instanceof VercelError) return jsonError(error.message, error.status && error.status < 500 ? 400 : 502);
   if (error instanceof LlmError) return jsonError(`AI provider error: ${error.message}`, 502);
