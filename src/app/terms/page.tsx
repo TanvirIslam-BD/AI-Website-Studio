@@ -43,7 +43,7 @@ export default async function TermsPage() {
       <PageHeader
         eyebrow="Legal"
         title="Terms of Service"
-        lede={`The agreement between you and ${COMPANY.legalName} for use of ${BRAND.name}. It also serves as the end user licence agreement for the Service.`}
+        lede={`The agreement between you and ${COMPANY.legalName} for use of ${BRAND.name}.`}
         meta={`Effective ${EFFECTIVE}`}
       />
 
@@ -54,8 +54,7 @@ export default async function TermsPage() {
         <P>
           These terms are a contract between you and {COMPANY.legalName}, {COMPANY.address.join(', ')}
           (&ldquo;we&rdquo;, &ldquo;us&rdquo;). They govern your use of {BRAND.name} (the &ldquo;Service&rdquo;),
-          including the website, the studio, and anything the Service publishes on your instruction. They are also the
-          end user licence agreement for the Service.
+          including the website, the studio, and anything the Service publishes on your instruction.
         </P>
         <P>
           By creating an account or using the Service you accept these terms. If you do not accept them, do not use the
@@ -63,8 +62,10 @@ export default async function TermsPage() {
           &ldquo;you&rdquo; means that company.
         </P>
         <P>
-          Our <TextLink href="/privacy">Privacy Policy</TextLink> explains how we handle personal data and forms part
-          of this agreement.
+          Two documents sit alongside these terms and form part of this agreement: the{' '}
+          <TextLink href="/eula">End User Licence Agreement</TextLink>, which sets out what you may do with the
+          software itself, and the <TextLink href="/privacy">Privacy Policy</TextLink>, which explains how we handle
+          personal data. Where these terms and the Licence address the same subject, these terms prevail.
         </P>
 
         <H2 id="service">2. The Service</H2>
@@ -91,9 +92,9 @@ export default async function TermsPage() {
         <H2 id="licence">4. Licence to use the Service</H2>
         <P>
           We grant you a limited, non-exclusive, non-transferable, revocable licence to access and use the Service for
-          its intended purpose, subject to these terms. We reserve every right not expressly granted.
-        </P>
-        <P>You may not:</P>
+          its intended purpose, subject to these terms. The{' '}
+          <TextLink href="/eula">End User Licence Agreement</TextLink> sets out that licence in full, including what it
+          does and does not cover. In summary, you may not:</P>
         <Bullets
           items={[
             'Copy, modify, translate or create derivative works of the Service itself, or reverse engineer it except to the extent that right cannot lawfully be excluded.',
@@ -279,7 +280,7 @@ export default async function TermsPage() {
         <H2 id="general">17. General</H2>
         <Bullets
           items={[
-            'These terms and the Privacy Policy are the entire agreement between us about the Service, and replace any earlier understanding on the same subject.',
+            'These terms, the End User Licence Agreement and the Privacy Policy are the entire agreement between us about the Service, and replace any earlier understanding on the same subject.',
             'If a provision is held unenforceable, the rest remains in force and that provision is narrowed to the minimum extent needed to make it enforceable.',
             'Our failure to enforce a provision is not a waiver of it.',
             'You may not assign this agreement without our written consent. We may assign it to an affiliate or in connection with a merger, acquisition or sale of assets.',

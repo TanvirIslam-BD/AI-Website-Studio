@@ -52,6 +52,7 @@ export const FOOTER_NAV: Array<{ title: string; links: Array<{ label: string; hr
       { label: 'About', href: '' },
       { label: 'Privacy', href: '/privacy' },
       { label: 'Terms', href: '/terms' },
+      { label: 'Licence', href: '/eula' },
     ],
   },
 ];
