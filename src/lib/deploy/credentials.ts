@@ -174,6 +174,28 @@ export async function connectWorkspaceFromOAuth(input: {
   return connectionStatus(input.workspaceId);
 }
 
+/**
+ * The workspace an install belongs to, from Vercel's own id for it.
+ *
+ * Vercel's Configure button hands back only a `configurationId`, so this is the
+ * one way to tell which workspace the person is configuring. Scoped to the
+ * signed-in user's memberships, so a guessed id cannot reach someone else's
+ * install - an unknown or foreign id is simply "not found".
+ */
+export async function workspaceForConfiguration(
+  configurationId: string,
+  userId: string,
+): Promise<{ workspaceId: string; accountName: string | null } | null> {
+  const connection = await db.hostingConnection.findFirst({
+    where: {
+      configurationId,
+      workspace: { members: { some: { userId } } },
+    },
+    select: { workspaceId: true, accountName: true },
+  });
+  return connection ?? null;
+}
+
 export async function disconnectWorkspace(workspaceId: string): Promise<ConnectionStatus> {
   await db.hostingConnection.deleteMany({ where: { workspaceId } });
   return connectionStatus(workspaceId);
