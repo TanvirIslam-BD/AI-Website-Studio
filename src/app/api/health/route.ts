@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { aiStatus } from '@/lib/ai';
 import { isVercelConfigured } from '@/lib/deploy/vercel';
+import { isOAuthAvailable } from '@/lib/deploy/oauth';
+import { isEncryptionConfigured } from '@/lib/crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -44,6 +46,21 @@ export async function GET() {
   const ai = aiStatus();
   const ready = config.AUTH_SECRET && database === 'ok';
 
+  /**
+   * Whether users can connect their own hosting account.
+   *
+   * Not part of `ready` - the studio generates and edits sites without any of
+   * it. But these three are set together and are easy to get half-right, and a
+   * half-configured connect flow fails at publish time rather than at the
+   * point of misconfiguration. `encryptionKey` checks the key actually decodes
+   * to 32 bytes, so a truncated paste is caught here too.
+   */
+  const hosting = {
+    encryptionKey: isEncryptionConfigured(),
+    integrationOAuth: isOAuthAvailable(),
+    platformFallbackToken: isVercelConfigured(),
+  };
+
   return NextResponse.json(
     {
       ready,
@@ -51,7 +68,7 @@ export async function GET() {
       config,
       database,
       ai: { configured: ai.configured, provider: ai.provider },
-      deployment: { vercelConfigured: isVercelConfigured() },
+      hosting,
       /** Actionable next step, so the response is useful on its own. */
       hint: ready
         ? null
