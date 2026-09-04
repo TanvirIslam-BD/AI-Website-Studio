@@ -7,6 +7,7 @@ import { Hero } from '@/components/marketing/hero';
 import { Audience } from '@/components/marketing/audience';
 import { ProductShowcase } from '@/components/marketing/product';
 import { StudioGallery } from '@/components/marketing/studio-gallery';
+import { GeneratedSites } from '@/components/marketing/generated-sites';
 import { HowItWorks } from '@/components/marketing/how-it-works';
 import { Features } from '@/components/marketing/features';
 import { CopilotShowcase } from '@/components/marketing/copilot-showcase';
@@ -62,6 +63,7 @@ export default async function HomePage() {
         <Audience />
         <ProductShowcase />
         <StudioGallery />
+        <GeneratedSites signedIn={signedIn} />
         <HowItWorks />
         <Features />
         <CopilotShowcase />
