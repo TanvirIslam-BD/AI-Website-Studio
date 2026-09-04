@@ -37,7 +37,7 @@ export default async function TermsPage() {
   const user = await currentUser();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white">
+    <div className="min-h-screen overflow-x-clip bg-white">
       <MarketingNav signedIn={Boolean(user)} anchorPrefix="/" />
 
       <PageHeader
