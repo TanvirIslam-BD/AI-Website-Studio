@@ -61,11 +61,17 @@ export default async function HomePage() {
 
       <main>
         <Hero providerLabel={ai.configured ? ai.label : null} signedIn={signedIn} />
+        {/*
+          Second, directly after the hero. Most visitors arrive already using a
+          block editor or comparing against one, so the difference is the first
+          thing worth settling - before the page spends five sections on detail
+          they have no reason to read yet.
+        */}
+        <TwoWays />
         <Audience />
         <ProductShowcase />
         <StudioGallery />
         <GeneratedSites signedIn={signedIn} />
-        <TwoWays />
         <HowItWorks />
         <Features />
         <CopilotShowcase />
