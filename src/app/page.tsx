@@ -6,6 +6,7 @@ import { RevealProvider } from '@/components/marketing/reveal';
 import { Hero } from '@/components/marketing/hero';
 import { Audience } from '@/components/marketing/audience';
 import { ProductShowcase } from '@/components/marketing/product';
+import { StudioGallery } from '@/components/marketing/studio-gallery';
 import { HowItWorks } from '@/components/marketing/how-it-works';
 import { Features } from '@/components/marketing/features';
 import { CopilotShowcase } from '@/components/marketing/copilot-showcase';
@@ -60,6 +61,7 @@ export default async function HomePage() {
         <Hero providerLabel={ai.configured ? ai.label : null} signedIn={signedIn} />
         <Audience />
         <ProductShowcase />
+        <StudioGallery />
         <HowItWorks />
         <Features />
         <CopilotShowcase />
