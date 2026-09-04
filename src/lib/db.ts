@@ -70,7 +70,24 @@ function createAdapter(): PrismaLibSQL {
   return new PrismaLibSQL({ url: resolveFileUrl(localUrl) });
 }
 
-/** Next.js hot-reloads modules, so cache the client to avoid leaking connections. */
+/**
+ * The one client, cached on globalThis.
+ *
+ * Two different problems are solved by the same cache. In development Next.js
+ * hot-reloads this module, and a module-scoped variable would be discarded on
+ * every reload, leaking a connection each time - so the cache has to outlive
+ * the module, which is why it lives on globalThis. In production the module is
+ * evaluated once, but the client is built lazily inside the proxy below rather
+ * than at module scope, so there is no module-level binding holding it either:
+ * without this cache, every property access on `db` would construct a fresh
+ * PrismaClient and open a fresh libSQL connection.
+ *
+ * That second case is why this is not the usual `NODE_ENV !== 'production'`
+ * guard. That idiom assigns the client to a module-level const, and it is the
+ * const - not the global - that memoises it in production. Deferring
+ * construction removes that binding, so the guard would leave production with
+ * no cache at all.
+ */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient(): PrismaClient {
@@ -78,7 +95,7 @@ function createClient(): PrismaClient {
     adapter: createAdapter(),
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
-  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client;
+  globalForPrisma.prisma = client;
   return client;
 }
 
