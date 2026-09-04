@@ -25,3 +25,6 @@ schema.sql
 
 .vercel
 .env*
+
+# Generated secrets, never committed
+encryption-key.txt
