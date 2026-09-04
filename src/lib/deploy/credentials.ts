@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { decryptSecret, encryptSecret, isEncryptionConfigured, secretHint } from '@/lib/crypto';
 import { checkToken, platformCredentials, type TokenCheck, type VercelCredentials } from './vercel';
+import { isOAuthAvailable } from './oauth';
 
 /**
  * Whose Vercel account a workspace deploys to.
@@ -47,6 +48,10 @@ export type ConnectionStatus = {
   verifiedAt: string | null;
   /** False when ENCRYPTION_KEY is missing, which blocks connecting at all. */
   canConnect: boolean;
+  /** True when an integration is registered, so the button flow is available. */
+  oauthAvailable: boolean;
+  /** How the stored credential was obtained. */
+  method: string | null;
 };
 
 export async function connectionStatus(workspaceId: string): Promise<ConnectionStatus> {
@@ -62,6 +67,8 @@ export async function connectionStatus(workspaceId: string): Promise<ConnectionS
       teamId: connection.teamId,
       verifiedAt: connection.verifiedAt?.toISOString() ?? null,
       canConnect,
+      oauthAvailable: isOAuthAvailable(),
+      method: connection.method,
     };
   }
 
@@ -74,6 +81,8 @@ export async function connectionStatus(workspaceId: string): Promise<ConnectionS
     teamId: null,
     verifiedAt: null,
     canConnect,
+    oauthAvailable: isOAuthAvailable(),
+    method: null,
   };
 }
 
@@ -105,6 +114,7 @@ export async function connectWorkspace(input: {
 
   const data = {
     provider: 'vercel',
+    method: 'token',
     token: encryptSecret(token),
     tokenHint: secretHint(token),
     teamId: teamId ?? null,
@@ -119,6 +129,49 @@ export async function connectWorkspace(input: {
   });
 
   return { status: await connectionStatus(input.workspaceId), check };
+}
+
+/**
+ * Stores a credential obtained through the OAuth install flow.
+ *
+ * Separate from connectWorkspace because the trust model differs: Vercel has
+ * already authenticated the user and told us which account or team the
+ * install belongs to, so there is nothing to validate a pasted string against.
+ * The account name is still looked up, purely so the UI can say whose account
+ * a site will deploy to.
+ */
+export async function connectWorkspaceFromOAuth(input: {
+  workspaceId: string;
+  userId: string;
+  token: string;
+  teamId?: string | null;
+  configurationId?: string | null;
+}): Promise<ConnectionStatus> {
+  if (!isEncryptionConfigured()) {
+    throw new Error('ENCRYPTION_KEY is not configured on the server, so credentials cannot be stored securely.');
+  }
+
+  const teamId = input.teamId?.trim() || undefined;
+  const check = await checkToken({ token: input.token, teamId });
+
+  const data = {
+    provider: 'vercel',
+    method: 'oauth',
+    token: encryptSecret(input.token),
+    tokenHint: secretHint(input.token),
+    teamId: teamId ?? null,
+    configurationId: input.configurationId ?? null,
+    accountName: check.accountName,
+    verifiedAt: new Date(),
+  };
+
+  await db.hostingConnection.upsert({
+    where: { workspaceId: input.workspaceId },
+    create: { workspaceId: input.workspaceId, createdById: input.userId, ...data },
+    update: data,
+  });
+
+  return connectionStatus(input.workspaceId);
 }
 
 export async function disconnectWorkspace(workspaceId: string): Promise<ConnectionStatus> {

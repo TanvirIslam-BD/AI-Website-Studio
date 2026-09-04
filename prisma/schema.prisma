@@ -271,22 +271,27 @@ model Asset {
 /// plaintext credential: it can create projects and deployments in someone
 /// else's account.
 model HostingConnection {
-  id          String    @id @default(cuid())
-  workspaceId String    @unique
-  provider    String    @default("vercel")
+  id              String    @id @default(cuid())
+  workspaceId     String    @unique
+  provider        String    @default("vercel")
   /// Encrypted credential, in the form `v1:<iv>:<tag>:<ciphertext>`.
-  token       String
+  token           String
   /// Last four characters, so the UI can show which token is stored.
-  tokenHint   String
+  tokenHint       String
   /// Required on every API call when the credential belongs to a team.
-  teamId      String?
+  teamId          String?
+  /// How the credential was obtained: "oauth" or "token".
+  method          String    @default("token")
+  /// Vercel's id for this integration install. Vercel hands back an existing
+  /// one on reinstall, so it is the key for finding the matching credential.
+  configurationId String?
   /// Account label shown in the UI, resolved when the token was connected.
-  accountName String?
-  createdById String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  accountName     String?
+  createdById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   /// Last time the credential was confirmed to still work.
-  verifiedAt  DateTime?
+  verifiedAt      DateTime?
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy User?     @relation(fields: [createdById], references: [id])

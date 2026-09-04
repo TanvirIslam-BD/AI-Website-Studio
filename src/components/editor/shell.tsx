@@ -85,6 +85,12 @@ export function EditorShell({ bootstrap }: { bootstrap: EditorBootstrap }) {
   const [deployOpen, setDeployOpen] = useState(false);
   const [pane, setPane] = useState<Pane>('canvas');
 
+  // Coming back from the Vercel connect flow: reopen the dialog the person
+  // started from, so they see the outcome instead of an unchanged editor.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has('vercel')) setDeployOpen(true);
+  }, []);
+
   useEffect(() => {
     init({
       projectId: bootstrap.projectId,

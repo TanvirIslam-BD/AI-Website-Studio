@@ -56,7 +56,9 @@ generation and copy editing; add a Vercel token to enable deployment.
 | `COMETAPI_API_KEY` / `COMETAPI_MODEL` | no | CometAPI gateway - one key, many upstream models |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | no | Claude direct |
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | no | OpenAI direct (`OPENAI_BASE_URL` for other compatible gateways) |
-| `VERCEL_TOKEN` / `VERCEL_TEAM_ID` | no | One-click deployment |
+| `ENCRYPTION_KEY` | yes | Encrypts each workspace's hosting credential at rest |
+| `VERCEL_INTEGRATION_CLIENT_ID` / `_CLIENT_SECRET` / `_SLUG` | no | "Continue with Vercel" button, so users connect by clicking instead of pasting a token |
+| `VERCEL_TOKEN` / `VERCEL_TEAM_ID` | no | Fallback deployment account, used only when a workspace has connected none of its own |
 | `UNSPLASH_ACCESS_KEY` | no | Unsplash image search (falls back to a built-in library) |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | no | Adds a "Continue with GitHub" button |
 
@@ -76,6 +78,42 @@ PowerShell (no OpenSSL needed):
 ```
 $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
 ```
+
+#### Letting users deploy to their own Vercel account
+
+A site belongs to the person who made it, so it deploys to *their* Vercel
+account - that is the only way they can point a domain at it, read its
+analytics, or keep it after leaving this product. The deploy dialog is where
+they connect one.
+
+Two ways in, and the difference matters to whoever is sitting in front of it:
+
+- **Continue with Vercel** (register an integration once, as the operator).
+  The user clicks, approves on vercel.com, and comes back connected. Nobody has
+  to know what an access token is.
+- **Paste an access token** (always available). The fallback for self-hosted
+  installs with no integration registered.
+
+To enable the button, create an integration at
+<https://vercel.com/dashboard/integrations/console>:
+
+| Field | Value |
+| --- | --- |
+| Redirect URL | `http://localhost:3000/api/integrations/vercel/callback` and `https://<your-domain>/api/integrations/vercel/callback` |
+| API Scopes | Deployments read+write, Projects read+write, Domains read+write, User read, Team read |
+
+Then set `VERCEL_INTEGRATION_CLIENT_ID`, `VERCEL_INTEGRATION_CLIENT_SECRET` and
+`VERCEL_INTEGRATION_SLUG` (the slug is the last segment of the integration's
+own URL).
+
+Use the **Integrations Console**, not Team Settings → Apps. The "Sign in with
+Vercel" OAuth apps on that screen issue identity tokens only; their API
+permissions are in private beta, so they cannot create a deployment.
+
+Either way the credential is encrypted with AES-256-GCM under `ENCRYPTION_KEY`
+before it is stored, and is never returned to the browser - the UI gets a
+four-character hint and the account name, nothing more. Generate the key the
+same way as `AUTH_SECRET` above.
 
 #### Setting up Turso
 
