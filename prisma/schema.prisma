@@ -148,19 +148,28 @@ enum ProjectStatus {
 }
 
 model Project {
-  id            String        @id @default(cuid())
-  workspaceId   String
-  createdById   String
-  name          String
-  slug          String
-  description   String?
+  id                String        @id @default(cuid())
+  workspaceId       String
+  createdById       String
+  name              String
+  slug              String
+  description       String?
   /// The original natural-language brief the site was generated from.
-  prompt        String?
-  status        ProjectStatus @default(DRAFT)
+  prompt            String?
+  status            ProjectStatus @default(DRAFT)
   /// Denormalised pointer to the latest successful production deployment.
-  productionUrl String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  productionUrl     String?
+  /// The Vercel project this site publishes into.
+  ///
+  /// Null means "create one on first deploy", named from the slug. Set when
+  /// someone maps this site onto a project that already exists in their Vercel
+  /// account - during the integration install, from the Configure screen, or
+  /// in the deploy dialog. The name is what the deployment API is given; the id
+  /// is kept so the link survives a rename on Vercel's side being noticed.
+  vercelProjectId   String?
+  vercelProjectName String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy   User          @relation("ProjectCreator", fields: [createdById], references: [id])

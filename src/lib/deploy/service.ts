@@ -65,7 +65,15 @@ export { isVercelConfigured };
 export async function startDeployment(projectId: string, userId: string): Promise<DeploymentView> {
   const project = await db.project.findUniqueOrThrow({
     where: { id: projectId },
-    select: { id: true, name: true, slug: true, description: true, productionUrl: true, workspaceId: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      productionUrl: true,
+      workspaceId: true,
+      vercelProjectName: true,
+    },
   });
 
   // The workspace's own account, falling back to the platform's only when no
@@ -103,7 +111,9 @@ export async function startDeployment(projectId: string, userId: string): Promis
 
   try {
     const created = await createDeployment({
-      name: vercelProjectName(project.slug, project.id),
+      // A site mapped onto an existing Vercel project publishes into that one;
+      // otherwise the deterministic name creates (and then reuses) its own.
+      name: project.vercelProjectName ?? vercelProjectName(project.slug, project.id),
       files,
       credentials: resolved.credentials,
     });
