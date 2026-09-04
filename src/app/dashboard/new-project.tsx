@@ -6,6 +6,7 @@ import { AlertCircle, FilePlus2, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/field';
 import { errorMessage } from '@/lib/utils';
+import { MAX_BRIEF_LENGTH } from '@/lib/limits';
 
 const EXAMPLES = [
   'A modern website for a photography business',
@@ -31,6 +32,14 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
       setError('Tell me a little more about the business - at least a few words.');
       return;
     }
+    // Caught here as well as on the server: a long brief is the good case, and
+    // finding out it was too long only after a round trip is the bad one.
+    if (mode === 'generate' && prompt.trim().length > MAX_BRIEF_LENGTH) {
+      setError(
+        `That brief is ${prompt.trim().length.toLocaleString()} characters - the limit is ${MAX_BRIEF_LENGTH.toLocaleString()}. Trim it a little and try again.`,
+      );
+      return;
+    }
     setBusy(mode);
     setError(null);
 
@@ -49,6 +58,8 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
     }
   }
 
+  const over = prompt.trim().length > MAX_BRIEF_LENGTH;
+
   return (
     <div className="rounded-2xl border border-ink-200 bg-white shadow-panel">
       <div className="p-5">
@@ -59,7 +70,7 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
           id="brief"
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
-          rows={3}
+          rows={6}
           disabled={busy !== null}
           placeholder="Create a modern website for a photography business, with a portfolio gallery and a contact form..."
           className="mt-3 text-[15px]"
@@ -82,6 +93,12 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
           ))}
         </div>
 
+        {prompt.length > MAX_BRIEF_LENGTH / 4 ? (
+          <p className={`mt-2 text-right text-[11px] tabular-nums ${over ? 'font-semibold text-red-600' : 'text-ink-400'}`}>
+            {prompt.length.toLocaleString()} / {MAX_BRIEF_LENGTH.toLocaleString()}
+          </p>
+        ) : null}
+
         {error ? (
           <p className="mt-4 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {error}
@@ -100,7 +117,13 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
             {busy === 'blank' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FilePlus2 className="h-3.5 w-3.5" />}
             Start blank
           </Button>
-          <Button variant="primary" size="md" loading={busy === 'generate'} onClick={() => void create('generate')}>
+          <Button
+            variant="primary"
+            size="md"
+            loading={busy === 'generate'}
+            disabled={over}
+            onClick={() => void create('generate')}
+          >
             <Wand2 className="h-3.5 w-3.5" />
             {busy === 'generate' ? 'Generating…' : 'Generate website'}
           </Button>

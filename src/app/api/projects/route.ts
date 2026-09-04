@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { handle, readJson } from '@/lib/api';
 import { requireUser, requireWorkspace } from '@/lib/tenancy';
 import { generateWebsite } from '@/lib/ai/generate';
+import { MAX_BRIEF_LENGTH } from '@/lib/limits';
 import { emptyDocument } from '@/lib/website/document';
 import { createProjectWithDocument } from '@/lib/website/persistence';
 import { createSection } from '@/lib/website/blueprints';
@@ -15,7 +16,10 @@ export const maxDuration = 120;
 
 const createSchema = z.object({
   name: z.string().max(80).optional(),
-  prompt: z.string().max(2000).optional(),
+  prompt: z
+    .string()
+    .max(MAX_BRIEF_LENGTH, `A brief can be at most ${MAX_BRIEF_LENGTH} characters.`)
+    .optional(),
   /** blank = scaffold a starter site without calling the model. */
   mode: z.enum(['generate', 'blank']).default('generate'),
 });
