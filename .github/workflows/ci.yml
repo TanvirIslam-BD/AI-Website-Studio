@@ -1,0 +1,32 @@
+# Typecheck and tests on every push and pull request.
+#
+# No build step here: `next build` needs database and provider credentials that
+# a CI runner has no business holding, and the Vercel deployment check already
+# builds every pull request. This covers what that check cannot - the tests.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` runs the postinstall, which generates the Prisma client the
+      # type checker needs to resolve @prisma/client.
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
