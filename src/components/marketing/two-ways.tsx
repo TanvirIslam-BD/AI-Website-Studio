@@ -42,9 +42,52 @@ const CONTROLS = [
   { label: 'Align', value: 'Left' },
 ];
 
-export function TwoWays() {
+/**
+ * The finished page, rendered the same way in both columns.
+ *
+ * Both routes end here, and showing it twice is the argument: the difference
+ * between them is not the outcome, it is how many decisions stand in front of
+ * it. Claiming that in a caption is weaker than putting the same website at the
+ * bottom of both.
+ *
+ * A rendered site brings its own headings, ids and links, all of which would
+ * collide with this page - `decorative` drops the ids, `aria-hidden` keeps the
+ * headings out of the accessibility tree, `inert` keeps the links out of the
+ * tab order.
+ */
+function ResultFrame({ tone }: { tone: 'dark' | 'light' }) {
   const page = homePage(RESULT.document);
+  const border = tone === 'dark' ? 'border-white/12' : 'border-ink-200';
 
+  return (
+    <figure className={`overflow-hidden rounded-xl border ${border} bg-white`}>
+      <div className="flex items-center gap-1.5 border-b border-ink-200 bg-ink-50 px-3 py-2">
+        <span className="h-2 w-2 rounded-full bg-ink-300" />
+        <span className="h-2 w-2 rounded-full bg-ink-300" />
+        <span className="h-2 w-2 rounded-full bg-ink-300" />
+        <span className="ml-1.5 font-mono text-[9px] text-ink-400">aperture-light.vercel.app</span>
+      </div>
+      <div className="h-[236px] overflow-hidden sm:h-[268px]" aria-hidden inert>
+        <div className="origin-top-left" style={{ width: RENDER_WIDTH, transform: `scale(${520 / RENDER_WIDTH})` }}>
+          <ThemeScope theme={RESULT.document.theme}>
+            <PageView page={page} theme={RESULT.document.theme} hrefFor={() => '#'} decorative />
+          </ThemeScope>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+/** The step between a column's tools and its result. */
+function Flow({ tone }: { tone: 'dark' | 'light' }) {
+  return (
+    <div className="my-4 flex justify-center">
+      <ArrowDown className={`h-4 w-4 ${tone === 'dark' ? 'text-white/30' : 'text-ink-300'}`} aria-hidden />
+    </div>
+  );
+}
+
+export function TwoWays() {
   return (
     <Section id="two-ways" className="overflow-hidden">
       {/*
@@ -96,37 +139,11 @@ export function TwoWays() {
               </div>
             </div>
 
-            <div className="my-4 flex justify-center">
-              <ArrowDown className="h-4 w-4 text-white/30" aria-hidden />
+            <Flow tone="dark" />
+
+            <div className="mt-auto">
+              <ResultFrame tone="dark" />
             </div>
-
-            {/*
-              The finished page. A real render, so this cannot flatter the
-              product - it is the same output the generator returns.
-
-              A rendered site brings its own headings, ids and links, all of
-              which would collide with this page: `decorative` drops the ids,
-              `aria-hidden` keeps the headings out of the accessibility tree and
-              `inert` keeps every link out of the tab order.
-            */}
-            <figure className="mt-auto overflow-hidden rounded-xl border border-white/12 bg-white">
-              <div className="flex items-center gap-1.5 border-b border-ink-200 bg-ink-50 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-ink-300" />
-                <span className="h-2 w-2 rounded-full bg-ink-300" />
-                <span className="h-2 w-2 rounded-full bg-ink-300" />
-                <span className="ml-1.5 font-mono text-[9px] text-ink-400">aperture-light.vercel.app</span>
-              </div>
-              <div className="h-[236px] overflow-hidden sm:h-[268px]" aria-hidden inert>
-                <div
-                  className="origin-top-left"
-                  style={{ width: RENDER_WIDTH, transform: `scale(${520 / RENDER_WIDTH})` }}
-                >
-                  <ThemeScope theme={RESULT.document.theme}>
-                    <PageView page={page} theme={RESULT.document.theme} hrefFor={() => '#'} decorative />
-                  </ThemeScope>
-                </div>
-              </div>
-            </figure>
 
             <p className="mt-4 text-[13px] leading-relaxed text-white/55">
               A complete draft — pages, copy, imagery and a brand kit — then edit anything by clicking it, or by asking.
@@ -187,9 +204,14 @@ export function TwoWays() {
               </dl>
             </div>
 
-            <p className="mt-auto pt-6 text-[13px] leading-relaxed text-ink-500">
-              The same controls, reached one block at a time — and a blank canvas until you have placed every one of
-              them yourself.
+            <Flow tone="light" />
+
+            <div className="mt-auto">
+              <ResultFrame tone="light" />
+            </div>
+
+            <p className="mt-4 text-[13px] leading-relaxed text-ink-500">
+              The same website at the end of it — reached one block at a time, from a blank canvas.
             </p>
           </article>
         </div>
