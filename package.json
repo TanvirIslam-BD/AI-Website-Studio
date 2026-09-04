@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "try:model": "tsx scripts/try-model.ts",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
