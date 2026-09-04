@@ -65,6 +65,38 @@ generation and copy editing; add a Vercel token to enable deployment.
 \* Either the two `TURSO_*` variables (remote) or `DATABASE_URL` (local file).
 Both go through the same libSQL driver adapter, so the code path is identical.
 
+#### Choosing a model
+
+The default for CometAPI is `claude-haiku-4-5-20251001`. It was picked by
+measurement rather than reputation - `npm run try:model` runs candidates through
+the real generation prompt and the real section schemas, which is the only thing
+that shows what a model is actually worth here.
+
+The number that matters is how many sections survive validation. Anything the
+model returns that fails a section schema is **dropped, not raised**, so a weak
+model produces a thin site that looks like a success rather than an error.
+
+Measured against the same brief, with the generation route's 120s limit and the
+copilot route's 60s limit as hard gates:
+
+| Model | Generation | Sections | Copilot | |
+| --- | --- | --- | --- | --- |
+| `claude-haiku-4-5-20251001` | 32-47s | 24-29 | 1.9-6.3s | chosen |
+| `gemini-3.8-flash` | 43-54s | 27 | 4.5-**118.5s** | exceeds the copilot limit |
+| `deepseek-v4-flash` | 28-**116s** | 26-28 | - | grazes the generation limit |
+| `gpt-4o` | 22-31s | **20** | 1.5-3.3s, 3/4 | thin, and flaky on edits |
+| `gpt-4.1-mini` | 58-61s | **18** | - | slow and thin |
+| `glm-5.3-flash` | 54-**551s** | 26-28 | 5-15s | good output, unusable latency |
+
+Two lessons worth keeping if you re-run this:
+
+- **Take several samples.** One candidate measured 54s and 351s on identical
+  requests. A single sample would have recommended it.
+- **Reasoning models need their effort turned down.** Left unconstrained,
+  `glm-5.3-flash` spent all 16,000 output tokens thinking and returned truncated
+  JSON after nine minutes. It refuses to disable thinking entirely - it wants
+  `low`, `high` or `max` - and `scripts/try-model.ts` passes `low` for it.
+
 #### Generating `AUTH_SECRET`
 
 macOS / Linux / Git Bash:
@@ -391,6 +423,7 @@ src/app/                   routes: landing, auth, dashboard, editor, preview, AP
 | `npm run db:push` | Sync the schema to the database |
 | `npm run db:migrate` | Create a migration |
 | `npm run db:sql` | Emit the schema as plain SQL (to apply with the Turso CLI) |
+| `npm run try:model` | Compare models against the real generation path |
 | `npm run db:seed` | Demo account and three websites |
 | `npm run db:studio` | Prisma Studio |
 

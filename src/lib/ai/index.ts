@@ -18,7 +18,11 @@ import type { LlmProvider, ProviderId } from './types';
 const DEFAULTS: Record<ProviderId, { model: string; baseURL?: string; label: string }> = {
   anthropic: { model: 'claude-sonnet-5', label: 'Claude' },
   openai: { model: 'gpt-4o', label: 'OpenAI' },
-  comet: { model: 'gpt-4o', baseURL: 'https://api.cometapi.com/v1', label: 'CometAPI' },
+  // Measured against the real generation path with scripts/try-model.ts:
+  // richer sites than gpt-4o (~24-29 sections against 20 from the same brief,
+  // the rest lost to schema validation), comfortably inside both route limits
+  // on every run, and cheaper. See the model note in the README.
+  comet: { model: 'claude-haiku-4-5-20251001', baseURL: 'https://api.cometapi.com/v1', label: 'CometAPI' },
 };
 
 /** Preference order when AI_PROVIDER is not set. */
