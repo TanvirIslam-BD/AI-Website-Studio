@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, ExternalLink, FileCode2, Loader2, Rocket, RotateCw, X } from 'lucide-react';
 import type { DeploymentStatus } from '@prisma/client';
 import { Button } from '@/components/ui/button';
@@ -39,15 +39,23 @@ const LIVE_STATES: DeploymentStatus[] = ['QUEUED', 'BUILDING'];
 /**
  * Deployment panel.
  *
- * Shows exactly what would be shipped, starts a deployment, then polls until
- * the build settles. Polling rather than a webhook keeps the studio deployable
- * anywhere, with no inbound URL to configure.
+ * Shows exactly what would be shipped, starts a deployment, then follows the
+ * build until it settles. Polling rather than a webhook keeps the studio
+ * deployable anywhere, with no inbound URL to configure.
+ *
+ * Two requests, doing different jobs. `load` reads the whole panel - the
+ * connection, the token check, the file list, the history - and is expensive:
+ * it re-renders every page of the site to list what would ship, and makes two
+ * calls to Vercel. So it runs only when that whole picture can actually have
+ * changed: on open, after starting a deploy, and once a build finishes.
+ *
+ * `poll` reads one deployment row and nothing else. That is what runs every few
+ * seconds while a build is in flight.
  */
 export function DeployPanel({ projectId, onClose }: { projectId: string; onClose: () => void }) {
   const [state, setState] = useState<DeployState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -62,19 +70,56 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
 
   useEffect(() => {
     void load();
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
   }, [load]);
 
-  const status = state?.deployment?.status;
+  const deploymentId = state?.deployment?.id ?? null;
+  const running = state?.deployment ? LIVE_STATES.includes(state.deployment.status) : false;
+
+  /**
+   * Follows a running build.
+   *
+   * The loop reschedules itself rather than being re-created by the effect on
+   * every tick. Keying it off the status instead - as this did - meant that once
+   * the status stopped changing, which is exactly what a build in progress does,
+   * the dependency stopped changing too, no further timer was scheduled and the
+   * panel silently stopped updating until someone pressed Refresh.
+   */
   useEffect(() => {
-    if (!status || !LIVE_STATES.includes(status)) return;
-    timer.current = setTimeout(() => void load(), POLL_INTERVAL);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
+    if (!deploymentId || !running) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = async () => {
+      if (cancelled) return;
+      try {
+        const response = await fetch(`/api/deployments/${deploymentId}`, { cache: 'no-store' });
+        const payload = (await response.json()) as { deployment?: DeploymentView; error?: string };
+        if (cancelled) return;
+
+        if (response.ok && payload.deployment) {
+          const next = payload.deployment;
+          setState((current) => (current ? { ...current, deployment: next } : current));
+
+          if (!LIVE_STATES.includes(next.status)) {
+            // Settled: the URL, the history and the file list can all have moved,
+            // so take the full picture once - and stop polling.
+            void load();
+            return;
+          }
+        }
+      } catch {
+        // A dropped request mid-build is not the end of the build. Try again.
+      }
+      timer = setTimeout(() => void tick(), POLL_INTERVAL);
     };
-  }, [status, load]);
+
+    timer = setTimeout(() => void tick(), POLL_INTERVAL);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [deploymentId, running, load]);
 
   async function deploy() {
     setBusy(true);
