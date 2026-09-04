@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, ExternalLink, FileCode2, Loader2, Rocket, RotateCw, X } from 'lucide-react';
 import type { DeploymentStatus } from '@prisma/client';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/field';
 import { DeploymentStatusBadge } from '@/components/ui/misc';
 import { errorMessage, formatBytes, formatRelative } from '@/lib/utils';
 import { VercelConnect, type ConnectionStatus } from './vercel-connect';
@@ -131,6 +132,10 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
               ) : null}
               {deployment ? <DeploymentCard deployment={deployment} live={live} /> : null}
 
+              {/* Only meaningful once an account is connected - there is nothing
+                  to choose between otherwise. */}
+              {state.connection?.source === 'workspace' ? <ProjectTarget projectId={projectId} /> : null}
+
               <div>
                 <p className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink-500">
                   <FileCode2 className="h-3.5 w-3.5" /> Files to ship ({state.files.length} · {formatBytes(totalBytes)})
@@ -170,6 +175,130 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Which Vercel project this site publishes into.
+ *
+ * Collapsed by default: creating a project per site is the right answer almost
+ * always, and opening this dialog to publish should not read as a decision to
+ * make. It matters for the one case the default cannot serve - replacing what
+ * is already live at a domain, which has to publish into the project that
+ * domain is attached to.
+ */
+function ProjectTarget({ projectId }: { projectId: string }) {
+  const [open, setOpen] = useState(false);
+  const [link, setLink] = useState<{ vercelProjectName: string | null; defaultName: string } | null>(null);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
+  const [cursor, setCursor] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  const loadLink = useCallback(async () => {
+    const response = await fetch(`/api/projects/${projectId}/vercel`, { cache: 'no-store' });
+    if (response.ok) setLink((await response.json()) as { vercelProjectName: string | null; defaultName: string });
+  }, [projectId]);
+
+  useEffect(() => {
+    void loadLink();
+  }, [loadLink]);
+
+  async function loadProjects(until?: number) {
+    setBusy(true);
+    setProblem(null);
+    try {
+      const response = await fetch(`/api/workspace/vercel/projects${until ? `?until=${until}` : ''}`, {
+        cache: 'no-store',
+      });
+      const payload = (await response.json()) as {
+        projects?: Array<{ id: string; name: string }>;
+        next?: number | null;
+        error?: string;
+      };
+      // Swallowing this left the select showing only "Create a new project",
+      // which reads as "you have no projects" rather than "we could not ask".
+      if (!response.ok) throw new Error(payload.error ?? 'Could not read your Vercel projects.');
+      setProjects((current) => (until ? [...current, ...(payload.projects ?? [])] : (payload.projects ?? [])));
+      setCursor(payload.next ?? null);
+    } catch (caught) {
+      setProblem(errorMessage(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function choose(value: string) {
+    const target = projects.find((project) => project.id === value);
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/vercel`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vercelProjectId: target?.id ?? null, vercelProjectName: target?.name ?? null }),
+      });
+      if (response.ok) setLink((await response.json()) as { vercelProjectName: string | null; defaultName: string });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-ink-200 px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-ink-500">Vercel project</p>
+          <p className="truncate text-[12px] text-ink-700">
+            {link?.vercelProjectName ?? `${link?.defaultName ?? 'Created on first deploy'} (new)`}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="shrink-0 text-[11px] text-ink-500 underline decoration-ink-300 underline-offset-2 hover:text-ink-900"
+          onClick={() => {
+            const next = !open;
+            setOpen(next);
+            if (next && projects.length === 0) void loadProjects();
+          }}
+        >
+          {open ? 'Done' : 'Change'}
+        </button>
+      </div>
+
+      {open ? (
+        <div className="mt-2 grid gap-1.5">
+          <Select
+            disabled={busy}
+            value={projects.find((project) => project.name === link?.vercelProjectName)?.id ?? '__new__'}
+            onChange={(event) => void choose(event.target.value)}
+            className="text-[12px]"
+            aria-label="Vercel project to publish into"
+          >
+            <option value="__new__">Create a new project</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </Select>
+          {cursor ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void loadProjects(cursor)}
+              className="justify-self-start text-[11px] text-ink-500 underline decoration-ink-300 underline-offset-2 hover:text-ink-900 disabled:opacity-50"
+            >
+              Load more projects
+            </button>
+          ) : null}
+          {problem ? (
+            <p className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] leading-relaxed text-amber-900">
+              {problem} You can still publish to a new project.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

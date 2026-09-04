@@ -100,7 +100,15 @@ To enable the button, create an integration at
 | Field | Value |
 | --- | --- |
 | Redirect URL | `https://<your-domain>/api/integrations/vercel/callback` |
+| Configuration URL | `https://<your-domain>/integrations/vercel/configure` |
 | API Scopes | Deployments read+write, Projects read+write, Domains read+write, User read, Team read |
+
+The Configuration URL is what the **Configure** button on an installed
+integration opens. Vercel appends `?configurationId=...`, which is resolved
+against the signed-in user's own workspaces - so the screen shows the install
+they actually belong to, and a guessed id resolves to nothing. Leave the field
+empty and Vercel shows a plain "Website" link instead, with nowhere to change
+anything.
 
 There is only one Redirect URL field, and it may point at `localhost`. So
 register two integrations - one for production, one for local development
@@ -114,6 +122,15 @@ own URL).
 Use the **Integrations Console**, not Team Settings → Apps. The "Sign in with
 Vercel" OAuth apps on that screen issue identity tokens only; their API
 permissions are in private beta, so they cannot create a deployment.
+
+Installs also arrive from the other direction - the **Install** button on the
+Vercel Marketplace listing, which opens the Redirect URL in a popup. That
+journey carries no `state` of ours, because Vercel started it, so the callback
+does not connect anything on the spot: it banks the authorization code in a
+short-lived httpOnly cookie and asks on `/integrations/vercel/setup` whether to
+attach that account to this workspace. The confirmation is what authorises the
+link, and it is also where sites are mapped onto projects. Finishing follows
+Vercel's `next`, which is what closes the popup.
 
 Either way the credential is encrypted with AES-256-GCM under `ENCRYPTION_KEY`
 before it is stored, and is never returned to the browser - the UI gets a
