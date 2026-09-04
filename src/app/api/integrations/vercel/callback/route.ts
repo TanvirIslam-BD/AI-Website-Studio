@@ -71,26 +71,15 @@ export async function GET(request: Request) {
 
     clear();
 
-    // `next` closes the Vercel-hosted install window. Only ever followed when
-    // it points at Vercel itself: it arrives in the query string, so treating
-    // it as a general redirect target would be an open redirect.
-    const next = url.searchParams.get('next');
-    if (next && isVercelUrl(next)) return NextResponse.redirect(next);
-
+    // Vercel also sends `next`, which exists to close the popup that its own
+    // marketplace flow opens. This install was a top-level navigation we
+    // started ourselves, so following it would strand the user on
+    // vercel.com. They came from the deploy dialog; send them back to it.
     const target = new URL(returnTo, url.origin);
     target.searchParams.set('vercel', 'connected');
     return NextResponse.redirect(target);
   } catch (error) {
     console.error('[vercel-oauth]', error);
     return fail(error instanceof Error ? error.message : 'The Vercel connection failed.');
-  }
-}
-
-function isVercelUrl(value: string): boolean {
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === 'https:' && (parsed.hostname === 'vercel.com' || parsed.hostname.endsWith('.vercel.com'));
-  } catch {
-    return false;
   }
 }

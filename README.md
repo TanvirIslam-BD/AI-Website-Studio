@@ -99,8 +99,13 @@ To enable the button, create an integration at
 
 | Field | Value |
 | --- | --- |
-| Redirect URL | `http://localhost:3000/api/integrations/vercel/callback` and `https://<your-domain>/api/integrations/vercel/callback` |
+| Redirect URL | `https://<your-domain>/api/integrations/vercel/callback` |
 | API Scopes | Deployments read+write, Projects read+write, Domains read+write, User read, Team read |
+
+There is only one Redirect URL field, and it may point at `localhost`. So
+register two integrations - one for production, one for local development
+pointing at `http://localhost:3000/api/integrations/vercel/callback` - and give
+each environment its own client id, secret and slug.
 
 Then set `VERCEL_INTEGRATION_CLIENT_ID`, `VERCEL_INTEGRATION_CLIENT_SECRET` and
 `VERCEL_INTEGRATION_SLUG` (the slug is the last segment of the integration's
