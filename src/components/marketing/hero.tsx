@@ -2,35 +2,23 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Container } from './shell';
 import { HeroPipeline } from './hero-pipeline';
+import { HeroSites } from './hero-sites';
 
 /**
  * The hero.
  *
- * Type on the left, the actual editor on the right. It opened on a photograph
- * of a laptop, which was atmospheric and said nothing - the product builds
- * websites, and the strongest thing available to put above the fold is the
- * thing doing the building.
+ * Type on the left, generated websites on the right. It opened on a photograph
+ * of a laptop, which was atmospheric and said nothing - the product turns a
+ * sentence into a website, so what belongs above the fold is the websites.
  *
- * That change forces the layout. A screenshot of a light interface cannot sit
- * full-bleed behind white text, so the picture moves out of the background and
- * into a column of its own, and the dark ground becomes a backdrop rather than
- * an image. The frame is deliberately allowed to run off the right edge: it
- * reads as a window onto something larger, and it buys the type a full column
- * on the left rather than half a screen.
- */
-
-/**
- * The editor, cropped out of the framed capture in `02-editor.webp`.
+ * Three of them, stacked, rather than one: different palettes, typefaces and
+ * photography side by side show range, which a single screenshot cannot - and
+ * range is the actual claim being made.
  *
- * That file is a marketing frame - the interface sitting under a caption and a
- * logo - which is right for a gallery and wrong here: the caption would land
- * directly under the h1 as a second, competing headline, and the logo would be
- * the page's third. This is the interface on its own.
+ * They are rendered, not photographed. A picture of output would be
+ * indistinguishable from art direction; this is the generator's own work, so it
+ * cannot promise more than the product delivers.
  */
-const HERO_SHOT = {
-  src: '/product/02-editor-app.webp',
-  alt: 'The Web Copilot editor: a generated photography site on the canvas, with the section list on the left and the AI copilot on the right.',
-};
 
 const TRUST = ['No credit card', 'Your Vercel account', 'Plain HTML', 'No lock-in'];
 
@@ -86,14 +74,14 @@ export function Hero({ providerLabel, signedIn }: { providerLabel: string | null
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Link
                   href={signedIn ? '/dashboard' : '/signin?mode=register'}
-                  className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-7 text-[15px] font-medium text-ink-950 transition-transform duration-200 hover:-translate-y-0.5 sm:w-auto"
+                  className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-white px-6 text-[15px] font-medium text-ink-950 transition-transform duration-200 hover:-translate-y-0.5 sm:w-auto"
                 >
                   {signedIn ? 'Open your dashboard' : 'Start building free'}
                   <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
                 <a
                   href="#how-it-works"
-                  className="focus-ring inline-flex h-12 w-full items-center justify-center rounded-lg border border-white/20 bg-white/5 px-7 text-[15px] font-medium text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10 sm:w-auto"
+                  className="focus-ring inline-flex h-12 w-full items-center justify-center whitespace-nowrap rounded-lg border border-white/20 bg-white/5 px-6 text-[15px] font-medium text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10 sm:w-auto"
                 >
                   See how it works
                 </a>
@@ -109,43 +97,10 @@ export function Hero({ providerLabel, signedIn }: { providerLabel: string | null
               </ul>
             </div>
 
-            {/* --------------------------------------------------- the editor */}
-            {/*
-              Wider than its column so the frame genuinely runs off the right
-              edge rather than stopping just short of it - a negative margin
-              sized in pixels only lands correctly at one viewport width. The
-              section clips it, so nothing here can widen the document.
-            */}
-            <div className="relative lg:w-[126%] lg:max-w-none xl:w-[132%]">
-              {/* Glow, so the frame lifts off the dark rather than sitting on it. */}
-              <div
-                className="absolute -inset-6 rounded-[2rem] opacity-70 blur-2xl"
-                style={{ background: 'radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.16), transparent 70%)' }}
-                aria-hidden
-              />
-
-              {/*
-                No browser chrome around it: the capture already includes the
-                editor's own toolbar, and a second frame on top of a real one
-                reads as a picture of a picture.
-              */}
-              <figure className="relative overflow-hidden rounded-xl border border-white/12 bg-ink-900 shadow-pop">
-                {/*
-                  The largest paint on the page now, so it loads eagerly and at
-                  high priority. Width and height are the file's real dimensions
-                  so the box is reserved before it arrives.
-                */}
-                <img
-                  src={HERO_SHOT.src}
-                  alt={HERO_SHOT.alt}
-                  width={1167}
-                  height={657}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="block w-full"
-                />
-              </figure>
+            {/* ------------------------------------------- what it produces */}
+            {/* The cluster brings its own glow; it needs no wrapper but this. */}
+            <div className="relative">
+              <HeroSites />
             </div>
           </div>
         </Container>
