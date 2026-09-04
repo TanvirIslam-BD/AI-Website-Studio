@@ -17,6 +17,14 @@ const nextConfig = {
     ],
   },
   eslint: { ignoreDuringBuilds: true },
+  /**
+   * The Vercel marketplace listing points its EULA link at /eula, and that
+   * URL is public now. The terms page is the EULA, so keep one canonical
+   * page and let the other address reach it.
+   */
+  async redirects() {
+    return [{ source: '/eula', destination: '/terms', permanent: true }];
+  },
 };
 
 export default nextConfig;
