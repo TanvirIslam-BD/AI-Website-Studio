@@ -4,12 +4,18 @@ import { db } from '@/lib/db';
 import { handle, readJson } from '@/lib/api';
 import { requireProjectRef, requireUser } from '@/lib/tenancy';
 import { generateWebsite } from '@/lib/ai/generate';
+import { MAX_BRIEF_LENGTH } from '@/lib/limits';
 import { loadDocument, saveDocument, writeRevision } from '@/lib/website/persistence';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
-const schema = z.object({ prompt: z.string().min(4).max(2000) });
+const schema = z.object({
+  prompt: z
+    .string()
+    .min(4)
+    .max(MAX_BRIEF_LENGTH, `A brief can be at most ${MAX_BRIEF_LENGTH} characters.`),
+});
 
 /**
  * Regenerates the whole website from a new brief. Distinct from the copilot on
