@@ -43,5 +43,32 @@ export function createAnthropicProvider(apiKey: string, model: string): LlmProvi
         throw new LlmError(error instanceof Error ? error.message : 'Anthropic request failed', 'anthropic', status);
       }
     },
+
+    async *stream(request: LlmRequest): AsyncIterable<string> {
+      try {
+        const messages = request.messages.map((m) => ({ role: m.role, content: m.content }));
+        // The same prefill trick as above. The caller is told about it by the
+        // opening brace being yielded first, so what it accumulates is valid.
+        if (request.json) messages.push({ role: 'assistant' as const, content: '{' });
+
+        const response = client.messages.stream({
+          model,
+          max_tokens: request.maxTokens ?? 8000,
+          temperature: request.temperature ?? 0.6,
+          system: request.system,
+          messages,
+        });
+
+        if (request.json) yield '{';
+        for await (const event of response) {
+          if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+            yield event.delta.text;
+          }
+        }
+      } catch (error) {
+        const status = error instanceof Anthropic.APIError ? error.status : undefined;
+        throw new LlmError(error instanceof Error ? error.message : 'Anthropic request failed', 'anthropic', status);
+      }
+    },
   };
 }
