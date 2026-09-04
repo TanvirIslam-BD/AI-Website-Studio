@@ -43,11 +43,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts    Account[]
-  sessions    Session[]
-  memberships Membership[]
-  projects    Project[]    @relation("ProjectCreator")
-  deployments Deployment[]
+  accounts           Account[]
+  sessions           Session[]
+  memberships        Membership[]
+  projects           Project[]           @relation("ProjectCreator")
+  deployments        Deployment[]
+  hostingConnections HostingConnection[]
 }
 
 model Account {
@@ -114,8 +115,9 @@ model Workspace {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  members  Membership[]
-  projects Project[]
+  members    Membership[]
+  projects   Project[]
+  connection HostingConnection?
 }
 
 model Membership {
@@ -258,6 +260,37 @@ model Asset {
 // ---------------------------------------------------------------------------
 // Deployment
 // ---------------------------------------------------------------------------
+
+/// A workspace's own hosting credentials.
+///
+/// Sites deploy to the account that owns the workspace, not to the platform's
+/// account - otherwise customers cannot attach a domain, read their own
+/// analytics or take their site with them. One connection per workspace.
+///
+/// `token` holds an AES-256-GCM ciphertext (see src/lib/crypto.ts), never a
+/// plaintext credential: it can create projects and deployments in someone
+/// else's account.
+model HostingConnection {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  provider    String    @default("vercel")
+  /// Encrypted credential, in the form `v1:<iv>:<tag>:<ciphertext>`.
+  token       String
+  /// Last four characters, so the UI can show which token is stored.
+  tokenHint   String
+  /// Required on every API call when the credential belongs to a team.
+  teamId      String?
+  /// Account label shown in the UI, resolved when the token was connected.
+  accountName String?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  /// Last time the credential was confirmed to still work.
+  verifiedAt  DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation(fields: [createdById], references: [id])
+}
 
 enum DeploymentStatus {
   QUEUED

@@ -2,6 +2,7 @@ import { db } from '@/lib/db';
 import { loadDocument } from '@/lib/website/persistence';
 import { generateProductionFiles, totalBytes } from './codegen';
 import { createDeployment, getDeployment, isVercelConfigured, productionUrlFor, vercelProjectName, VercelError, type VercelReadyState } from './vercel';
+import { resolveCredentials } from './credentials';
 import type { DeploymentStatus } from '@prisma/client';
 
 /**
@@ -64,8 +65,15 @@ export { isVercelConfigured };
 export async function startDeployment(projectId: string, userId: string): Promise<DeploymentView> {
   const project = await db.project.findUniqueOrThrow({
     where: { id: projectId },
-    select: { id: true, name: true, slug: true, description: true, productionUrl: true },
+    select: { id: true, name: true, slug: true, description: true, productionUrl: true, workspaceId: true },
   });
+
+  // The workspace's own account, falling back to the platform's only when no
+  // connection exists (self-hosting and local development).
+  const resolved = await resolveCredentials(project.workspaceId);
+  if (!resolved) {
+    throw new Error('No Vercel account is connected. Connect one to deploy this site to your own account.');
+  }
 
   const document = await loadDocument(projectId);
   if (document.pages.every((page) => page.sections.length === 0)) {
@@ -84,14 +92,21 @@ export async function startDeployment(projectId: string, userId: string): Promis
       createdById: userId,
       status: 'QUEUED',
       target: 'production',
-      meta: { fileCount: files.length, bytes: totalBytes(files) },
+      // Recording the account keeps the history honest about where a given
+      // deployment actually went, which matters if a workspace reconnects to a
+      // different account later.
+      meta: { fileCount: files.length, bytes: totalBytes(files), account: resolved.accountName, source: resolved.source },
     },
   });
 
   await db.project.update({ where: { id: projectId }, data: { status: 'DEPLOYING' } });
 
   try {
-    const created = await createDeployment({ name: vercelProjectName(project.slug, project.id), files });
+    const created = await createDeployment({
+      name: vercelProjectName(project.slug, project.id),
+      files,
+      credentials: resolved.credentials,
+    });
 
     const updated = await db.deployment.update({
       where: { id: deployment.id },
@@ -126,13 +141,19 @@ export async function startDeployment(projectId: string, userId: string): Promis
  * The client polls this; there is no webhook to configure.
  */
 export async function refreshDeployment(deploymentId: string): Promise<DeploymentView> {
-  const row = await db.deployment.findUniqueOrThrow({ where: { id: deploymentId } });
+  const row = await db.deployment.findUniqueOrThrow({
+    where: { id: deploymentId },
+    include: { project: { select: { workspaceId: true } } },
+  });
 
   const settled = row.status === 'READY' || row.status === 'ERROR' || row.status === 'CANCELED';
   if (settled || !row.externalId) return toView(row);
 
+  const resolved = await resolveCredentials(row.project.workspaceId);
+  if (!resolved) return toView(row);
+
   try {
-    const remote = await getDeployment(row.externalId);
+    const remote = await getDeployment(row.externalId, resolved.credentials);
     const status = STATUS_MAP[remote.readyState];
     const url = productionUrlFor(remote) ?? row.url;
 

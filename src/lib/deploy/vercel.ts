@@ -37,20 +37,29 @@ export class VercelError extends Error {
   }
 }
 
-export function isVercelConfigured(): boolean {
-  return Boolean(process.env.VERCEL_TOKEN?.trim());
+/**
+ * Whose account a deployment goes to.
+ *
+ * Passed in rather than read from the environment: each workspace deploys with
+ * its own credential, so the caller resolves whose it is. The platform's own
+ * environment token remains only as a fallback for self-hosting and local
+ * development - see src/lib/deploy/credentials.ts.
+ */
+export type VercelCredentials = {
+  token: string;
+  /** Required on every request when the credential belongs to a team. */
+  teamId?: string;
+};
+
+/** The platform-wide fallback, for self-hosting and local development. */
+export function platformCredentials(): VercelCredentials | null {
+  const token = process.env.VERCEL_TOKEN?.trim();
+  if (!token) return null;
+  return { token, teamId: process.env.VERCEL_TEAM_ID?.trim() || undefined };
 }
 
-function credentials(): { token: string; teamId?: string } {
-  const token = process.env.VERCEL_TOKEN?.trim();
-  if (!token) {
-    throw new VercelError(
-      'Vercel is not configured. Add VERCEL_TOKEN (and VERCEL_TEAM_ID for team accounts) to your environment.',
-      400,
-      'not_configured',
-    );
-  }
-  return { token, teamId: process.env.VERCEL_TEAM_ID?.trim() || undefined };
+export function isVercelConfigured(): boolean {
+  return platformCredentials() !== null;
 }
 
 /**
@@ -75,8 +84,8 @@ function explain(message: string, status: number, teamId?: string): string {
   return `${message} Two things cause this: ${causes.join('; or ')}.`;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const { token, teamId } = credentials();
+async function request<T>(path: string, credentials: VercelCredentials, init?: RequestInit): Promise<T> {
+  const { token, teamId } = credentials;
   const url = new URL(`${API}${path}`);
   if (teamId) url.searchParams.set('teamId', teamId);
 
@@ -151,8 +160,9 @@ export async function createDeployment(options: {
   name: string;
   files: GeneratedFile[];
   target?: 'production' | 'preview';
+  credentials: VercelCredentials;
 }): Promise<VercelDeployment> {
-  const raw = await request<RawDeployment>('/v13/deployments?skipAutoDetectionConfirmation=1', {
+  const raw = await request<RawDeployment>('/v13/deployments?skipAutoDetectionConfirmation=1', options.credentials, {
     method: 'POST',
     body: JSON.stringify({
       name: options.name,
@@ -172,8 +182,13 @@ export async function createDeployment(options: {
   return normalize(raw);
 }
 
-export async function getDeployment(deploymentId: string): Promise<VercelDeployment> {
-  return normalize(await request<RawDeployment>(`/v13/deployments/${encodeURIComponent(deploymentId)}`));
+export async function getDeployment(
+  deploymentId: string,
+  credentials: VercelCredentials,
+): Promise<VercelDeployment> {
+  return normalize(
+    await request<RawDeployment>(`/v13/deployments/${encodeURIComponent(deploymentId)}`, credentials),
+  );
 }
 
 /**
@@ -195,41 +210,45 @@ export function productionUrlFor(deployment: VercelDeployment): string | null {
   );
 }
 
-export type TokenCheck = { usable: boolean; scope: string | null; reason: string | null };
+export type TokenCheck = { usable: boolean; accountName: string | null; scope: string | null; reason: string | null };
 
 /**
- * Preflight for the deploy panel.
+ * Validates a credential and resolves whose account it belongs to.
  *
- * Probing with a project listing was misleading: a project-scoped token can
- * list projects perfectly well and still be refused when a first deployment
- * tries to create one, which produced a false all-clear. Reading the account
- * is the signal that actually separated them - a full-access token returns the
- * user, a restricted one answers 404 or 403.
+ * Reading the account is the probe that matters: a project-scoped or read-only
+ * token can list projects perfectly well and still be refused when a first
+ * deployment tries to create one, which produced a false all-clear when this
+ * checked /v9/projects instead.
  *
- * Advisory only, and never throws. The mapping from token type to permission
- * is not documented exhaustively, so a token that fails this check might still
- * deploy; the panel warns but does not block, because a wrong refusal is worse
- * than a wrong warning.
+ * Never throws. Used both to verify a token at the moment a user connects it,
+ * and advisorily before a deploy - the mapping from token type to permission is
+ * not documented exhaustively, so a token that fails this might still work.
  */
-export async function checkToken(): Promise<TokenCheck> {
-  if (!isVercelConfigured()) {
-    return { usable: false, scope: null, reason: 'No VERCEL_TOKEN is configured.' };
+export async function checkToken(credentials: VercelCredentials | null): Promise<TokenCheck> {
+  if (!credentials) {
+    return { usable: false, accountName: null, scope: null, reason: 'No Vercel account is connected.' };
   }
 
   try {
-    await request<{ user: { username: string } }>('/v2/user');
-    const teamId = process.env.VERCEL_TEAM_ID?.trim();
-    return { usable: true, scope: teamId ? `team ${teamId}` : 'personal account', reason: null };
+    const me = await request<{ user?: { username?: string; email?: string } }>('/v2/user', credentials);
+    const accountName = me.user?.username ?? me.user?.email ?? null;
+    return {
+      usable: true,
+      accountName,
+      scope: credentials.teamId ? `team ${credentials.teamId}` : 'personal account',
+      reason: null,
+    };
   } catch (error) {
     if (error instanceof VercelError && [401, 403, 404].includes(error.status ?? 0)) {
       return {
         usable: false,
+        accountName: null,
         scope: null,
         reason:
-          'Vercel does not recognise this token as an account token, which usually means it is project-scoped or read-only. Deploying a new site needs a token that can create projects. If the token belongs to a team, VERCEL_TEAM_ID must be set too.',
+          'Vercel did not recognise this as an account token, which usually means it is project-scoped or read-only. Deploying a new site needs a token that can create projects. If it belongs to a team, the team ID is required too.',
       };
     }
-    // A network blip or Vercel outage is not a token problem.
-    return { usable: true, scope: null, reason: null };
+    // A network blip or Vercel outage is not a credential problem.
+    return { usable: true, accountName: null, scope: null, reason: null };
   }
 }

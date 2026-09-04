@@ -6,6 +6,7 @@ import type { DeploymentStatus } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { DeploymentStatusBadge } from '@/components/ui/misc';
 import { errorMessage, formatBytes, formatRelative } from '@/lib/utils';
+import { VercelConnect, type ConnectionStatus } from './vercel-connect';
 
 export type DeploymentView = {
   id: string;
@@ -19,10 +20,12 @@ export type DeploymentView = {
   readyAt: string | null;
 };
 
-type TokenCheck = { usable: boolean; scope: string | null; reason: string | null };
+type TokenCheck = { usable: boolean; accountName: string | null; scope: string | null; reason: string | null };
 
 type DeployState = {
   configured: boolean;
+  platformFallback?: boolean;
+  connection?: ConnectionStatus;
   token?: TokenCheck;
   deployment: DeploymentView | null;
   history: DeploymentView[];
@@ -114,7 +117,8 @@ export function DeployPanel({ projectId, onClose }: { projectId: string; onClose
             </div>
           ) : (
             <div className="grid gap-4">
-              {!state.configured ? <NotConfigured /> : null}
+              {state.connection ? <VercelConnect status={state.connection} onChange={() => void load()} /> : null}
+              {!state.configured && !state.connection?.canConnect ? <NotConfigured /> : null}
               {state.configured && state.token && !state.token.usable ? (
                 <TokenProblem reason={state.token.reason} />
               ) : null}
@@ -170,8 +174,8 @@ function NotConfigured() {
         <AlertCircle className="h-3.5 w-3.5" /> Vercel is not configured
       </p>
       <p className="mt-1 text-[12px] leading-relaxed text-amber-800">
-        Add <code className="rounded bg-white/70 px-1">VERCEL_TOKEN</code> to your environment (plus{' '}
-        <code className="rounded bg-white/70 px-1">VERCEL_TEAM_ID</code> for team accounts), then restart the server.
+        Connect a Vercel account above, or for self-hosting add{' '}
+        <code className="rounded bg-white/70 px-1">VERCEL_TOKEN</code> to the server environment.
       </p>
     </div>
   );
