@@ -2,6 +2,7 @@ import NextAuth, { type DefaultSession } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import Credentials from 'next-auth/providers/credentials';
 import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { db } from './db';
@@ -31,7 +32,15 @@ export const credentialsSchema = z.object({
   name: z.string().max(80).optional(),
 });
 
+/**
+ * Social providers turn themselves on when their credentials are present.
+ *
+ * Nothing is required: the app still runs on email and password alone, which is
+ * what keeps a local checkout and a self-hosted install working with no
+ * third-party setup at all.
+ */
 const githubEnabled = Boolean(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET);
+const googleEnabled = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -43,6 +52,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: [
     ...(githubEnabled ? [GitHub] : []),
+    ...(googleEnabled
+      ? [
+          Google({
+            // Google refuses to re-issue a refresh token on a repeat consent
+            // unless it is asked to, which makes an account that was linked
+            // once impossible to re-link cleanly later.
+            authorization: { params: { prompt: 'consent', access_type: 'offline', response_type: 'code' } },
+          }),
+        ]
+      : []),
     Credentials({
       name: 'Email',
       credentials: {
@@ -81,7 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-export const AUTH_PROVIDERS = { github: githubEnabled };
+export const AUTH_PROVIDERS = { github: githubEnabled, google: googleEnabled };
 
 /** Idempotent: creates the user's personal workspace the first time they sign in. */
 export async function ensureWorkspace(userId: string, label: string) {

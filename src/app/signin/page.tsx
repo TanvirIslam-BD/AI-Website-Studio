@@ -37,7 +37,13 @@ export default async function SignInPage({
               : 'Sign in to your workspace to keep building.'}
           </p>
 
-          <AuthForm mode={mode} prompt={params.prompt} githubEnabled={AUTH_PROVIDERS.github} error={params.error} />
+          <AuthForm
+            mode={mode}
+            prompt={params.prompt}
+            githubEnabled={AUTH_PROVIDERS.github}
+            googleEnabled={AUTH_PROVIDERS.google}
+            error={params.error}
+          />
         </div>
       </div>
 
