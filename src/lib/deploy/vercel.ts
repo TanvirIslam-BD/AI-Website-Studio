@@ -210,6 +210,67 @@ export function productionUrlFor(deployment: VercelDeployment): string | null {
   );
 }
 
+/**
+ * One of the user's own Vercel projects, for the mapping UI.
+ */
+export type VercelProject = {
+  id: string;
+  name: string;
+  framework: string | null;
+  updatedAt: number | null;
+  /** The project's own production URL, when it has been deployed before. */
+  url: string | null;
+};
+
+export type VercelProjectPage = {
+  projects: VercelProject[];
+  /**
+   * Cursor for the next page, or null at the end. Vercel paginates projects by
+   * timestamp rather than offset, so this is passed straight back as `until`.
+   */
+  next: number | null;
+};
+
+/**
+ * Lists the account's projects, newest first.
+ *
+ * Paginated rather than fetched whole on purpose: an agency account can hold
+ * far more projects than one response returns, and a picker that silently shows
+ * only the first page would hide exactly the project someone is looking for.
+ */
+export async function listProjects(
+  credentials: VercelCredentials,
+  options: { limit?: number; until?: number } = {},
+): Promise<VercelProjectPage> {
+  const params = new URLSearchParams({ limit: String(Math.min(Math.max(options.limit ?? 20, 1), 100)) });
+  if (options.until) params.set('until', String(options.until));
+
+  const raw = await request<{
+    projects?: Array<{
+      id: string;
+      name: string;
+      framework?: string | null;
+      updatedAt?: number;
+      targets?: { production?: { url?: string | null } | null } | null;
+    }>;
+    pagination?: { next?: number | null } | null;
+  }>(`/v9/projects?${params.toString()}`, credentials);
+
+  return {
+    projects: (raw.projects ?? []).map((project) => {
+      const url = project.targets?.production?.url ?? null;
+      return {
+        id: project.id,
+        name: project.name,
+        framework: project.framework ?? null,
+        updatedAt: project.updatedAt ?? null,
+        url: url ? `https://${url.replace(/^https?:\/\//, '')}` : null,
+      };
+    }),
+    next: raw.pagination?.next ?? null,
+  };
+}
+
 export type TokenCheck = { usable: boolean; accountName: string | null; scope: string | null; reason: string | null };
 
 /**
