@@ -4,6 +4,7 @@ import { requireProjectRef, requireUser } from '@/lib/tenancy';
 import { deploymentHistory, isVercelConfigured, latestDeployment, previewDeploymentFiles, refreshDeployment, startDeployment } from '@/lib/deploy/service';
 import { checkToken } from '@/lib/deploy/vercel';
 import { connectionStatus, resolveCredentials } from '@/lib/deploy/credentials';
+import { recordUsage, requireAllowance } from '@/lib/billing/entitlements';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -48,6 +49,10 @@ export const POST = handle(async (_request: Request, { params }: Params) => {
   const user = await requireUser();
   const project = await requireProjectRef(projectId, user.id);
 
+  // The plan gate comes first: someone who cannot publish should be told that,
+  // not sent to connect a hosting account they will not be allowed to use.
+  const entitlements = await requireAllowance(project.workspaceId, 'deploy');
+
   const resolved = await resolveCredentials(project.workspaceId);
   if (!resolved) {
     return NextResponse.json(
@@ -57,5 +62,14 @@ export const POST = handle(async (_request: Request, { params }: Params) => {
   }
 
   const deployment = await startDeployment(projectId, user.id);
+
+  await recordUsage({
+    workspaceId: project.workspaceId,
+    plan: entitlements.plan,
+    kind: 'deploy',
+    userId: user.id,
+    projectId,
+  });
+
   return NextResponse.json({ deployment }, { status: 202 });
 });

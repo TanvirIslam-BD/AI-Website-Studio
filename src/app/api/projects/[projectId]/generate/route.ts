@@ -5,6 +5,7 @@ import { handle, readJson } from '@/lib/api';
 import { requireProjectRef, requireUser } from '@/lib/tenancy';
 import { generateWebsite } from '@/lib/ai/generate';
 import { MAX_BRIEF_LENGTH } from '@/lib/limits';
+import { recordUsage, requireAllowance } from '@/lib/billing/entitlements';
 import { loadDocument, saveDocument, writeRevision } from '@/lib/website/persistence';
 
 export const runtime = 'nodejs';
@@ -25,7 +26,8 @@ const schema = z.object({
 export const POST = handle(async (request: Request, { params }: { params: Promise<{ projectId: string }> }) => {
   const { projectId } = await params;
   const user = await requireUser();
-  await requireProjectRef(projectId, user.id);
+  const project = await requireProjectRef(projectId, user.id);
+  const entitlements = await requireAllowance(project.workspaceId, 'regenerate');
   const { prompt } = schema.parse(await readJson(request));
 
   await db.project.update({ where: { id: projectId }, data: { status: 'GENERATING' } });
@@ -46,6 +48,14 @@ export const POST = handle(async (request: Request, { params }: { params: Promis
         { projectId, role: 'USER', content: `Regenerate the site: ${prompt}` },
         { projectId, role: 'ASSISTANT', content: `Rebuilt the website from your new brief (${result.document.pages.length} pages).` },
       ],
+    });
+
+    await recordUsage({
+      workspaceId: project.workspaceId,
+      plan: entitlements.plan,
+      kind: 'regenerate',
+      userId: user.id,
+      projectId,
     });
 
     return NextResponse.json({ document: result.document, source: result.source, warning: result.warning ?? null });

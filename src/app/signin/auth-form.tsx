@@ -27,6 +27,8 @@ function describeAuthError(code: string): string {
       return 'That account is not allowed to sign in.';
     case 'Verification':
       return 'That sign-in link has expired. Please request a new one.';
+    case 'SignupsPaused':
+      return 'New signups are paused right now. If you already have an account, sign in with your email and password.';
     default:
       return 'That sign-in attempt did not work. Please try again.';
   }

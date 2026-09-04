@@ -6,6 +6,7 @@ import Google from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { db } from './db';
+import { platformSettings } from './platform/settings';
 import { slugify } from './ids';
 
 /**
@@ -84,6 +85,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    /**
+     * The signup pause, on the social side.
+     *
+     * Checked against the database by email rather than by trusting whatever
+     * the provider says about newness: an account that already exists must keep
+     * working while signups are closed, and only genuinely new ones are turned
+     * away. Existing users are never affected by the pause.
+     */
+    async signIn({ user }) {
+      const email = user.email?.toLowerCase();
+      if (!email) return true;
+
+      try {
+        const { signupsPaused } = await platformSettings();
+        if (!signupsPaused) return true;
+
+        const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
+        return existing ? true : '/signin?error=SignupsPaused';
+      } catch (error) {
+        // A failure to read the pause must not lock everyone out of the
+        // product. Erring open costs an unwanted signup; erring closed takes
+        // the whole sign-in page down.
+        console.error('[auth] could not check the signup pause:', error);
+        return true;
+      }
+    },
     async jwt({ token, user }) {
       if (user?.id) token.sub = user.id;
       return token;
@@ -101,6 +128,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 
 export const AUTH_PROVIDERS = { github: githubEnabled, google: googleEnabled };
+
+/**
+ * Refuses new accounts while the owner has signups paused.
+ *
+ * Reads the same switch the console writes, so the toggle is not decorative.
+ * A read failure lets the signup through - the pause is an operational
+ * convenience, not a security boundary, and failing closed here would mean a
+ * database hiccup silently closes the product to new users.
+ */
+async function requireSignupsOpen(): Promise<void> {
+  try {
+    const { signupsPaused } = await platformSettings();
+    if (!signupsPaused) return;
+  } catch (error) {
+    console.error('[auth] could not check the signup pause:', error);
+    return;
+  }
+  throw new Error('New signups are paused right now. Please try again later.');
+}
 
 /** Idempotent: creates the user's personal workspace the first time they sign in. */
 export async function ensureWorkspace(userId: string, label: string) {
@@ -130,6 +176,8 @@ export async function ensureWorkspace(userId: string, label: string) {
 
 export async function registerUser(input: z.infer<typeof credentialsSchema>) {
   const email = input.email.toLowerCase();
+  await requireSignupsOpen();
+
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) throw new Error('An account with that email already exists.');
 

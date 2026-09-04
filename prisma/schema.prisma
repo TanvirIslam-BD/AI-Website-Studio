@@ -108,16 +108,79 @@ enum WorkspacePlan {
 }
 
 model Workspace {
-  id        String        @id @default(cuid())
-  name      String
-  slug      String        @unique
-  plan      WorkspacePlan @default(FREE)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  plan        WorkspacePlan @default(FREE)
+  /// Start of the current credit period. Credits are counted from here rather
+  /// than stored as a balance, so a reset is a date change and can never drift
+  /// out of step with what was actually spent.
+  periodStart DateTime      @default(now())
+  /// When a paid plan lapses. Null on FREE, and on plans granted by the owner.
+  planEndsAt  DateTime?
+  /// How the current plan was obtained: "signup", "granted", or a payment
+  /// provider's name once one is wired up.
+  planSource  String        @default("signup")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   members    Membership[]
   projects   Project[]
   connection HostingConnection?
+  usage      UsageEvent[]
+}
+
+/// One row per chargeable action.
+///
+/// A ledger rather than a counter on Workspace: a counter answers "how many
+/// left" and nothing else, while this also answers what was spent, by whom, on
+/// which project and when - which is exactly what the owner console needs, and
+/// what anyone disputing a bill would ask for. Credits remaining are derived by
+/// summing from `Workspace.periodStart`.
+model UsageEvent {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String?
+  projectId   String?
+  /// generate | regenerate | copilot | deploy | scaffold
+  kind        String
+  /// Credits this action consumed. Zero for actions worth recording but not
+  /// charging for, so the ledger stays a complete history of activity.
+  credits     Int           @default(0)
+  /// Plan at the time, so history stays readable after an upgrade.
+  plan        WorkspacePlan
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt])
+  @@index([createdAt])
+}
+
+/// Platform-wide controls, one row.
+///
+/// Deliberately in the database rather than the environment: these are levers
+/// the owner needs during an incident, and an environment variable cannot be
+/// changed without a redeploy.
+model PlatformSetting {
+  /// Always "singleton". A fixed id makes this a row that can be upserted
+  /// rather than a table that could grow a second, contradictory row.
+  id String @id @default("singleton")
+
+  /// auto | ai | template. `auto` uses whatever the environment configures;
+  /// the other two force generation down one path regardless.
+  generationMode String @default("auto")
+
+  /// Stops generation entirely - for an incident, or a runaway provider bill.
+  generationPaused Boolean @default(false)
+  /// Stops new accounts being created.
+  signupsPaused    Boolean @default(false)
+
+  /// Free-text banner shown to every signed-in user while set.
+  notice String?
+
+  updatedAt   DateTime @updatedAt
+  updatedById String?
 }
 
 model Membership {

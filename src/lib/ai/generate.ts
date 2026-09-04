@@ -11,6 +11,7 @@ import { generationUserMessage, websiteGenerationPrompt } from './prompts';
 import { generateFromTemplate } from './template';
 import { detectTopic, guessBrand, normalizeTopic } from './topics';
 import { ProgressReader, type GenerationProgress } from './progress';
+import { platformSettings } from '@/lib/platform/settings';
 
 /**
  * Prompt -> structured website.
@@ -63,7 +64,15 @@ export type GenerateOptions = {
 };
 
 export async function generateWebsite(brief: string, options: GenerateOptions = {}): Promise<GenerationResult> {
-  const provider = getProvider();
+  /**
+   * The owner console can force the template path regardless of which keys are
+   * configured. Read here rather than in the route because every caller of this
+   * function should honour it - a switch that only some paths respect is worse
+   * than no switch, since it looks like it worked.
+   */
+  const { generationMode } = await platformSettings();
+  const provider = generationMode === 'template' ? null : getProvider();
+
   if (!provider) {
     options.onProgress?.({ stage: 'template' });
     const template = generateFromTemplate(brief);
