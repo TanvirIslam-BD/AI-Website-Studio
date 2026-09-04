@@ -26,7 +26,11 @@ execFileSync(
   { stdio: ['ignore', 'ignore', 'inherit'], cwd: root },
 );
 
-const css = readFileSync(tmp, 'utf8').trim();
+// Normalise line endings before embedding. Tailwind's output follows the
+// platform, so without this a Windows build and a Linux build emit different
+// string literals (and a different WEBSITE_CSS_BYTES) from identical input,
+// leaving this checked-in generated file dirty after every build.
+const css = readFileSync(tmp, 'utf8').replace(/\r\n/g, '\n').trim();
 rmSync(tmp, { force: true });
 
 mkdirSync(dirname(out), { recursive: true });
