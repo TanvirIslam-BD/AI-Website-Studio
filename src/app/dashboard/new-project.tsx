@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/field';
 import { errorMessage } from '@/lib/utils';
 import { MAX_BRIEF_LENGTH } from '@/lib/limits';
+import type { GenerationProgress } from '@/lib/ai/progress';
+import { GenerationProgressList } from './generation-progress';
 
 const EXAMPLES = [
   'A modern website for a photography business',
@@ -26,6 +28,7 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
   const [prompt, setPrompt] = useState(initialPrompt ?? '');
   const [busy, setBusy] = useState<null | 'generate' | 'blank'>(null);
   const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<GenerationProgress[]>([]);
 
   async function create(mode: 'generate' | 'blank') {
     if (mode === 'generate' && prompt.trim().length < 8) {
@@ -42,18 +45,32 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
     }
     setBusy(mode);
     setError(null);
+    setEvents([]);
 
     try {
       const response = await fetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // Ask for progress. A blank project has none to report, and the
+          // server answers plain JSON when this is absent.
+          ...(mode === 'generate' ? { Accept: 'text/event-stream' } : {}),
+        },
         body: JSON.stringify({ mode, prompt: prompt.trim() || undefined }),
       });
-      const payload = (await response.json()) as { project?: { id: string }; error?: string };
-      if (!response.ok || !payload.project) throw new Error(payload.error ?? 'Could not create that project.');
-      router.push(`/editor/${payload.project.id}`);
+
+      if (mode !== 'generate' || !response.headers.get('content-type')?.includes('text/event-stream')) {
+        const payload = (await response.json()) as { project?: { id: string }; error?: string };
+        if (!response.ok || !payload.project) throw new Error(payload.error ?? 'Could not create that project.');
+        router.push(`/editor/${payload.project.id}`);
+        return;
+      }
+
+      const projectId = await consume(response, (event) => setEvents((current) => [...current, event]));
+      router.push(`/editor/${projectId}`);
     } catch (caught) {
       setError(errorMessage(caught));
+      setEvents([]);
       setBusy(null);
     }
   }
@@ -99,6 +116,8 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
           </p>
         ) : null}
 
+        {busy === 'generate' ? <GenerationProgressList events={events} /> : null}
+
         {error ? (
           <p className="mt-4 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {error}
@@ -131,4 +150,52 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Reads the progress stream and resolves with the new project's id.
+ *
+ * Server-sent events arrive as `data: {...}` blocks separated by a blank line,
+ * and a chunk boundary can fall anywhere - including mid-event - so the tail of
+ * the buffer is kept until its terminator turns up.
+ */
+async function consume(
+  response: Response,
+  onEvent: (event: GenerationProgress) => void,
+): Promise<string> {
+  if (!response.body) throw new Error('The server did not send a progress stream.');
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let projectId: string | null = null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop() ?? '';
+
+    for (const block of blocks) {
+      const line = block.split('\n').find((candidate) => candidate.startsWith('data:'));
+      if (!line) continue;
+
+      let event: GenerationProgress;
+      try {
+        event = JSON.parse(line.slice(5).trim()) as GenerationProgress;
+      } catch {
+        continue;
+      }
+
+      // Failures arrive inside the stream, because the response has already begun.
+      if (event.stage === 'error') throw new Error(event.message);
+      onEvent(event);
+      if (event.stage === 'done') projectId = event.projectId;
+    }
+  }
+
+  if (!projectId) throw new Error('Generation ended without producing a website.');
+  return projectId;
 }

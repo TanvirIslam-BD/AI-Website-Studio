@@ -48,6 +48,14 @@ export interface LlmProvider {
   readonly label: string;
   readonly model: string;
   complete(request: LlmRequest): Promise<LlmResponse>;
+  /**
+   * The same request, yielding text as the model writes it.
+   *
+   * Optional: a provider without it still works, callers just wait for the
+   * whole response. Generation uses it to report what is being built while it
+   * is being built, rather than showing a spinner for forty seconds.
+   */
+  stream?(request: LlmRequest): AsyncIterable<string>;
 }
 
 export class LlmError extends Error {

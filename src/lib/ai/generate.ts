@@ -10,6 +10,7 @@ import { extractJsonObject } from './json';
 import { generationUserMessage, websiteGenerationPrompt } from './prompts';
 import { generateFromTemplate } from './template';
 import { detectTopic, guessBrand, normalizeTopic } from './topics';
+import { ProgressReader, type GenerationProgress } from './progress';
 
 /**
  * Prompt -> structured website.
@@ -50,9 +51,21 @@ const responseSchema = z.object({
     .max(8),
 });
 
-export async function generateWebsite(brief: string): Promise<GenerationResult> {
+export type GenerateOptions = {
+  /**
+   * Called as the model writes, when the provider can stream.
+   *
+   * Every event reflects something that has actually arrived - there is no
+   * timer behind them - so a caller can report real progress instead of
+   * guessing at it. Providers without streaming simply never call this.
+   */
+  onProgress?: (event: GenerationProgress) => void;
+};
+
+export async function generateWebsite(brief: string, options: GenerateOptions = {}): Promise<GenerationResult> {
   const provider = getProvider();
   if (!provider) {
+    options.onProgress?.({ stage: 'template' });
     const template = generateFromTemplate(brief);
     return { document: template.document, brand: template.brand, description: template.description, source: 'template' };
   }
@@ -60,19 +73,34 @@ export async function generateWebsite(brief: string): Promise<GenerationResult> 
   try {
     const topicGuess = detectTopic(brief);
     const stock = stockImages(topicGuess, 6);
-
-    const response = await provider.complete({
+    const request = {
       system: websiteGenerationPrompt(),
-      messages: [{ role: 'user', content: generationUserMessage(brief, stock) }],
+      messages: [{ role: 'user' as const, content: generationUserMessage(brief, stock) }],
       maxTokens: 16000,
       temperature: 0.7,
       json: true,
-    });
+    };
 
-    return buildFromResponse(response.text, brief, stock);
+    let text: string;
+    if (provider.stream && options.onProgress) {
+      const reader = new ProgressReader();
+      for await (const chunk of provider.stream(request)) {
+        for (const event of reader.push(chunk)) options.onProgress(event);
+      }
+      text = reader.text();
+    } else {
+      text = (await provider.complete(request)).text;
+    }
+
+    options.onProgress?.({ stage: 'validating' });
+    return buildFromResponse(text, brief, stock);
   } catch (error) {
     // Never leave the user without a website: fall back to the template path
     // and tell them why the AI result was not used.
+    options.onProgress?.({
+      stage: 'template',
+      reason: error instanceof Error ? error.message : undefined,
+    });
     const template = generateFromTemplate(brief);
     return {
       document: template.document,

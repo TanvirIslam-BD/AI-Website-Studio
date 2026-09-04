@@ -48,5 +48,29 @@ export function createOpenAiProvider(apiKey: string, model: string, options: Ope
         throw new LlmError(error instanceof Error ? error.message : 'OpenAI request failed', 'openai', status);
       }
     },
+
+    async *stream(request: LlmRequest): AsyncIterable<string> {
+      try {
+        const response = await client.chat.completions.create({
+          model,
+          max_tokens: request.maxTokens ?? 8000,
+          temperature: request.temperature ?? 0.6,
+          response_format: request.json ? { type: 'json_object' } : undefined,
+          stream: true,
+          messages: [
+            { role: 'system', content: request.system },
+            ...request.messages.map((m) => ({ role: m.role, content: m.content })),
+          ],
+        });
+
+        for await (const chunk of response) {
+          const delta = chunk.choices[0]?.delta?.content;
+          if (delta) yield delta;
+        }
+      } catch (error) {
+        const status = error instanceof OpenAI.APIError ? error.status : undefined;
+        throw new LlmError(error instanceof Error ? error.message : 'OpenAI request failed', 'openai', status);
+      }
+    },
   };
 }
