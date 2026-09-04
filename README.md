@@ -457,6 +457,33 @@ Then redeploy, since environment variables are read at build and boot time. The
 Vercel dashboard (Project → Settings → Environment Variables) does the same job
 without the CLI.
 
+### Checking a deployment
+
+`GET /api/health` reports whether the app can actually run, and is the first
+thing to read when something is wrong in production. It returns 200 when ready
+and 503 when not, with a `hint` naming the next step.
+
+The database check is the part worth understanding. It queries every table with
+a statement that names every column the schema expects, so it catches three
+different failures and tells them apart:
+
+| `database` | Means |
+| --- | --- |
+| `ok` | Reachable, and every table has the columns the app expects |
+| `unreachable` | No connection - usually missing `TURSO_*` variables |
+| `schema-missing` | Connected, but the tables do not exist. Run `npm run db:push` |
+| `schema-stale` | Tables exist but are short of columns, so a schema change shipped without a migration. `databaseTables` names them |
+
+`schema-stale` is the one that catches a real deployment mistake. A schema change
+deployed without migrating leaves reads that use an explicit `select` working
+while anything loading a whole row fails, so the app looks half-alive: listing
+projects succeeds, creating one returns "Something went wrong on our end". Only a
+check that names every column sees it.
+
+Note the trap when fixing it: `npm run db:push` falls back to the local SQLite
+file when `TURSO_DATABASE_URL` is unset, and cheerfully reports "already in sync"
+having never touched production. Confirm the output names your `libsql://` URL.
+
 Two deployment notes:
 
 - `next.config.mjs` lists the libSQL packages in `serverExternalPackages`. They
