@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * The health check.
@@ -64,7 +64,13 @@ beforeEach(() => {
   findFirst.clear();
   transaction.mockReset();
   transaction.mockResolvedValue([]);
-  process.env.AUTH_SECRET = 'set-for-tests';
+  // Stubbed, not assigned: the suite below deletes it in one test, and an
+  // assignment left standing makes the rest of the file order-dependent.
+  vi.stubEnv('AUTH_SECRET', 'set-for-tests');
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe('a healthy database', () => {
@@ -178,7 +184,7 @@ describe('a transient failure', () => {
 
 describe('configuration problems', () => {
   it('reports a missing AUTH_SECRET ahead of anything else', async () => {
-    delete process.env.AUTH_SECRET;
+    vi.stubEnv('AUTH_SECRET', '');
     breakTable('project', 'no such column: main.Project.x');
 
     const { body } = await get();
