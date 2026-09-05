@@ -334,7 +334,7 @@ export default async function AiWebsiteGeneratorPage() {
                   generating a site versus starting from a blank editor
                 </Link>
                 , and{' '}
-                <Link href="/pricing" className="focus-ring text-ink-300 underline underline-offset-4">
+                <Link href="/#pricing" className="focus-ring text-ink-300 underline underline-offset-4">
                   what each plan includes
                 </Link>
                 .

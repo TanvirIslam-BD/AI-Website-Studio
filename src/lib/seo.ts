@@ -36,11 +36,16 @@ export function absoluteUrl(path = '/'): string {
  * none of which belong in an index, and an automatic crawl of the route tree
  * would sweep them all in. `changeFrequency` is a hint search engines largely
  * ignore; the ordering by `priority` is the part worth maintaining.
+ *
+ * `/pricing` is not here on purpose. It is the signed-in plans screen, and it
+ * redirects an anonymous visitor to `/signin` - which robots.txt disallows - so
+ * listing it would ask a crawler to follow a redirect into a blocked path and
+ * report a soft error for the trouble. The public pricing is the `/#pricing`
+ * section of the home page, which is already covered by `/`.
  */
 export const INDEXABLE_PAGES: Array<{ path: string; priority: number; changeFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly' }> = [
   { path: '/', priority: 1.0, changeFrequency: 'weekly' },
   { path: '/ai-website-generator', priority: 0.9, changeFrequency: 'weekly' },
-  { path: '/pricing', priority: 0.8, changeFrequency: 'monthly' },
   { path: '/docs', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/support', priority: 0.5, changeFrequency: 'monthly' },
   { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
