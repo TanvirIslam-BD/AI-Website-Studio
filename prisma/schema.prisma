@@ -112,9 +112,12 @@ model Workspace {
   name        String
   slug        String        @unique
   plan        WorkspacePlan @default(FREE)
-  /// Start of the current credit period. Credits are counted from here rather
-  /// than stored as a balance, so a reset is a date change and can never drift
-  /// out of step with what was actually spent.
+  /// Anchor for the monthly credit period - the day this workspace started
+  /// counting, not the period it is in now. The current month is derived from
+  /// it on read (src/lib/billing/period.ts), so allowances roll over with
+  /// nothing scheduled to run and no value here to go stale. Credits are
+  /// summed from the ledger rather than stored as a balance, so they can never
+  /// drift out of step with what was actually spent.
   periodStart DateTime      @default(now())
   /// When a paid plan lapses. Null on FREE, and on plans granted by the owner.
   planEndsAt  DateTime?

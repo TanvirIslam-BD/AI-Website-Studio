@@ -1,6 +1,7 @@
 import type { Prisma, WorkspacePlan } from '@prisma/client';
 import { db } from '@/lib/db';
 import { COST, FREE_KINDS, PLANS, cheapestPlanWith, type ChargeableAction, type PlanLimits, type UsageKind } from './plans';
+import { currentPeriod } from './period';
 
 /**
  * What a workspace is currently allowed to do, and the recording of it.
@@ -41,7 +42,10 @@ export type Entitlements = {
   limits: PlanLimits;
   websites: { used: number; limit: number; remaining: number };
   credits: { used: number; limit: number; remaining: number };
+  /** Start of the period credits are counted from. Derived, see ./period. */
   periodStart: Date;
+  /** When the allowance next resets. */
+  periodEnd: Date;
   canEdit: boolean;
   canDeploy: boolean;
 };
@@ -52,6 +56,10 @@ export type Entitlements = {
  * Summed from the ledger rather than read from a counter, so it cannot drift
  * from the record of what actually happened. The index on
  * `(workspaceId, createdAt)` is what keeps this cheap.
+ *
+ * `Workspace.periodStart` is an anchor, not the current period - the month in
+ * force right now is derived from it, so allowances roll over on their own
+ * with nothing scheduled to run. See ./period.
  */
 export async function entitlementsFor(workspaceId: string): Promise<Entitlements> {
   const workspace = await db.workspace.findUniqueOrThrow({
@@ -60,11 +68,12 @@ export async function entitlementsFor(workspaceId: string): Promise<Entitlements
   });
 
   const limits = PLANS[workspace.plan];
+  const period = currentPeriod(workspace.periodStart);
 
   const [websites, spent] = await Promise.all([
     db.project.count({ where: { workspaceId } }),
     db.usageEvent.aggregate({
-      where: { workspaceId, createdAt: { gte: workspace.periodStart } },
+      where: { workspaceId, createdAt: { gte: period.start } },
       _sum: { credits: true },
     }),
   ]);
@@ -76,7 +85,8 @@ export async function entitlementsFor(workspaceId: string): Promise<Entitlements
     limits,
     websites: { used: websites, limit: limits.websites, remaining: Math.max(0, limits.websites - websites) },
     credits: { used, limit: limits.credits, remaining: Math.max(0, limits.credits - used) },
-    periodStart: workspace.periodStart,
+    periodStart: period.start,
+    periodEnd: period.end,
     canEdit: limits.canEdit,
     canDeploy: limits.canDeploy,
   };

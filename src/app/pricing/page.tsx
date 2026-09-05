@@ -95,8 +95,9 @@ export default async function PricingPage() {
         </div>
 
         <p className="mt-8 text-[12px] leading-relaxed text-ink-500">
-          Credits are spent by generating a website and by AI edits. They reset at the start of each period, which
-          began {entitlements.periodStart.toLocaleDateString()}.
+          Credits are spent by generating a website and by AI edits. This period began{' '}
+          {entitlements.periodStart.toLocaleDateString()} and your allowance resets on{' '}
+          {entitlements.periodEnd.toLocaleDateString()}.
         </p>
       </div>
     </main>
