@@ -23,20 +23,22 @@ export const runtime = 'nodejs';
  */
 
 /**
- * Chosen for how it reads at a glance, on a black section.
+ * Chosen for how it reads at a glance, scaled to a third of its size.
  *
- * This was a photography studio: white ground, one photograph, a lot of air.
- * Elegant at full size and almost invisible scaled to a third of it - three
- * pale rectangles on a dark band, which is not what a section arguing the
- * generator produces finished work should show. This one carries its own warm
- * ground and an accent colour, so it reads as a designed page rather than as a
- * blank one even at 384px wide.
+ * This was a photography studio - white ground, one photograph, a lot of air -
+ * which is elegant at full size and close to invisible in a 384px frame. The
+ * section argues that the generator produces finished work, so the example has
+ * to survive being shrunk: a decided ground, a hard accent, and a photograph
+ * behind the headline rather than beside it.
  *
- * Still a brief the offline template path answers with tailored copy rather
- * than filler, which is the constraint every showcase brief is under - this
- * renders at build time, with no model.
+ * Of the briefs the offline template path answers with tailored copy - the
+ * constraint every showcase brief is under, since this renders at build time
+ * with no model - this is the one that commits hardest.
+ *
+ * Changing it means changing SITE_SURFACE in every-screen.tsx to match, or the
+ * frames flash the previous site's ground before they load.
  */
-const SITE = generateFromTemplate('a neighbourhood sushi restaurant with a seasonal omakase menu');
+const SITE = generateFromTemplate('a personal training studio offering small-group coaching and nutrition plans');
 
 export async function GET() {
   const page = homePage(SITE.document);

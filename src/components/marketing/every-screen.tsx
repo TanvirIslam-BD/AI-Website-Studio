@@ -20,8 +20,14 @@ import { Container, Section, SectionHeading } from './shell';
  * URL the browser fetches it once and reuses it for all three.
  */
 
-/** The example site's page background, so an unloaded frame matches it. */
-const SITE_SURFACE = '#fdf9f4';
+/**
+ * The example site's page background, so an unloaded frame matches it.
+ *
+ * Read from the document `/showcase` actually serves, and it has to change with
+ * the brief there - a placeholder left on the previous site's colour flashes
+ * the wrong ground before each frame loads.
+ */
+const SITE_SURFACE = '#0a1633';
 
 /** Real device widths, so the breakpoints inside resolve the way they will in use. */
 const SCREENS = [
@@ -49,9 +55,9 @@ export function EveryScreen() {
                 style={{
                   width: screen.width * screen.scale,
                   height: screen.height * screen.scale,
-                  // The example site's own ground, read from the document it
-                  // serves, so a frame that has not loaded yet is a warm
-                  // rectangle rather than a white flash against the dark band.
+                  // The example site's own ground, so a frame that has not
+                  // loaded yet is the right colour rather than a white flash
+                  // against the dark band.
                   backgroundColor: SITE_SURFACE,
                 }}
               >
