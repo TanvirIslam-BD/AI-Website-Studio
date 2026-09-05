@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * Plan enforcement.
@@ -159,6 +159,62 @@ describe('the ledger', () => {
   it('does not fail the request when the write fails', async () => {
     usageEvent.create.mockRejectedValue(new Error('database is gone'));
     await expect(recordUsage({ workspaceId: 'ws', plan: 'PRO', kind: 'generate' })).resolves.toBeUndefined();
+  });
+});
+
+/**
+ * The rollover, seen from the outside.
+ *
+ * period.test.ts covers the calendar arithmetic; what matters here is that the
+ * derived month is the one the ledger is actually queried with. Getting this
+ * wrong does not throw - it silently counts last month's spend against this
+ * month's allowance, and the first anyone hears of it is a paying customer who
+ * cannot generate.
+ */
+describe('when the period has rolled over', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('counts credits from the current month, not from the anchor', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-10T00:00:00Z'));
+
+    workspace.findUniqueOrThrow.mockResolvedValue({ plan: 'PRO', periodStart: new Date('2026-01-20T10:00:00Z') });
+    project.count.mockResolvedValue(3);
+    usageEvent.aggregate.mockResolvedValue({ _sum: { credits: 12 } });
+
+    const entitlements = await entitlementsFor('ws');
+
+    expect(usageEvent.aggregate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ createdAt: { gte: new Date('2026-03-20T10:00:00Z') } }),
+      }),
+    );
+    expect(entitlements.periodStart).toEqual(new Date('2026-03-20T10:00:00Z'));
+    expect(entitlements.periodEnd).toEqual(new Date('2026-04-20T10:00:00Z'));
+    expect(entitlements.credits.remaining).toBe(288);
+  });
+
+  /**
+   * The case that made this necessary: an exhausted allowance has to come back
+   * on its own, with nothing scheduled to bring it back.
+   */
+  it('restores a spent allowance once the month turns', async () => {
+    workspace.findUniqueOrThrow.mockResolvedValue({ plan: 'PRO', periodStart: new Date('2026-01-20T10:00:00Z') });
+    project.count.mockResolvedValue(3);
+    platformSetting.findUnique.mockResolvedValue({ generationPaused: false });
+
+    vi.useFakeTimers();
+
+    // Late in the first period, everything spent.
+    vi.setSystemTime(new Date('2026-02-19T00:00:00Z'));
+    usageEvent.aggregate.mockResolvedValue({ _sum: { credits: 300 } });
+    expect((await refusal(requireAllowance('ws', 'copilot')))?.reason).toBe('credits');
+
+    // A day later the anchor comes round, and last month's rows fall outside
+    // the window the ledger is asked about.
+    vi.setSystemTime(new Date('2026-02-20T11:00:00Z'));
+    usageEvent.aggregate.mockResolvedValue({ _sum: { credits: 0 } });
+    await expect(requireAllowance('ws', 'copilot')).resolves.toMatchObject({ plan: 'PRO' });
   });
 });
 

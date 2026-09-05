@@ -1,6 +1,7 @@
 import type { WorkspacePlan } from '@prisma/client';
 import { db } from '@/lib/db';
 import { PLANS } from '@/lib/billing/plans';
+import { currentPeriod } from '@/lib/billing/period';
 
 /**
  * What the console reads.
@@ -118,9 +119,26 @@ export async function workspaces(take = 50): Promise<WorkspaceRow[]> {
 
   if (rows.length === 0) return [];
 
+  /**
+   * Each workspace is in its own month, anchored on when it started, so the
+   * filter is per workspace rather than one shared date. Still one grouped
+   * query - an OR of narrow conditions the index on (workspaceId, createdAt)
+   * serves directly - because the obvious alternative is a query per row.
+   *
+   * This used to sum every event ever recorded and show it against a monthly
+   * limit, which read as a ratio and was not one: a workspace in its fourth
+   * month showed four months of spend over one month's allowance.
+   */
+  const periods = new Map(rows.map((row) => [row.id, currentPeriod(row.periodStart)]));
+
   const usage = await db.usageEvent.groupBy({
     by: ['workspaceId'],
-    where: { workspaceId: { in: rows.map((row) => row.id) } },
+    where: {
+      OR: rows.map((row) => ({
+        workspaceId: row.id,
+        createdAt: { gte: periods.get(row.id)!.start },
+      })),
+    },
     _sum: { credits: true },
   });
   const spentByWorkspace = new Map(usage.map((row) => [row.workspaceId, row._sum.credits ?? 0]));
@@ -133,11 +151,11 @@ export async function workspaces(take = 50): Promise<WorkspaceRow[]> {
     planSource: row.planSource,
     members: row._count.members,
     projects: row._count.projects,
-    // Grouped without a period filter, so this is lifetime spend; the per-period
-    // figure lives on the workspace's own screen where the period is in view.
     creditsUsed: spentByWorkspace.get(row.id) ?? 0,
     creditLimit: PLANS[row.plan].credits,
-    periodStart: row.periodStart,
+    // The period actually in force, so this row agrees with what the customer
+    // is shown on their own screen.
+    periodStart: periods.get(row.id)!.start,
     createdAt: row.createdAt,
     ownerEmail: row.members[0]?.user.email ?? null,
   }));

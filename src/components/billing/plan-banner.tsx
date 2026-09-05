@@ -20,6 +20,7 @@ type PlanState = {
   limits: PlanLimits;
   websites: { used: number; limit: number; remaining: number };
   credits: { used: number; limit: number; remaining: number };
+  periodEnd: string;
   canEdit: boolean;
   canDeploy: boolean;
   /** Set by the operator from the console; absent almost all of the time. */
@@ -90,8 +91,19 @@ export function PlanBanner() {
             : `${state.websites.limit} website${state.websites.limit === 1 ? '' : 's'} used`}
         </span>
 
+        {/*
+          The reset date appears once credits are actually short. Before that it
+          is noise; at that point it is the difference between "upgrade" and
+          "wait until Tuesday", and only one of those costs money.
+        */}
         <span className={paid ? 'text-ink-600' : 'text-white/75'}>
           {creditsLeft} of {state.credits.limit} credits
+          {creditsLeft <= state.credits.limit / 10 ? (
+            <span className={paid ? 'text-ink-400' : 'text-white/50'}>
+              {' '}
+              · resets {new Date(state.periodEnd).toLocaleDateString()}
+            </span>
+          ) : null}
         </span>
 
         {!state.canEdit || !state.canDeploy ? (

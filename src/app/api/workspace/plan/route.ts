@@ -22,6 +22,7 @@ export const GET = handle(async () => {
     websites: entitlements.websites,
     credits: entitlements.credits,
     periodStart: entitlements.periodStart,
+    periodEnd: entitlements.periodEnd,
     canEdit: entitlements.canEdit,
     canDeploy: entitlements.canDeploy,
     catalogue: PLANS,
