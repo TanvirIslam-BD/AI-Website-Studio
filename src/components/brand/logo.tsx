@@ -12,12 +12,18 @@ import { cn } from '@/lib/utils';
  * Uniform stroke weight, round caps and round joins throughout: the weight and
  * the roundness are the character, and both are one number each, so the whole
  * mark stays adjustable without redrawing any path.
+ *
+ * Proportioned wide - the ink spans roughly 91 x 64 units - because the mark is
+ * noticeably wider than tall, and drawn so that the ink, not the path, is
+ * centred in the viewBox. Round caps push half a stroke beyond each end point,
+ * so a path centred on paper renders a glyph sitting low and left of centre,
+ * which then reads as misaligned everywhere the lockup places it beside text.
  */
 
 export type LogoTone = 'dark' | 'light' | 'brand';
 
 /** Stroke weight of the monogram, in viewBox units. */
-const STROKE = 13;
+const STROKE = 15;
 
 /** No accent hue in the identity: the mark is pure black or pure white. */
 const INK = { dark: '#0a0a0a', light: '#ffffff', brand: '#0a0a0a' } as const;
@@ -54,8 +60,8 @@ export function LogoMark({
         and the reason this is not drawn as a single polyline.
       */}
       <g stroke={colour} strokeWidth={STROKE} strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M20 26 L39 76 L58 26" />
-        <path d="M42 26 L61 76 L80 26" />
+        <path d="M12 26 L35 75 L58 26" />
+        <path d="M42 26 L65 75 L88 26" />
       </g>
     </svg>
   );
