@@ -54,6 +54,9 @@ export const FONTS = [
   { name: 'Poppins', stack: "'Poppins', ui-sans-serif, sans-serif", category: 'sans' },
   { name: 'Sora', stack: "'Sora', ui-sans-serif, sans-serif", category: 'sans' },
   { name: 'Space Grotesk', stack: "'Space Grotesk', ui-sans-serif, sans-serif", category: 'sans' },
+  // A grotesque that holds up at display size, which the rest of the sans
+  // list does not - they are all built for paragraphs.
+  { name: 'Archivo', stack: "'Archivo', ui-sans-serif, system-ui, sans-serif", category: 'sans' },
   { name: 'IBM Plex Sans', stack: "'IBM Plex Sans', ui-sans-serif, sans-serif", category: 'sans' },
   { name: 'Playfair Display', stack: "'Playfair Display', ui-serif, Georgia, serif", category: 'serif' },
   { name: 'Fraunces', stack: "'Fraunces', ui-serif, Georgia, serif", category: 'serif' },
@@ -207,6 +210,30 @@ export const THEME_PRESETS = [
     id: 'soft-pastel',
     name: 'Soft Pastel',
     patch: { primaryColor: '#db2777', secondaryColor: '#7c3aed', background: '#fffbfd', surface: '#fdf2f8', headingFont: 'Plus Jakarta Sans', bodyFont: 'Plus Jakarta Sans', mode: 'light', radius: 'full' },
+  },
+  /**
+   * Three louder starting points.
+   *
+   * The six above are all safe, and safe is what a first draft should not be
+   * when the draft's job is to convince someone the generator can design. Each
+   * of these commits to one saturated colour against a decided ground rather
+   * than tinting everything gently, which is the difference between a page that
+   * reads as designed and one that reads as unstyled.
+   */
+  {
+    id: 'court-lime',
+    name: 'Court Lime',
+    patch: { primaryColor: '#d7f22e', secondaryColor: '#4f7cff', background: '#0a1633', surface: '#122048', textColor: '#f2f6ff', mutedColor: '#9fb0d6', borderColor: '#22315f', headingFont: 'Archivo', bodyFont: 'Inter', mode: 'dark', radius: 'md' },
+  },
+  {
+    id: 'cobalt-press',
+    name: 'Cobalt Press',
+    patch: { primaryColor: '#2f2fe0', secondaryColor: '#0f172a', background: '#ffffff', surface: '#f1f2f9', textColor: '#0c1024', mutedColor: '#5b6180', borderColor: '#dfe1ef', headingFont: 'Archivo', bodyFont: 'Inter', mode: 'light', radius: 'lg' },
+  },
+  {
+    id: 'ember-press',
+    name: 'Ember Press',
+    patch: { primaryColor: '#c9350f', secondaryColor: '#141414', background: '#f7f5f2', surface: '#ffffff', textColor: '#141414', mutedColor: '#6b6660', borderColor: '#e2ddd6', headingFont: 'Archivo', bodyFont: 'Inter', mode: 'light', radius: 'none' },
   },
 ] satisfies Array<{ id: string; name: string; patch: ThemePatch }>;
 
