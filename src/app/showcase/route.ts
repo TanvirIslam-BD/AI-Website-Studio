@@ -22,7 +22,21 @@ export const runtime = 'nodejs';
  * nothing that is not already on the marketing page.
  */
 
-const SITE = generateFromTemplate('a modern website for a photography studio shooting weddings and portraits');
+/**
+ * Chosen for how it reads at a glance, on a black section.
+ *
+ * This was a photography studio: white ground, one photograph, a lot of air.
+ * Elegant at full size and almost invisible scaled to a third of it - three
+ * pale rectangles on a dark band, which is not what a section arguing the
+ * generator produces finished work should show. This one carries its own warm
+ * ground and an accent colour, so it reads as a designed page rather than as a
+ * blank one even at 384px wide.
+ *
+ * Still a brief the offline template path answers with tailored copy rather
+ * than filler, which is the constraint every showcase brief is under - this
+ * renders at build time, with no model.
+ */
+const SITE = generateFromTemplate('a neighbourhood sushi restaurant with a seasonal omakase menu');
 
 export async function GET() {
   const page = homePage(SITE.document);
