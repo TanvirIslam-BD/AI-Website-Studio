@@ -20,6 +20,9 @@ import { Container, Section, SectionHeading } from './shell';
  * URL the browser fetches it once and reuses it for all three.
  */
 
+/** The example site's page background, so an unloaded frame matches it. */
+const SITE_SURFACE = '#fdf9f4';
+
 /** Real device widths, so the breakpoints inside resolve the way they will in use. */
 const SCREENS = [
   { label: 'Desktop', width: 1280, height: 820, scale: 0.3 },
@@ -42,8 +45,15 @@ export function EveryScreen() {
           {SCREENS.map((screen) => (
             <figure key={screen.label} className="flex flex-col items-center">
               <div
-                className="overflow-hidden rounded-xl border border-white/12 bg-white shadow-pop"
-                style={{ width: screen.width * screen.scale, height: screen.height * screen.scale }}
+                className="overflow-hidden rounded-xl border border-white/12 shadow-pop"
+                style={{
+                  width: screen.width * screen.scale,
+                  height: screen.height * screen.scale,
+                  // The example site's own ground, read from the document it
+                  // serves, so a frame that has not loaded yet is a warm
+                  // rectangle rather than a white flash against the dark band.
+                  backgroundColor: SITE_SURFACE,
+                }}
               >
                 {/*
                   Sized to the real width first and only then scaled, so the
