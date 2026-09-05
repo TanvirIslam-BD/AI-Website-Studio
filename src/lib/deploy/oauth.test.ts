@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   decodePending,
   encodePending,
@@ -110,15 +110,20 @@ describe('pending install envelope', () => {
 });
 
 describe('integrationConfig', () => {
-  const saved = { ...process.env };
+  /**
+   * `vi.stubEnv` rather than assigning to `process.env` and restoring a
+   * snapshot. The snapshot version replaced the whole object - which drops any
+   * variable set after this file loaded, and swaps Node's env object for a
+   * plain one - to undo three keys. Stubs are tracked and unwound individually.
+   */
   afterEach(() => {
-    process.env = { ...saved };
+    vi.unstubAllEnvs();
   });
 
   const set = (id?: string, secret?: string, slug?: string) => {
-    process.env.VERCEL_INTEGRATION_CLIENT_ID = id;
-    process.env.VERCEL_INTEGRATION_CLIENT_SECRET = secret;
-    process.env.VERCEL_INTEGRATION_SLUG = slug;
+    vi.stubEnv('VERCEL_INTEGRATION_CLIENT_ID', id);
+    vi.stubEnv('VERCEL_INTEGRATION_CLIENT_SECRET', secret);
+    vi.stubEnv('VERCEL_INTEGRATION_SLUG', slug);
   };
 
   it('is available only when all three variables are present', () => {
