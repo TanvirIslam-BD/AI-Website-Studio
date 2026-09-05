@@ -74,6 +74,16 @@ export function LogoMark({
 /**
  * Horizontal lockup: mark beside the name. Used in navigation and app chrome
  * where vertical space is tight.
+ *
+ * Two lines, as the supplied artwork sets it - "Web Copilot" with "AI STUDIO"
+ * tracked out beneath it to the same optical width. It used to run both on one
+ * line with "AI Studio" simply greyed, which reads as a subtitle appended to a
+ * name rather than as a lockup, and left the header disagreeing with every
+ * other place the brand appears.
+ *
+ * The tracked line needs the trailing letter-space removed: CSS adds the gap
+ * after the final letter too, so without the negative margin the second line
+ * sits visibly left of the first.
  */
 export function Logo({
   size = 26,
@@ -92,11 +102,26 @@ export function Logo({
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <LogoMark size={size} tone={tone} title={BRAND.name} />
       {showWordmark ? (
-        <span className="whitespace-nowrap font-brand text-[16px] font-semibold leading-none tracking-[-0.01em]">
-          <span className={onDark ? 'text-white' : 'text-ink-900'}>Web Copilot</span>
-          {/* Dropped on the narrowest screens, where the full name wraps and
-              crowds the header. The mark plus "Web Copilot" still identifies it. */}
-          <span className={cn('hidden sm:inline', onDark ? 'text-white/55' : 'text-ink-400')}> AI Studio</span>
+        <span className="flex flex-col justify-center whitespace-nowrap font-brand leading-none">
+          <span
+            className={cn(
+              'text-[16px] font-semibold tracking-[-0.01em]',
+              onDark ? 'text-white' : 'text-ink-900',
+            )}
+          >
+            Web Copilot
+          </span>
+          {/* Dropped on the narrowest screens, where the header is tightest.
+              The mark plus "Web Copilot" still identifies it. */}
+          <span
+            className={cn(
+              'mt-[4px] hidden text-[8px] font-medium uppercase sm:block',
+              onDark ? 'text-white/55' : 'text-ink-400',
+            )}
+            style={{ letterSpacing: '0.33em', marginRight: '-0.33em' }}
+          >
+            AI Studio
+          </span>
         </span>
       ) : null}
     </span>
