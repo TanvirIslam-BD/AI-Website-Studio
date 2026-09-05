@@ -65,7 +65,7 @@ export function GeneratedSites({ signedIn }: { signedIn: boolean }) {
         />
 
         <div className="reveal mt-14">
-          <ShowcaseSlider label="Example websites generated from a brief">
+          <ShowcaseSlider label="Example websites generated from a brief" surface="#fafafa">
             {SITES.map(({ brief, industry, brand, document }) => {
               const page = homePage(document);
 

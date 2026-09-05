@@ -15,7 +15,23 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
  * addition for mouse users on desktop, not the mechanism - which is why they
  * are hidden from assistive tech and the rail itself is focusable and labelled.
  */
-export function ShowcaseSlider({ children, label }: { children: React.ReactNode; label: string }) {
+export function ShowcaseSlider({
+  children,
+  label,
+  /**
+   * The colour the rail sits on, as a 6-digit hex. The edge fades are drawn in
+   * it, so they have to match the section's surface - a white fade over the
+   * muted surface reads as a smear rather than as the rail running out.
+   *
+   * Faded to the same colour at zero alpha rather than to `transparent`, which
+   * is rgba(0,0,0,0) and interpolates through grey on the way there.
+   */
+  surface = '#ffffff',
+}: {
+  children: React.ReactNode;
+  label: string;
+  surface?: string;
+}) {
   const rail = useRef<HTMLDivElement | null>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -50,27 +66,44 @@ export function ShowcaseSlider({ children, label }: { children: React.ReactNode;
 
   return (
     <div className="relative">
-      <div
-        ref={rail}
-        // Focusable and labelled, so the rail is reachable and scrollable by
-        // keyboard even though the buttons are decorative.
-        tabIndex={0}
-        role="region"
-        aria-label={label}
-        className="studio-scroll -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-5 pb-4 sm:-mx-8 sm:px-8"
-      >
-        {children}
-      </div>
+      {/*
+        The bleed lives here rather than on the rail itself, so the fades can be
+        positioned against the rail's real edges. With the negative margin on
+        the rail, `left-0` on this wrapper landed a gutter's width inside the
+        cards - a white band down the middle of the first one instead of a fade
+        at the cut.
+      */}
+      <div className="relative -mx-5 sm:-mx-8">
+        <div
+          ref={rail}
+          // Focusable and labelled, so the rail is reachable and scrollable by
+          // keyboard even though the buttons are decorative.
+          tabIndex={0}
+          role="region"
+          aria-label={label}
+          // `scroll-px` matters as much as `px` here: snap positions are
+          // measured against the scroll padding, and without it a mandatory
+          // snap immediately scrolls the gutter away. The rail then sat at
+          // scrollLeft 32 at rest, which read as "already scrolled" - the start
+          // fade never turned off and the first card lost its inset.
+          className="studio-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth scroll-px-5 px-5 pb-4 sm:scroll-px-8 sm:px-8"
+        >
+          {children}
+        </div>
 
-      {/* Edge fades, so a cut-off card reads as "more this way". */}
-      <div
-        className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent transition-opacity duration-200 ${atStart ? 'opacity-0' : 'opacity-100'}`}
-        aria-hidden
-      />
-      <div
-        className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent transition-opacity duration-200 ${atEnd ? 'opacity-0' : 'opacity-100'}`}
-        aria-hidden
-      />
+        {/* Edge fades, so a cut-off card reads as "more this way". Stopping
+            above the scrollbar gutter, which should not be tinted. */}
+        <div
+          className={`pointer-events-none absolute bottom-4 left-0 top-0 w-14 transition-opacity duration-200 ${atStart ? 'opacity-0' : 'opacity-100'}`}
+          style={{ background: `linear-gradient(to right, ${surface}, ${surface}00)` }}
+          aria-hidden
+        />
+        <div
+          className={`pointer-events-none absolute bottom-4 right-0 top-0 w-14 transition-opacity duration-200 ${atEnd ? 'opacity-0' : 'opacity-100'}`}
+          style={{ background: `linear-gradient(to left, ${surface}, ${surface}00)` }}
+          aria-hidden
+        />
+      </div>
 
       <div className="mt-2 hidden justify-end gap-2 md:flex">
         <button
