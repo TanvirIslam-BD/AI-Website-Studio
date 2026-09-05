@@ -1,5 +1,4 @@
 import { currentUser } from '@/lib/tenancy';
-import { aiStatus } from '@/lib/ai';
 import { googleFontsHrefFor, THEME_PRESETS, themeSchema } from '@/lib/website/theme';
 import { MarketingNav } from '@/components/marketing/nav';
 import { RevealProvider } from '@/components/marketing/reveal';
@@ -31,7 +30,6 @@ import { FinalCta, MarketingFooter } from '@/components/marketing/closing';
  */
 export default async function HomePage() {
   const user = await currentUser();
-  const ai = aiStatus();
   const signedIn = Boolean(user);
 
   // The brand-kit previews and the hero showcase render in the presets' real
@@ -61,7 +59,7 @@ export default async function HomePage() {
       <MarketingNav signedIn={signedIn} tone="dark" />
 
       <main>
-        <Hero providerLabel={ai.configured ? ai.label : null} signedIn={signedIn} />
+        <Hero signedIn={signedIn} />
         {/*
           Second, directly after the hero. Most visitors arrive already using a
           block editor or comparing against one, so the difference is the first
