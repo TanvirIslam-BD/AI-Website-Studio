@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, ExternalLink, Link2, Unlink } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/field';
 import { errorMessage } from '@/lib/utils';
+import { VercelMark } from '@/components/brand/vercel-mark';
 
 export type ConnectionStatus = {
   connected: boolean;
@@ -232,14 +233,5 @@ export function VercelConnect({
         </>
       )}
     </div>
-  );
-}
-
-/** Vercel's triangle, so the button is recognisable before the label is read. */
-function VercelMark() {
-  return (
-    <svg viewBox="0 0 76 65" aria-hidden className="h-3 w-3" fill="currentColor">
-      <path d="M37.53 0 75.06 65H0z" />
-    </svg>
   );
 }
