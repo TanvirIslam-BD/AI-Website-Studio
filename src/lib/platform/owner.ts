@@ -1,4 +1,9 @@
 import { currentUser, type SessionUser } from '@/lib/tenancy';
+import { isOwnerEmail } from './owner-emails';
+
+// Re-exported so a caller that only needs the list can import either module,
+// while callers that need the session keep importing this one.
+export { isOwnerConfigured, isOwnerEmail, ownerEmails } from './owner-emails';
 
 /**
  * Who may open the owner console.
@@ -29,23 +34,6 @@ export class NotOwnerError extends Error {
   }
 }
 
-/** Owner addresses, lower-cased and de-duplicated. */
-export function ownerEmails(): string[] {
-  return (process.env.OWNER_EMAILS ?? '')
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-/** True when the platform has any owner configured at all. */
-export function isOwnerConfigured(): boolean {
-  return ownerEmails().length > 0;
-}
-
-export function isOwnerEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  return ownerEmails().includes(email.trim().toLowerCase());
-}
 
 /** The signed-in user if they own the platform, otherwise null. */
 export async function currentOwner(): Promise<SessionUser | null> {

@@ -62,7 +62,7 @@ generation and copy editing; add a Vercel token to enable deployment.
 | `UNSPLASH_ACCESS_KEY` | no | Unsplash image search (falls back to a built-in library) |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | no | Adds a "Continue with GitHub" button |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | no | Adds a "Continue with Google" button |
-| `OWNER_EMAILS` | no | Comma-separated emails that may open the owner console at `/admin` |
+| `OWNER_EMAILS` | no | Comma-separated emails that may open the owner console at `/admin`. In a hosting dashboard set it unquoted |
 | `BILLING_PROVIDER` | no | Names the checkout upgrades are sent to; blank keeps plans grant-only from `/admin` |
 
 \* Either the two `TURSO_*` variables (remote) or `DATABASE_URL` (local file).
@@ -409,6 +409,16 @@ request the app serves can write to it, so no bug in a signup or profile path
 can escalate anyone into it. Non-owners get **404** rather than 403 - on the
 page and on each API independently - so the console does not confirm its own
 existence to someone probing for it.
+
+That last property is also what makes a misconfiguration hard to read: every
+way of getting this wrong produces the same 404. Three things have to be true,
+and `GET /api/health` reports the first as an `owners` count so it can be told
+apart from the other two:
+
+1. the running deployment can see `OWNER_EMAILS` - a variable added after the
+   last deploy needs a new one
+2. you are **signed in** - an anonymous visitor gets the 404 too
+3. the address you signed in with is in the list
 
 ---
 

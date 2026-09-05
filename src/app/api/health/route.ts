@@ -5,6 +5,7 @@ import { aiStatus } from '@/lib/ai';
 import { isVercelConfigured } from '@/lib/deploy/vercel';
 import { isOAuthAvailable } from '@/lib/deploy/oauth';
 import { isEncryptionConfigured } from '@/lib/crypto';
+import { ownerEmails } from '@/lib/platform/owner-emails';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -164,6 +165,13 @@ export async function GET() {
       databaseTables: tables,
       ai: { configured: ai.configured, provider: ai.provider },
       hosting,
+      /**
+       * How many owner addresses the running deployment can see - a count, not
+       * the addresses. Without this, a console that 404s gives no way to tell
+       * "the variable never reached this build" from "you are signed in as
+       * someone else", and those have opposite fixes.
+       */
+      owners: ownerEmails().length,
       /** Actionable next step, so the response is useful on its own. */
       hint: hintFor(config, database, tables),
     },
