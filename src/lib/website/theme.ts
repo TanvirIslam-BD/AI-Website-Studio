@@ -180,6 +180,15 @@ export function cssVarsToText(vars: Record<string, string>): string {
 }
 
 /** Ready-made brand kits offered in the UI and used as AI few-shot targets. */
+/**
+ * Starting points.
+ *
+ * Every accent here has to be readable on both the preset's background and its
+ * surface, because eyebrows and links are painted in it and sections alternate
+ * between the two. The surface is always the harder of the pair and is the one
+ * easy to forget - two presets shipped passing on their background and failing
+ * on their surface. theme.test.ts checks both, so the next one cannot.
+ */
 export const THEME_PRESETS = [
   {
     id: 'studio-indigo',
@@ -199,7 +208,7 @@ export const THEME_PRESETS = [
   {
     id: 'warm-clay',
     name: 'Warm Clay',
-    patch: { primaryColor: '#b4552d', secondaryColor: '#3f6212', background: '#fdf9f4', surface: '#f5ece1', textColor: '#231a13', mutedColor: '#6d5a4b', borderColor: '#e6d8c8', headingFont: 'Fraunces', bodyFont: 'DM Sans', mode: 'light', radius: 'lg' },
+    patch: { primaryColor: '#9f4522', secondaryColor: '#3f6212', background: '#fdf9f4', surface: '#f5ece1', textColor: '#231a13', mutedColor: '#6d5a4b', borderColor: '#e6d8c8', headingFont: 'Fraunces', bodyFont: 'DM Sans', mode: 'light', radius: 'lg' },
   },
   {
     id: 'clinic-blue',
@@ -209,7 +218,7 @@ export const THEME_PRESETS = [
   {
     id: 'soft-pastel',
     name: 'Soft Pastel',
-    patch: { primaryColor: '#db2777', secondaryColor: '#7c3aed', background: '#fffbfd', surface: '#fdf2f8', headingFont: 'Plus Jakarta Sans', bodyFont: 'Plus Jakarta Sans', mode: 'light', radius: 'full' },
+    patch: { primaryColor: '#be185d', secondaryColor: '#7c3aed', background: '#fffbfd', surface: '#fdf2f8', headingFont: 'Plus Jakarta Sans', bodyFont: 'Plus Jakarta Sans', mode: 'light', radius: 'full' },
   },
   /**
    * Three louder starting points.
