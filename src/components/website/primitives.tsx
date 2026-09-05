@@ -78,12 +78,19 @@ export function Container({ children, className = '', wide = false }: { children
   return <div className={`mx-auto w-full ${wide ? 'max-w-7xl' : 'max-w-6xl'} px-5 sm:px-8 ${className}`}>{children}</div>;
 }
 
-export function Eyebrow({ children }: { children?: ReactNode }) {
+export function Eyebrow({ children, onDark = false }: { children?: ReactNode; onDark?: boolean }) {
   if (!children) return null;
   return (
     <p
       className="mb-3 text-xs font-semibold uppercase tracking-[0.14em]"
-      style={{ color: 'var(--ws-primary)', fontFamily: 'var(--ws-font-body)' }}
+      style={{
+        // The brand accent is the right colour for an eyebrow on the page's own
+        // ground, and the wrong one over a photograph: a mid-tone accent on a
+        // dark scrim is the least readable text on the page, and it is the
+        // first line anyone reads.
+        color: onDark ? 'rgba(255,255,255,0.82)' : 'var(--ws-primary)',
+        fontFamily: 'var(--ws-font-body)',
+      }}
     >
       {children}
     </p>

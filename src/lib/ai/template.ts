@@ -17,6 +17,13 @@ import { detectTopic, guessBrand } from './topics';
 
 type TopicCopy = {
   themeId: string;
+  /**
+   * `imageBackground` puts the photograph behind the words instead of beside
+   * them. Worth it wherever the picture is the argument - a room, a plate, a
+   * gym - and wrong where the words are, because a scrim over a stock photo of
+   * an office says nothing and costs the headline its contrast.
+   */
+  heroVariant?: 'split' | 'imageBackground';
   hero: { eyebrow: string; heading: (brand: string) => string; subheading: string };
   services: Array<{ icon: string; title: string; description: string }>;
   /** Body section order for the home page. */
@@ -24,7 +31,9 @@ type TopicCopy = {
 };
 
 const GENERIC: TopicCopy = {
-  themeId: 'studio-indigo',
+  // The fallback is the draft most likely to be seen by someone whose brief the
+  // template did not recognise, so it should be the least apologetic of them.
+  themeId: 'ember-press',
   hero: {
     eyebrow: 'Now taking new clients',
     heading: (brand) => `${brand} does the work that moves your business`,
@@ -40,6 +49,7 @@ const GENERIC: TopicCopy = {
 const TOPIC_COPY: Partial<Record<StockTopic, TopicCopy>> = {
   photography: {
     themeId: 'editorial-noir',
+    heroVariant: 'imageBackground',
     hero: {
       eyebrow: 'Portrait & editorial photography',
       heading: (brand) => `${brand} photographs the moments that matter`,
@@ -54,6 +64,7 @@ const TOPIC_COPY: Partial<Record<StockTopic, TopicCopy>> = {
   },
   restaurant: {
     themeId: 'warm-clay',
+    heroVariant: 'imageBackground',
     hero: {
       eyebrow: 'Open Tuesday to Sunday',
       heading: (brand) => `${brand} - seasonal cooking, done properly`,
@@ -67,7 +78,8 @@ const TOPIC_COPY: Partial<Record<StockTopic, TopicCopy>> = {
     home: ['features', 'gallery', 'textMedia', 'testimonials', 'contact'],
   },
   fitness: {
-    themeId: 'midnight-neon',
+    themeId: 'court-lime',
+    heroVariant: 'imageBackground',
     hero: {
       eyebrow: 'First session free',
       heading: (brand) => `Train with ${brand} and actually stick with it`,
@@ -95,7 +107,7 @@ const TOPIC_COPY: Partial<Record<StockTopic, TopicCopy>> = {
     home: ['features', 'gallery', 'pricing', 'testimonials', 'contact'],
   },
   tech: {
-    themeId: 'studio-indigo',
+    themeId: 'cobalt-press',
     hero: {
       eyebrow: 'Built for teams that ship',
       heading: (brand) => `${brand} turns messy work into one clear workflow`,
@@ -208,6 +220,7 @@ export function generateFromTemplate(brief: string): TemplateSite {
   const hero = createSection(
     'hero',
     {
+      variant: copy.heroVariant ?? 'split',
       eyebrow: copy.hero.eyebrow,
       heading: copy.hero.heading(brand),
       subheading: copy.hero.subheading,
