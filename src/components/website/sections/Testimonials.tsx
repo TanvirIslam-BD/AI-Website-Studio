@@ -31,7 +31,7 @@ function Author({ name, role, avatar }: { name: string; role: string; avatar?: {
   );
 }
 
-export function TestimonialsSection({ section }: SectionViewProps<SectionOfType<'testimonials'>>) {
+export function TestimonialsSection({ section , decorative }: SectionViewProps<SectionOfType<'testimonials'>>) {
   const { items, variant } = section;
 
   if (variant === 'single') {
@@ -62,7 +62,7 @@ export function TestimonialsSection({ section }: SectionViewProps<SectionOfType<
   return (
     <SectionShell background={section.background} paddingY={section.paddingY}>
       <Container wide>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div
           className={`mt-12 grid ${compact ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}
           style={{ gap: 'var(--ws-gap)' }}

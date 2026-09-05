@@ -6,12 +6,12 @@ export function TeamSection({ section, decorative }: SectionViewProps<SectionOfT
   return (
     <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('team', decorative)}>
       <Container wide>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div className={`mt-14 grid ${GRID_COLUMNS[section.columns] ?? GRID_COLUMNS[3]}`} style={{ gap: 'var(--ws-gap)' }}>
           {section.items.map((member, i) => (
             <div key={i}>
               <Img src={member.image?.url} alt={member.image?.alt || member.name} ratio="1/1" className="w-full" />
-              <Heading level={3} className="mt-5">
+              <Heading level={3} decorative={decorative} className="mt-5">
                 {member.name}
               </Heading>
               {member.role ? (

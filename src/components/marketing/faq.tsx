@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { FaqStructuredData } from '@/components/seo/structured-data';
 import { Container, Section, SectionHeading } from './shell';
 
 /**
@@ -7,7 +8,31 @@ import { Container, Section, SectionHeading } from './shell';
  *
  * Uses native details/summary, so it works without JavaScript.
  */
-const FAQS = [
+export const FAQS = [
+  /**
+   * The first four define the category before answering about the product.
+   *
+   * Someone searching "what is an AI website generator" has not decided they
+   * want this one yet, and a page that answers only "how do I use ours" is no
+   * use to them. These also give an answer engine a definition it can quote
+   * without having to assemble one out of marketing copy.
+   */
+  {
+    q: 'What is an AI website generator?',
+    a: 'An AI website generator turns a written description of a business into a working website - pages, sections, copy and imagery - instead of asking you to assemble one from blocks or a template. Web Copilot AI Studio is an AI website generator: you describe the site in a sentence and it produces a complete, editable, multi-page website you can then publish.',
+  },
+  {
+    q: 'Can I create a website from a prompt?',
+    a: 'Yes. A prompt as short as "a neighbourhood sushi restaurant with a seasonal omakase menu" is enough. A longer brief - your services, tone, audience, the pages you want - produces a closer first draft, and you can keep refining after generation rather than starting again.',
+  },
+  {
+    q: 'Can Web Copilot generate a multi-page website?',
+    a: 'Yes. Generation produces a multi-page site - typically home, about, services and contact - with a shared header, footer and brand kit, not a single landing page. You can add, remove and reorder pages and sections afterwards.',
+  },
+  {
+    q: 'Can I edit an AI-generated website with AI?',
+    a: 'Yes, in two ways. The visual editor exposes every heading, image, link, colour and spacing value as a field, and the AI copilot takes instructions in plain language - "make the hero darker", "add a pricing section", "rewrite this for a younger audience" - and applies them as real edits you can undo.',
+  },
   {
     q: 'Do I need to know how to code?',
     a: 'No. You describe the business, then edit what you see. Everything the AI produces is editable through the visual editor, and nothing requires touching markup.',
@@ -47,6 +72,12 @@ export function Faq() {
   return (
     <Section id="faq" tone="muted">
       <Container>
+        {/*
+          The markup is generated from the same array the page renders, so it
+          cannot describe answers a reader cannot see - which is both the
+          guideline and the only version worth shipping.
+        */}
+        <FaqStructuredData items={FAQS} path="/" />
         <SectionHeading eyebrow="FAQ" title="Questions, answered honestly" />
 
         <div className="mx-auto mt-12 max-w-3xl">

@@ -2,19 +2,19 @@ import type { SectionOfType } from '@/lib/website/sections';
 import { Card, Container, GRID_COLUMNS, Heading, Icon, Img, Prose, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
-export function FeaturesSection({ section }: SectionViewProps<SectionOfType<'features'>>) {
+export function FeaturesSection({ section, decorative }: SectionViewProps<SectionOfType<'features'>>) {
   const { items, columns, variant, align } = section;
 
   if (variant === 'alternating') {
     return (
       <SectionShell background={section.background} paddingY={section.paddingY}>
         <Container>
-          <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
+          <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
           <div className="mt-14 space-y-16">
             {items.map((item, i) => (
               <div key={i} className="grid items-center gap-8 lg:grid-cols-2">
                 <div className={i % 2 === 1 ? 'lg:order-2' : ''}>
-                  <Heading level={3}>{item.title}</Heading>
+                  <Heading level={3} decorative={decorative}>{item.title}</Heading>
                   <Prose className="mt-3">{item.description}</Prose>
                 </div>
                 <Img src={item.image?.url} alt={item.image?.alt ?? item.title} ratio="4/3" className="w-full" />
@@ -30,7 +30,7 @@ export function FeaturesSection({ section }: SectionViewProps<SectionOfType<'fea
     return (
       <SectionShell background={section.background} paddingY={section.paddingY}>
         <Container>
-          <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
+          <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
           <ul className="mt-12 divide-y" style={{ borderColor: 'var(--sec-border)' }}>
             {items.map((item, i) => (
               <li key={i} className="flex gap-5 py-6" style={{ borderColor: 'var(--sec-border)' }}>
@@ -38,7 +38,7 @@ export function FeaturesSection({ section }: SectionViewProps<SectionOfType<'fea
                   <Icon name={item.icon} className="h-6 w-6" />
                 </span>
                 <div>
-                  <Heading level={4}>{item.title}</Heading>
+                  <Heading level={4} decorative={decorative}>{item.title}</Heading>
                   <Prose size="sm" className="mt-1.5">
                     {item.description}
                   </Prose>
@@ -56,7 +56,7 @@ export function FeaturesSection({ section }: SectionViewProps<SectionOfType<'fea
   return (
     <SectionShell background={section.background} paddingY={section.paddingY}>
       <Container>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align={align} />
         <div className={`mt-14 grid ${GRID_COLUMNS[columns] ?? GRID_COLUMNS[3]}`} style={{ gap: 'var(--ws-gap)' }}>
           {items.map((item, i) => {
             const body = (
@@ -67,7 +67,7 @@ export function FeaturesSection({ section }: SectionViewProps<SectionOfType<'fea
                 >
                   <Icon name={item.icon} />
                 </span>
-                <Heading level={3} className="mt-5">
+                <Heading level={3} decorative={decorative} className="mt-5">
                   {item.title}
                 </Heading>
                 <Prose size="sm" className="mt-2.5">

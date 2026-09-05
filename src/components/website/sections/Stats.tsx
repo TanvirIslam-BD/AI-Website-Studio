@@ -2,12 +2,12 @@ import type { SectionOfType } from '@/lib/website/sections';
 import { Card, Container, SectionShell, type SectionViewProps } from '../primitives';
 import { SectionHead } from './SectionHead';
 
-export function StatsSection({ section }: SectionViewProps<SectionOfType<'stats'>>) {
+export function StatsSection({ section , decorative }: SectionViewProps<SectionOfType<'stats'>>) {
   const cards = section.variant === 'cards';
   return (
     <SectionShell background={section.background} paddingY={section.paddingY}>
       <Container wide>
-        <SectionHead heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} heading={section.heading} subheading={section.subheading} />
         <div
           className={`grid grid-cols-2 lg:grid-cols-4 ${section.heading || section.subheading ? 'mt-12' : ''}`}
           style={{ gap: 'var(--ws-gap)' }}

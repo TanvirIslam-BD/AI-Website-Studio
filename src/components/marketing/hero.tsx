@@ -48,18 +48,26 @@ export function Hero({ signedIn }: { signedIn: boolean }) {
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-10">
           {/* ------------------------------------------------------- type */}
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
-              AI website builder
-            </p>
-
-            <h1 className="mt-6 text-balance text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] text-white sm:text-[3.5rem] lg:text-[4rem]">
-              Build Smarter.
-              <br />
-              Launch Faster.
+            {/*
+              The category line lives inside the h1 rather than in a paragraph
+              above it. Pixel-identical, and it means the page's one heading
+              says what the product is: "Build Smarter. Launch Faster." is a
+              good line on a page and an empty one in a result list, matchable
+              only by the brand - the query that needs the least help.
+            */}
+            <h1 className="text-white">
+              <span className="block font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
+                AI website generator
+              </span>
+              <span className="mt-6 block text-balance text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] sm:text-[3.5rem] lg:text-[4rem]">
+                Build Smarter.
+                <br />
+                Launch Faster.
+              </span>
             </h1>
 
             <p className="mt-7 max-w-xl text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-white/85 sm:text-[21px]">
-              Turn one sentence into a complete, production-ready website.
+              Describe your website in one sentence and get a complete, production-ready site.
             </p>
 
             <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/55">
