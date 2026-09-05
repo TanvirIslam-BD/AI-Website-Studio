@@ -14,6 +14,7 @@ import { Features } from '@/components/marketing/features';
 import { CopilotShowcase } from '@/components/marketing/copilot-showcase';
 import { Examples } from '@/components/marketing/examples';
 import { SectionLibrary, BrandKits } from '@/components/marketing/library';
+import { VercelIntegration } from '@/components/marketing/vercel-integration';
 import { Deploy } from '@/components/marketing/deploy';
 import { Pricing } from '@/components/marketing/pricing';
 import { Faq } from '@/components/marketing/faq';
@@ -78,6 +79,8 @@ export default async function HomePage() {
         <Examples signedIn={signedIn} />
         <SectionLibrary />
         <BrandKits />
+        {/* Whose account the result lands in, before the section about what it costs. */}
+        <VercelIntegration />
         <Deploy />
         <Pricing />
         <Faq />
