@@ -9,7 +9,7 @@ export function TextMediaSection({ section, theme, hrefFor, decorative }: Sectio
   const copy = (
     <div>
       <Eyebrow>{section.eyebrow}</Eyebrow>
-      <Heading level={2}>{section.heading}</Heading>
+      <Heading level={2} decorative={decorative}>{section.heading}</Heading>
       {section.body ? (
         <div className="mt-5 space-y-4">
           {section.body.split(/\n\n+/).map((paragraph, i) => (

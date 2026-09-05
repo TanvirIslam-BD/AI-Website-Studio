@@ -25,7 +25,7 @@ export function HeroSection({ section, theme, hrefFor, decorative }: SectionView
     <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-xl'}>
       <Eyebrow onDark={onPhoto}>{section.eyebrow}</Eyebrow>
       {/* Demoted when embedded as illustration, so the host page keeps a single h1. */}
-      <Heading level={decorative ? 2 : 1}>{section.heading}</Heading>
+      <Heading level={decorative ? 2 : 1} decorative={decorative}>{section.heading}</Heading>
       {section.subheading ? (
         <Prose size="lg" className="mt-5">
           {section.subheading}

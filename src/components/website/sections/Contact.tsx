@@ -89,7 +89,7 @@ export function ContactSection({ section, decorative }: SectionViewProps<Section
     return (
       <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('contact', decorative)}>
         <Container>
-          <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+          <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
           <div className="mx-auto mt-10 max-w-xl">
             <div className="mb-8 flex flex-wrap justify-center gap-x-8 gap-y-3">{details}</div>
             {form}
@@ -104,12 +104,12 @@ export function ContactSection({ section, decorative }: SectionViewProps<Section
       <Container>
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
           <div>
-            <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align="left" />
+            <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align="left" />
             <div className="mt-8">{details}</div>
           </div>
           {form ?? (
             <div>
-              <Heading level={3}>Prefer email?</Heading>
+              <Heading level={3} decorative={decorative}>Prefer email?</Heading>
               <Prose className="mt-2">Reach us directly at {section.email}.</Prose>
             </div>
           )}

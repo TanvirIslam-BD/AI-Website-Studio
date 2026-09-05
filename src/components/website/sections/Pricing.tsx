@@ -7,7 +7,7 @@ export function PricingSection({ section, theme, hrefFor, decorative }: SectionV
   return (
     <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('pricing', decorative)}>
       <Container wide>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div
           className="mt-14 grid grid-cols-1 items-start md:grid-cols-2 lg:grid-cols-3"
           style={{ gap: 'var(--ws-gap)' }}
@@ -31,7 +31,7 @@ export function PricingSection({ section, theme, hrefFor, decorative }: SectionV
                   Most popular
                 </span>
               ) : null}
-              <Heading level={3}>{plan.name}</Heading>
+              <Heading level={3} decorative={decorative}>{plan.name}</Heading>
               {plan.description ? (
                 <Prose size="sm" className="mt-2">
                   {plan.description}

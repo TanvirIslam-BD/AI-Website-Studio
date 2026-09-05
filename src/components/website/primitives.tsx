@@ -101,13 +101,28 @@ export function Heading({
   children,
   level = 2,
   className = '',
+  decorative = false,
 }: {
   children?: ReactNode;
   level?: 1 | 2 | 3 | 4;
   className?: string;
+  /**
+   * True when this page is being rendered as an illustration inside another
+   * page - the hero cluster, the example gallery, the width comparison.
+   *
+   * Such a heading is a picture of a heading. It is already `aria-hidden`, so
+   * it contributes nothing to the accessibility tree, but as an `h2` it still
+   * joins the host page's document outline: the marketing home page was
+   * emitting 97 `h2`s and 75 `h3`s, almost all of them belonging to a salon, a
+   * restaurant and a gym, against one real `h1`. That buries the page's own
+   * structure and tells a crawler the page is substantially about hairdressing.
+   *
+   * Rendered as a paragraph instead. Identical pixels, no outline entry.
+   */
+  decorative?: boolean;
 }) {
   if (!children) return null;
-  const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
+  const Tag = (decorative ? 'p' : `h${level}`) as 'h1' | 'h2' | 'h3' | 'h4' | 'p';
   const size =
     level === 1
       ? 'text-4xl sm:text-5xl lg:text-6xl leading-[1.05]'

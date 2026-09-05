@@ -12,7 +12,17 @@ export const BRAND = {
   /** Longer descriptive line, used for page titles and link previews. */
   tagline: 'From a sentence to a deployed website',
   description:
-    'Describe your business and get a real, editable, multi-page website. Refine it in a visual editor, direct it with an AI copilot, and deploy to Vercel in one click.',
+    'Build complete websites with AI from a single prompt. Web Copilot AI Studio generates multi-page sites, lets you edit them visually or with an AI copilot, and deploys them as fast, portable HTML to your own Vercel account.',
+  /**
+   * What the product *is*, in one sentence, for anything that has to answer
+   * "what is Web Copilot AI?" without the page around it - structured data, an
+   * answer engine, a link preview. Category first, because that is the part a
+   * reader needs to place the name.
+   */
+  definition:
+    'Web Copilot AI Studio is an AI website generator that turns a written description into a complete, editable, multi-page website and deploys it as static HTML.',
+  /** The product category, stated plainly for entity understanding. */
+  category: 'AI website generator and website builder',
 } as const;
 
 /**
@@ -29,6 +39,7 @@ export const FOOTER_NAV: Array<{ title: string; links: Array<{ label: string; hr
   {
     title: 'Product',
     links: [
+      { label: 'AI website generator', href: '/ai-website-generator' },
       { label: 'Examples', href: '/#examples' },
       { label: 'Features', href: '/#features' },
       { label: 'How it works', href: '/#how-it-works' },

@@ -12,11 +12,11 @@ export function FaqSection({ section, decorative }: SectionViewProps<SectionOfTy
     return (
       <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('faq', decorative)}>
         <Container>
-          <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align="left" />
+          <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} align="left" />
           <div className="mt-12 grid gap-x-12 gap-y-9 md:grid-cols-2">
             {section.items.map((item, i) => (
               <div key={i}>
-                <Heading level={4}>{item.question}</Heading>
+                <Heading level={4} decorative={decorative}>{item.question}</Heading>
                 <Prose size="sm" className="mt-2">
                   {item.answer}
                 </Prose>
@@ -31,7 +31,7 @@ export function FaqSection({ section, decorative }: SectionViewProps<SectionOfTy
   return (
     <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('faq', decorative)}>
       <Container>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
         <div className="mx-auto mt-12 max-w-3xl">
           {section.items.map((item, i) => (
             <details

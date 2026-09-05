@@ -8,7 +8,7 @@ export function GallerySection({ section, decorative }: SectionViewProps<Section
   return (
     <SectionShell background={section.background} paddingY={section.paddingY} id={anchorId('work', decorative)}>
       <Container wide>
-        <SectionHead eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
+        <SectionHead decorative={decorative} eyebrow={section.eyebrow} heading={section.heading} subheading={section.subheading} />
 
         {variant === 'filmstrip' ? (
           <div className="mt-12 flex snap-x gap-5 overflow-x-auto pb-4">
