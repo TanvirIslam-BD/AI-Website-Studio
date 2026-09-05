@@ -51,13 +51,20 @@ export function MarketingNav({
   const onDark = tone === 'dark' && !scrolled;
 
   return (
+    /*
+      The height lives on the header, not on the row inside it, so the bottom
+      border is drawn *within* the 4rem rather than added to it. It used to sit
+      on the inner row, which made the bar 65px while everything positioned
+      against it - the hero's -mt-16, the sections' scroll-mt-16 - assumed 64.
+      That one pixel showed as a white hairline across the top of the dark hero.
+    */
     <header
       className={cn(
-        'sticky top-0 z-40 transition-colors duration-200',
+        'sticky top-0 z-40 box-border h-16 transition-colors duration-200',
         scrolled ? 'border-b border-ink-200 bg-white/80 backdrop-blur-xl' : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
         <Link href="/" aria-label={BRAND.name}>
           <Logo tone={onDark ? 'light' : 'dark'} />
         </Link>
