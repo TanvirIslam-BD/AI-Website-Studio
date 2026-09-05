@@ -4,17 +4,20 @@ import { cn } from '@/lib/utils';
 /**
  * The Web Copilot AI Studio logo.
  *
- * An SVG recreation of the supplied brand mark: an angular "W" whose final
- * stroke rises past the others and is cut on the diagonal like a pen nib, with
- * a four-point spark above it.
+ * The mark is a monogram W built from two overlapping V strokes rather than one
+ * continuous zig-zag. Drawing it as two shapes is what produces the crossing at
+ * the centre - each V's inner arm runs past the other's - and that crossing is
+ * the detail the mark is recognised by. A single polyline cannot make it.
  *
- * The W is one stroked polyline rather than filled polygons. That keeps the
- * weight uniform, gives mitred points at the apex and valleys, and makes the
- * nib angle fall out of the butt cap for free - so the whole mark stays
- * editable by changing two numbers.
+ * Uniform stroke weight, round caps and round joins throughout: the weight and
+ * the roundness are the character, and both are one number each, so the whole
+ * mark stays adjustable without redrawing any path.
  */
 
 export type LogoTone = 'dark' | 'light' | 'brand';
+
+/** Stroke weight of the monogram, in viewBox units. */
+const STROKE = 13;
 
 /** No accent hue in the identity: the mark is pure black or pure white. */
 const INK = { dark: '#0a0a0a', light: '#ffffff', brand: '#0a0a0a' } as const;
@@ -45,28 +48,15 @@ export function LogoMark({
       aria-hidden={title ? undefined : true}
     >
       {/*
-        Strokes 1-3 of the W, plus a stub into the fourth. The stub exists so
-        the mitre at the right-hand valley is drawn correctly; the tapered
-        blade below covers it in the same colour.
+        Two V strokes, each running past the other at the top centre. Their
+        inner arms cross rather than meeting, which is what leaves the small
+        counter at the middle of the W - the mark's one distinguishing detail,
+        and the reason this is not drawn as a single polyline.
       */}
-      <path
-        d="M12 30 L31 82 L48 44 L64 82 L69 62"
-        stroke={colour}
-        strokeWidth="15"
-        strokeLinejoin="miter"
-        strokeLinecap="butt"
-        strokeMiterlimit="12"
-      />
-      {/*
-        The rising blade, filled rather than stroked so it can narrow towards
-        the diagonal nib cut - the detail that gives the mark its character.
-      */}
-      <path d="M56.7 80.2 L71.3 83.8 L82.4 27.1 L73.6 24.9 Z" fill={colour} />
-      {/* Four-point spark, concave sides. */}
-      <path
-        d="M88.5 0 Q90.4 8 97.5 10.2 Q90.4 12.4 88.5 20.5 Q86.6 12.4 79.5 10.2 Q86.6 8 88.5 0 Z"
-        fill={colour}
-      />
+      <g stroke={colour} strokeWidth={STROKE} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M20 26 L39 76 L58 26" />
+        <path d="M42 26 L61 76 L80 26" />
+      </g>
     </svg>
   );
 }
