@@ -26,24 +26,43 @@ export function GenerationProgressList({ events }: { events: GenerationProgress[
 
   const steps = collapse(events);
 
+  const done = steps.length - 1;
+
   return (
-    <div className="mt-4 rounded-xl border border-ink-200 bg-ink-50/60 p-3">
-      <ul className="studio-scroll max-h-40 space-y-1.5 overflow-y-auto pr-1">
+    <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+      {/*
+        An indeterminate bar, not a percentage: the number of sections is not
+        known until the model has chosen them, so any figure would be invented.
+      */}
+      <div className="relative h-0.5 overflow-hidden bg-white/[0.06]" aria-hidden>
+        <div className="progress-sweep absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-sky-300 to-transparent" />
+      </div>
+      <div className="flex items-center justify-between px-4 pt-3 text-[11px] text-white/40">
+        <span className="font-medium uppercase tracking-[0.14em]">Building</span>
+        <span className="tabular-nums">
+          {done} step{done === 1 ? '' : 's'} done
+        </span>
+      </div>
+      <ul className="studio-scroll max-h-44 space-y-2 overflow-y-auto px-4 pb-3.5 pt-2.5" aria-live="polite">
         {steps.map((step, index) => {
           const last = index === steps.length - 1;
           return (
             <li
               key={`${step.key}-${index}`}
               ref={last ? endRef : null}
-              className="flex items-center gap-2 text-[12px] leading-snug"
+              className="flex animate-fade-in items-center gap-2.5 text-[13px] leading-snug"
             >
               {last ? (
-                <Loader2 className="h-3 w-3 shrink-0 animate-spin text-brand-600" />
+                <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-sky-400/15">
+                  <Loader2 className="h-3 w-3 animate-spin text-sky-300" />
+                </span>
               ) : (
-                <Check className="h-3 w-3 shrink-0 text-emerald-600" />
+                <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-400/15">
+                  <Check className="h-2.5 w-2.5 text-emerald-300" strokeWidth={3} />
+                </span>
               )}
-              <span className={last ? 'font-medium text-ink-900' : 'text-ink-500'}>{step.label}</span>
-              {step.count > 1 ? <span className="text-ink-400">×{step.count}</span> : null}
+              <span className={last ? 'font-medium text-white' : 'text-white/50'}>{step.label}</span>
+              {step.count > 1 ? <span className="text-white/30">×{step.count}</span> : null}
             </li>
           );
         })}
