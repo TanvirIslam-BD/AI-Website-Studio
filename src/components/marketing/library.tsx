@@ -26,7 +26,7 @@ export function SectionLibrary() {
       <Container>
         <SectionHeading
           eyebrow="Section library"
-          title={`${SECTION_TYPES.length} section types. Real layouts. Fully editable.`}
+          title={`${SECTION_TYPES.length} section types. Real layouts. *Fully editable.*`}
           body="Sections are typed and validated, so the AI can only ever produce a layout that actually renders - and you can always take over by hand."
         />
 
@@ -64,7 +64,7 @@ export function BrandKits() {
       <Container>
         <SectionHeading
           eyebrow="Brand kit"
-          title="A complete brand system, generated with your site"
+          title="A complete *brand system,* generated with your site"
           body="Typography, colour, spacing, radius and button style - applied consistently across every section, and swappable in one click."
         />
 

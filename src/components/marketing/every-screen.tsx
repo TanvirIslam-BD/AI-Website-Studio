@@ -43,7 +43,7 @@ export function EveryScreen() {
         <SectionHeading
           dark
           eyebrow="Every screen"
-          title="One site. Every width."
+          title="One site. *Every width.*"
           body="Not three mock-ups at different sizes - the same page, rendered three times at real device widths, so each breakpoint resolves the way it will for a visitor."
         />
 

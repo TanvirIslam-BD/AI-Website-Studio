@@ -54,7 +54,7 @@ export function Examples({ signedIn }: { signedIn: boolean }) {
       <Container>
         <SectionHeading
           eyebrow="Examples"
-          title="One sentence. A complete website."
+          title="One sentence. *A complete website.*"
           body="Each of these came from a single line of description. Pick one to start from the same brief."
         />
 

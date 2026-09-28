@@ -47,10 +47,24 @@ const config: Config = {
           800: '#000000',
           900: '#000000',
         },
+        /**
+         * Champagne. The one warm note in an otherwise grayscale identity, used
+         * only for hairlines, eyebrows and a few points of emphasis on the
+         * marketing site - never as a fill for controls or large surfaces.
+         */
+        gold: {
+          100: '#f3ecdf',
+          200: '#e6d8bd',
+          300: '#d7c19a',
+          400: '#c5a878',
+          500: '#ad8e5c',
+          600: '#8a6f45',
+        },
       },
       fontFamily: {
         sans: ['var(--font-studio-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+        display: ['var(--font-display)', 'ui-serif', 'Georgia', 'serif'],
         brand: ['var(--font-brand)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
@@ -58,6 +72,8 @@ const config: Config = {
         panel: '0 1px 2px rgba(10,10,10,0.04), 0 8px 24px -14px rgba(10,10,10,0.10)',
         pop: '0 1px 2px rgba(10,10,10,0.05), 0 24px 60px -24px rgba(10,10,10,0.22)',
         lift: '0 1px 0 rgba(10,10,10,0.04), 0 12px 32px -16px rgba(10,10,10,0.16)',
+        // Long, soft falloff for the few objects the marketing page elevates.
+        luxe: '0 1px 1px rgba(10,10,10,0.04), 0 2px 6px -2px rgba(10,10,10,0.05), 0 40px 80px -40px rgba(10,10,10,0.28)',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },

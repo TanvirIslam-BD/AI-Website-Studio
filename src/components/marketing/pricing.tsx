@@ -66,37 +66,81 @@ export function Pricing() {
       <Container>
         <SectionHeading
           eyebrow="Pricing"
-          title="Start free, pay when it pays for itself"
+          title="Start free, pay when it *pays for itself*"
           body="No credit card to begin, and the free tier is a complete product rather than a trial."
         />
 
-        <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-3">
+        <div className="mt-20 grid items-stretch gap-6 lg:grid-cols-3 lg:items-center">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
               className={cn(
-                'reveal relative flex h-full flex-col rounded-xl border p-7',
-                plan.highlighted ? 'border-ink-950 bg-white shadow-pop' : 'border-ink-200 bg-white',
+                'reveal relative flex h-full flex-col overflow-hidden rounded-2xl border p-8 sm:p-9',
+                plan.highlighted
+                  ? 'border-ink-900 bg-ink-950 text-white shadow-luxe lg:-my-4 lg:py-12'
+                  : 'border-[#ebe6dc] bg-white',
               )}
             >
               {plan.highlighted ? (
-                <span className="absolute -top-2.5 left-7 rounded bg-ink-950 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
-                  Most popular
-                </span>
+                <>
+                  <div className="glow-warm absolute inset-0" aria-hidden />
+                  <div className="hairline-gold absolute inset-x-0 top-0" aria-hidden />
+                </>
               ) : null}
 
-              <h3 className="text-[15px] font-semibold text-ink-900">{plan.name}</h3>
-              <p className="mt-1.5 min-h-[38px] text-[13px] leading-relaxed text-ink-500">{plan.description}</p>
+              <div className="relative flex items-center justify-between gap-3">
+                <h3
+                  className={cn(
+                    'text-[11px] font-medium uppercase tracking-[0.28em]',
+                    plan.highlighted ? 'text-gold-300' : 'text-gold-600',
+                  )}
+                >
+                  {plan.name}
+                </h3>
+                {plan.highlighted ? (
+                  <span className="rounded-full border border-gold-300/40 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-gold-200">
+                    Most popular
+                  </span>
+                ) : null}
+              </div>
 
-              <p className="mt-5 flex items-baseline gap-1.5">
-                <span className="text-4xl font-bold tracking-[-0.03em] text-ink-950">{plan.price}</span>
-                <span className="text-[13px] text-ink-400">{plan.period}</span>
+              <p className="relative mt-7 flex items-baseline gap-2">
+                <span
+                  className={cn(
+                    'font-display text-[3.75rem] font-normal leading-none tracking-[-0.02em]',
+                    plan.highlighted ? 'text-white' : 'text-ink-950',
+                  )}
+                >
+                  {plan.price}
+                </span>
+                <span className={cn('text-[13px]', plan.highlighted ? 'text-white/45' : 'text-ink-400')}>
+                  {plan.period}
+                </span>
+              </p>
+              <p
+                className={cn(
+                  'relative mt-4 min-h-[42px] text-[14px] leading-relaxed',
+                  plan.highlighted ? 'text-white/60' : 'text-ink-500',
+                )}
+              >
+                {plan.description}
               </p>
 
-              <ul className="mt-7 flex-1 space-y-3">
+              <div className={cn('relative mt-7 h-px', plan.highlighted ? 'bg-white/10' : 'bg-[#ebe6dc]')} />
+
+              <ul className="relative mt-7 flex-1 space-y-3.5">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-[13px] text-ink-600">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-900" strokeWidth={2.5} />
+                  <li
+                    key={feature}
+                    className={cn(
+                      'flex items-start gap-3 text-[14px]',
+                      plan.highlighted ? 'text-white/75' : 'text-ink-600',
+                    )}
+                  >
+                    <Check
+                      className={cn('mt-0.5 h-3.5 w-3.5 shrink-0', plan.highlighted ? 'text-gold-300' : 'text-gold-500')}
+                      strokeWidth={2.25}
+                    />
                     {feature}
                   </li>
                 ))}
@@ -106,16 +150,21 @@ export function Pricing() {
                 <Link
                   href={plan.cta.href}
                   className={cn(
-                    'mt-8 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold transition-colors',
+                    'relative mt-10 inline-flex h-12 items-center justify-center rounded-full text-sm font-medium transition-colors duration-300',
                     plan.highlighted
                       ? 'bg-ink-950 text-white hover:bg-ink-800'
-                      : 'border border-ink-200 bg-white text-ink-900 hover:bg-ink-50',
+                      : 'border border-ink-950 bg-ink-950 text-white hover:bg-ink-800',
                   )}
                 >
                   {plan.cta.label}
                 </Link>
               ) : (
-                <span className="mt-8 inline-flex h-11 cursor-default items-center justify-center gap-2 rounded-lg border border-dashed border-ink-200 text-sm font-medium text-ink-400">
+                <span
+                  className={cn(
+                    'relative mt-10 inline-flex h-12 cursor-default items-center justify-center gap-2 rounded-full border text-sm font-medium',
+                    plan.highlighted ? 'border-white/15 text-white/55' : 'border-[#e3ddd1] text-ink-400',
+                  )}
+                >
                   {plan.cta.label}
                 </span>
               )}

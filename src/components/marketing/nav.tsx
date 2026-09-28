@@ -61,7 +61,7 @@ export function MarketingNav({
     <header
       className={cn(
         'sticky top-0 z-40 box-border h-16 transition-colors duration-200',
-        scrolled ? 'border-b border-ink-200 bg-white/80 backdrop-blur-xl' : 'border-b border-transparent bg-transparent',
+        scrolled ? 'border-b border-ink-200/70 bg-white/75 backdrop-blur-2xl backdrop-saturate-150' : 'border-b border-transparent bg-transparent',
       )}
     >
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
@@ -75,7 +75,7 @@ export function MarketingNav({
               key={link.href}
               href={`${anchorPrefix}${link.href}`}
               className={cn(
-                'focus-ring rounded-md px-2.5 py-2 text-[13px] transition-colors',
+                'focus-ring rounded-md px-3 py-2 text-[13px] tracking-[0.01em] transition-colors duration-200',
                 onDark ? 'text-white/65 hover:text-white' : 'text-ink-600 hover:text-ink-950',
               )}
             >
@@ -89,8 +89,10 @@ export function MarketingNav({
             <Link
               href="/dashboard"
               className={cn(
-                'focus-ring inline-flex h-9 items-center gap-1.5 rounded-lg px-4 text-[13px] font-medium transition-colors',
-                onDark ? 'bg-white text-ink-950 hover:bg-white/90' : 'bg-ink-950 text-white hover:bg-ink-800',
+                'focus-ring inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full px-4 sm:px-5 text-[13px] font-medium transition-colors',
+                onDark
+                    ? 'bg-white text-ink-950 shadow-[0_0_0_1px_rgba(215,193,154,0.4)] hover:bg-[#f6f1e7]'
+                    : 'bg-ink-950 text-white hover:bg-ink-800',
               )}
             >
               Dashboard <ArrowRight className="h-3.5 w-3.5" />
@@ -109,8 +111,10 @@ export function MarketingNav({
               <Link
                 href="/signin?mode=register"
                 className={cn(
-                  'focus-ring inline-flex h-9 items-center rounded-lg px-4 text-[13px] font-medium transition-colors',
-                  onDark ? 'bg-white text-ink-950 hover:bg-white/90' : 'bg-ink-950 text-white hover:bg-ink-800',
+                  'focus-ring inline-flex h-9 items-center whitespace-nowrap rounded-full px-4 sm:px-5 text-[13px] font-medium transition-colors',
+                  onDark
+                    ? 'bg-white text-ink-950 shadow-[0_0_0_1px_rgba(215,193,154,0.4)] hover:bg-[#f6f1e7]'
+                    : 'bg-ink-950 text-white hover:bg-ink-800',
                 )}
               >
                 Start building free

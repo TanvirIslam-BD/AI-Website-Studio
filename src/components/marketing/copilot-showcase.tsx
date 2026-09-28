@@ -30,7 +30,7 @@ export function CopilotShowcase() {
         <SectionHeading
           dark
           eyebrow="AI Copilot"
-          title="Your website has a copilot."
+          title="Your website has a *copilot.*"
           body="Describe the change. Web Copilot makes it."
         />
 
