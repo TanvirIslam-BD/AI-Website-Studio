@@ -153,3 +153,162 @@
     radial-gradient(60% 55% at 50% 0%, rgba(215, 193, 154, 0.12), transparent 70%),
     radial-gradient(40% 40% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 70%);
 }
+
+/* ---------------------------------------------------------------------------
+ * Home page (dark)
+ *
+ * The home page is one continuous dark surface. These are its few finishes:
+ * gradient display type, glass panels with a lit top edge, an aurora glow, a
+ * fine grid, the showcase reel and the hero's entrance. Everything that moves
+ * stops under prefers-reduced-motion.
+ * ------------------------------------------------------------------------ */
+.home-page {
+  color-scheme: dark;
+}
+
+.home-page ::selection {
+  background: rgba(165, 180, 252, 0.35);
+}
+
+/* Focus rings: the studio default is dark ink, invisible on this surface. */
+.home-page .focus-ring:focus-visible {
+  --tw-ring-color: rgba(255, 255, 255, 0.85);
+  --tw-ring-offset-color: #07070a;
+}
+
+.text-gradient {
+  background-image: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.55) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glass: a translucent fill and a hairline border that is brightest on top. */
+.glass,
+.glass-lit {
+  /* No position here: this rule loads after Tailwind's utilities and would
+   * override `absolute`. Give the element `relative` or `absolute` in markup. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    0 30px 80px -40px rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.glass::before,
+.glass-lit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 40%, rgba(255, 255, 255, 0.06));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* The highlighted variant: a coloured edge and a glow from above. */
+.glass-lit {
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(129, 140, 248, 0.16), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.glass-lit::before {
+  background: linear-gradient(180deg, rgba(165, 180, 252, 0.7), rgba(125, 211, 252, 0.25) 45%, rgba(255, 255, 255, 0.06));
+}
+
+.aurora {
+  background:
+    radial-gradient(35% 45% at 35% 50%, rgba(99, 102, 241, 0.32), transparent 70%),
+    radial-gradient(30% 40% at 62% 45%, rgba(56, 189, 248, 0.22), transparent 70%),
+    radial-gradient(28% 35% at 50% 62%, rgba(217, 70, 239, 0.14), transparent 70%);
+  filter: blur(40px);
+}
+
+.aurora-soft {
+  background:
+    radial-gradient(50% 50% at 40% 50%, rgba(99, 102, 241, 0.22), transparent 70%),
+    radial-gradient(45% 45% at 65% 50%, rgba(56, 189, 248, 0.14), transparent 70%);
+}
+
+.home-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Showcase reel. The track is the list twice, so -50% lands on a seam-free loop. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  animation: marquee 70s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Hero entrance. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .animate-rise {
+    animation: none;
+  }
+  .marquee-mask {
+    overflow-x: auto;
+  }
+}
+
+/* Generated-site cards: scroll the whole page through the frame on hover.
+ * The element's own height is the unscaled page, so -100% scaled by --s is
+ * its rendered height; adding the frame height stops on the footer. */
+.site-scroll {
+  transform: scale(var(--s));
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .site-scroll {
+  transform: translateY(calc(var(--s) * -100% + var(--h))) scale(var(--s));
+  transition: transform 9s cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-scroll,
+  .group:hover .site-scroll {
+    transform: scale(var(--s));
+    transition: none;
+  }
+}

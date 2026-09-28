@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
+import { COMPANY } from '@/lib/brand';
 import { FaqStructuredData } from '@/components/seo/structured-data';
-import { Container, Section, SectionHeading } from './shell';
+import { Band, Container, Heading } from './primitives';
 
 /**
  * Answers are deliberately specific about current limits. A visitor who finds
@@ -67,41 +68,54 @@ export const FAQS = [
   },
 ];
 
-
+/**
+ * FAQ. The answers are shared with the structured data, so the markup cannot
+ * describe answers a reader cannot see. Native details/summary: keyboard
+ * accessible and works with no JavaScript.
+ */
 export function Faq() {
   return (
-    <Section id="faq" tone="muted">
+    <Band id="faq">
+      <FaqStructuredData items={FAQS} path="/" />
       <Container>
-        {/*
-          The markup is generated from the same array the page renders, so it
-          cannot describe answers a reader cannot see - which is both the
-          guideline and the only version worth shipping.
-        */}
-        <FaqStructuredData items={FAQS} path="/" />
-        <SectionHeading eyebrow="FAQ" title="Questions, *answered honestly*" />
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <Heading
+              align="left"
+              kicker="FAQ"
+              title="Straight answers."
+              lede="Including the limits. If something is not built yet, it says so here."
+            />
+            <p className="reveal mt-8 text-[14px] text-white/45">
+              Something else?{' '}
+              <a
+                href={`mailto:${COMPANY.supportEmail}`}
+                className="focus-ring rounded text-white underline decoration-white/25 underline-offset-4 hover:decoration-white"
+              >
+                {COMPANY.supportEmail}
+              </a>
+            </p>
+          </div>
 
-        <div className="mx-auto mt-12 max-w-3xl">
-          {FAQS.map((item) => (
-            <details key={item.q} className="group border-b border-ink-200">
-              <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-6 rounded py-5 text-left text-[15px] font-medium text-ink-950 [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <Plus
-                  className="h-4 w-4 shrink-0 text-ink-400 transition-transform duration-300 group-open:rotate-45"
-                  aria-hidden
-                />
-              </summary>
-              {/* Native details/summary: keyboard accessible and works with no
-                  JavaScript. The grid-rows transition animates the open state
-                  without needing a measured height. */}
-              <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-open:grid-rows-[1fr]">
-                <p className="max-w-2xl overflow-hidden pr-8 text-[14px] leading-relaxed text-ink-600">
-                  <span className="block pb-5">{item.a}</span>
-                </p>
-              </div>
-            </details>
-          ))}
+          <div className="reveal divide-y divide-white/[0.08] border-y border-white/[0.08]">
+            {FAQS.map((item) => (
+              <details key={item.q} className="group">
+                <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-6 rounded py-5 text-left text-[15px] font-medium text-white/90 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+                  {item.q}
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 text-white/50 transition-transform duration-300 group-open:rotate-45">
+                    <Plus className="h-3.5 w-3.5" aria-hidden />
+                  </span>
+                </summary>
+                <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-open:grid-rows-[1fr]">
+                  <p className="overflow-hidden pr-10 text-[14px] leading-relaxed text-white/55">
+                    <span className="block pb-6">{item.a}</span>
+                  </p>
+                </div>
+              </details>
+            ))}
+          </div>
         </div>
       </Container>
-    </Section>
+    </Band>
   );
 }
