@@ -8,8 +8,29 @@
  * two addresses and neither ranks.
  */
 
+const PRODUCTION_ORIGIN = 'https://web.copilotai.live';
+
+/**
+ * The configured origin, or production when it is missing or not an http(s)
+ * URL. A malformed value - one Vercel project had the variable's own name as
+ * its value - otherwise throws inside `new URL()` while Next collects page
+ * data, and fails the whole build rather than one canonical.
+ */
+function resolveOrigin(raw: string | undefined): string {
+  const value = raw?.trim();
+  if (!value) return PRODUCTION_ORIGIN;
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'http:' || url.protocol === 'https:') return value.replace(/\/+$/, '');
+  } catch {
+    // Fall through to production.
+  }
+  console.warn(`NEXT_PUBLIC_APP_URL is not a valid http(s) URL; using ${PRODUCTION_ORIGIN}.`);
+  return PRODUCTION_ORIGIN;
+}
+
 /** The production origin, without a trailing slash. */
-export const SITE_ORIGIN = (process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://web.copilotai.live').replace(/\/+$/, '');
+export const SITE_ORIGIN = resolveOrigin(process.env.NEXT_PUBLIC_APP_URL);
 
 /**
  * Whether this deployment should be indexed at all.
