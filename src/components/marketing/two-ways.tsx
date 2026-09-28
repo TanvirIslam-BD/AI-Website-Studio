@@ -114,7 +114,7 @@ export function TwoWays() {
       <Container>
         <SectionHeading
           eyebrow="Two ways to build"
-          title="Same website. Different starting line."
+          title="Same website. *Different starting line.*"
           body="A block editor is a good tool - this product ships one too. The difference is whether you open it on an empty canvas or on a finished draft."
         />
 

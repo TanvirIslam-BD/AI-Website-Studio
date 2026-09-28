@@ -33,7 +33,7 @@ export function Deploy() {
       <Container>
         <SectionHeading
           eyebrow="Deployment"
-          title="From editor to live website."
+          title="From editor to *live website.*"
           body="Your Vercel account. Your website. Your domain."
         />
 
@@ -88,7 +88,7 @@ export function Deploy() {
         <div className="mt-16">
           <div className="flex items-center justify-center gap-2">
             <Gauge className="h-4 w-4 text-ink-500" strokeWidth={1.8} />
-            <h3 className="text-center text-xl font-semibold tracking-[-0.02em] text-ink-950">Fast by default</h3>
+            <h3 className="text-center font-display text-[1.9rem] font-normal tracking-[-0.01em] text-ink-950">Fast by default</h3>
           </div>
           <p className="mx-auto mt-3 max-w-lg text-center text-[14px] leading-relaxed text-ink-500">
             Generated sites are plain HTML and CSS. There is no framework runtime to download, nothing to hydrate, and
@@ -98,7 +98,7 @@ export function Deploy() {
           <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
             {METRICS.map((metric, i) => (
               <div key={metric.label} className="reveal text-center" style={{ transitionDelay: `${i * 50}ms` }}>
-                <dd className="text-2xl font-semibold tracking-[-0.03em] text-ink-950 sm:text-3xl">{metric.value}</dd>
+                <dd className="font-display text-4xl font-normal tracking-[-0.01em] text-ink-950 sm:text-5xl">{metric.value}</dd>
                 <dt className="mt-1.5 text-[12px] font-medium text-ink-700">{metric.label}</dt>
                 <p className="mt-0.5 text-[11px] text-ink-400">{metric.detail}</p>
               </div>

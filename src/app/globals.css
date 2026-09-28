@@ -121,3 +121,35 @@
     transition: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Marketing finish
+ *
+ * The small set of treatments that give the marketing page its premium
+ * register: a champagne text gradient for the one emphasised phrase per
+ * heading, a hairline that fades at both ends, and a warm glow for dark bands.
+ * ------------------------------------------------------------------------ */
+.text-champagne {
+  background-image: linear-gradient(100deg, #f3ecdf 0%, #d7c19a 38%, #f6efe2 58%, #c5a878 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-champagne-deep {
+  background-image: linear-gradient(100deg, #8a6f45 0%, #ad8e5c 45%, #6f5836 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hairline-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(197, 168, 120, 0.55) 50%, transparent);
+}
+
+.glow-warm {
+  background:
+    radial-gradient(60% 55% at 50% 0%, rgba(215, 193, 154, 0.12), transparent 70%),
+    radial-gradient(40% 40% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 70%);
+}

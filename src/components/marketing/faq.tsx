@@ -78,7 +78,7 @@ export function Faq() {
           guideline and the only version worth shipping.
         */}
         <FaqStructuredData items={FAQS} path="/" />
-        <SectionHeading eyebrow="FAQ" title="Questions, answered honestly" />
+        <SectionHeading eyebrow="FAQ" title="Questions, *answered honestly*" />
 
         <div className="mx-auto mt-12 max-w-3xl">
           {FAQS.map((item) => (

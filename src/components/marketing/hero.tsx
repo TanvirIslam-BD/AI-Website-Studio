@@ -30,22 +30,29 @@ export function Hero({ signedIn }: { signedIn: boolean }) {
       {/* Atmosphere only, now that the photograph is gone from behind. */}
       <div className="absolute inset-0 -z-10" aria-hidden>
         <div
-          className="studio-grid absolute inset-0 opacity-[0.18]"
+          className="studio-grid absolute inset-0 opacity-[0.12]"
           style={{
             maskImage: 'radial-gradient(70% 60% at 30% 40%, black 5%, transparent 75%)',
             WebkitMaskImage: 'radial-gradient(70% 60% at 30% 40%, black 5%, transparent 75%)',
           }}
         />
-        {/* A cool lift behind the screenshot, so the frame has something to sit on. */}
+        {/* Warm key light from the top left, behind the type. */}
+        <div
+          className="absolute -left-40 -top-40 h-[42rem] w-[42rem] rounded-full"
+          style={{ background: 'radial-gradient(closest-side, rgba(215,193,154,0.16), transparent 72%)' }}
+        />
+        {/* A cooler lift behind the websites, so the frames have something to sit on. */}
         <div
           className="absolute inset-y-0 right-0 w-2/3"
-          style={{ background: 'radial-gradient(60% 60% at 70% 45%, rgba(255,255,255,0.10), transparent 70%)' }}
+          style={{ background: 'radial-gradient(60% 60% at 70% 45%, rgba(255,255,255,0.09), transparent 70%)' }}
         />
         <div className="grain absolute inset-0 opacity-40" />
+        {/* A champagne hairline where the hero ends. */}
+        <div className="hairline-gold absolute inset-x-0 bottom-0" />
       </div>
 
-      <Container className="relative pb-32 pt-32 sm:pb-40 sm:pt-40">
-        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-10">
+      <Container className="relative pb-32 pt-36 sm:pb-44 sm:pt-44">
+        <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-12">
           {/* ------------------------------------------------------- type */}
           <div>
             {/*
@@ -56,45 +63,46 @@ export function Hero({ signedIn }: { signedIn: boolean }) {
               only by the brand - the query that needs the least help.
             */}
             <h1 className="text-white">
-              <span className="block font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
+              <span className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.34em] text-gold-300">
+                <span className="h-px w-10 bg-gold-300/50" aria-hidden />
                 AI website generator
               </span>
-              <span className="mt-6 block text-balance text-[2.75rem] font-semibold leading-[0.95] tracking-[-0.045em] sm:text-[3.5rem] lg:text-[4rem]">
+              <span className="mt-8 block text-balance font-display text-[3.4rem] font-normal leading-[0.95] tracking-[-0.025em] sm:text-[4.6rem] lg:text-[5.4rem]">
                 Build Smarter.
                 <br />
-                Launch Faster.
+                <em className="text-champagne pr-[0.08em] italic">Launch Faster.</em>
               </span>
             </h1>
 
-            <p className="mt-7 max-w-xl text-pretty text-[19px] font-medium leading-snug tracking-[-0.01em] text-white/85 sm:text-[21px]">
+            <p className="mt-9 max-w-xl text-pretty text-[19px] font-light leading-[1.5] tracking-[-0.005em] text-white/85 sm:text-[21px]">
               Describe your website in one sentence and get a complete, production-ready site.
             </p>
 
-            <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-white/55">
+            <p className="mt-5 max-w-lg text-pretty text-[15px] leading-[1.75] text-white/50">
               Web Copilot generates structured multi-page websites, lets you edit them visually or through AI, and
               deploys the final site to your own Vercel account.
             </p>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-11 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
                 href={signedIn ? '/dashboard' : '/signin?mode=register'}
-                className="focus-ring group inline-flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-white px-6 text-[15px] font-medium text-ink-950 transition-transform duration-200 hover:-translate-y-0.5 sm:w-auto"
+                className="focus-ring group inline-flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-gradient-to-b from-white to-[#f1ece2] px-8 text-[15px] font-medium text-ink-950 shadow-[0_0_0_1px_rgba(215,193,154,0.45),0_18px_40px_-18px_rgba(215,193,154,0.55)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(215,193,154,0.7),0_22px_48px_-18px_rgba(215,193,154,0.75)] sm:w-auto"
               >
                 {signedIn ? 'Open your dashboard' : 'Start building free'}
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
               <a
                 href="#how-it-works"
-                className="focus-ring inline-flex h-12 w-full items-center justify-center whitespace-nowrap rounded-lg border border-white/20 bg-white/5 px-6 text-[15px] font-medium text-white backdrop-blur-sm transition-colors hover:border-white/35 hover:bg-white/10 sm:w-auto"
+                className="focus-ring inline-flex h-[52px] w-full items-center justify-center whitespace-nowrap rounded-full border border-white/15 bg-white/[0.03] px-8 text-[15px] font-medium text-white/90 backdrop-blur-sm transition-colors duration-300 hover:border-gold-300/50 hover:text-white sm:w-auto"
               >
                 See how it works
               </a>
             </div>
 
-            <ul className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <ul className="mt-12 flex flex-wrap items-center gap-x-4 gap-y-2.5 border-t border-white/[0.08] pt-7">
               {TRUST.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-[12px] text-white/50">
-                  <span className="h-1 w-1 rounded-full bg-white/35" aria-hidden />
+                <li key={item} className="flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-white/45">
+                  <span className="h-1 w-1 rotate-45 bg-gold-300/70" aria-hidden />
                   {item}
                 </li>
               ))}

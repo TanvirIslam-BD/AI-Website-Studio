@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Instrument_Serif, Inter, Poppins } from 'next/font/google';
 import { BRAND } from '@/lib/brand';
 import { IS_INDEXABLE_DEPLOYMENT, SITE_ORIGIN } from '@/lib/seo';
 import { SiteStructuredData } from '@/components/seo/structured-data';
@@ -16,6 +16,19 @@ const poppins = Poppins({
   subsets: ['latin'],
   weight: ['500', '600'],
   variable: '--font-brand',
+  display: 'swap',
+});
+
+/**
+ * The display face for the marketing headlines. A high-contrast serif gives the
+ * large type an editorial, considered register that a geometric sans cannot,
+ * and its italic carries emphasis without needing a colour.
+ */
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -69,7 +82,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${inter.variable} ${poppins.variable} ${instrumentSerif.variable}`}>
       <body className="min-h-full font-sans antialiased">
         {children}
         <SiteStructuredData />

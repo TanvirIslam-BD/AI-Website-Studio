@@ -25,7 +25,7 @@ export function ProductShowcase() {
       <Container>
         <SectionHeading
           eyebrow="The product"
-          title="One sentence in. A complete website out."
+          title="One sentence in. *A complete website out.*"
           body="Generated as structured pages and sections, so every heading, image, link and colour stays yours to change."
         />
 

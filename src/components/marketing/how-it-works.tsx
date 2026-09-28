@@ -45,7 +45,7 @@ export function HowItWorks() {
       <Container>
         <SectionHeading
           eyebrow="How it works"
-          title="Four steps, and the last one is live"
+          title="Four steps, and the last one is *live*"
           body="No template picking, no blank canvas, no drag-and-drop archaeology."
         />
 

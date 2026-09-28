@@ -17,25 +17,77 @@ export function Section({
   className?: string;
   tone?: 'default' | 'muted' | 'dark';
 }) {
+  // Muted bands are ivory rather than a cool grey: the warmth is what separates
+  // a considered page from a template, and it sits under the neutral ramp fine.
   const tones = {
     default: 'bg-white',
-    muted: 'border-y border-ink-200 bg-[#fafafa]',
+    muted: 'border-y border-[#ebe6dc] bg-[#f8f6f1]',
     dark: 'bg-ink-950 text-white',
   } as const;
 
   return (
-    <section id={id} className={cn('relative scroll-mt-16 py-20 sm:py-28', tones[tone], className)}>
+    <section id={id} className={cn('relative scroll-mt-16 py-24 sm:py-36', tones[tone], className)}>
       {tone === 'dark' ? (
-        // A single soft highlight, no hue: enough to stop a large black band
-        // reading as a flat rectangle.
-        <div
-          className="absolute inset-0 opacity-70"
-          style={{ background: 'radial-gradient(70% 55% at 50% 0%, rgba(255,255,255,0.08), transparent 72%)' }}
-          aria-hidden
-        />
+        <>
+          {/* A warm highlight from above, so a large black band reads as lit rather than flat. */}
+          <div className="glow-warm absolute inset-0" aria-hidden />
+          <div className="hairline-gold absolute inset-x-0 top-0" aria-hidden />
+        </>
       ) : null}
       <div className="relative">{children}</div>
     </section>
+  );
+}
+
+/**
+ * Renders a heading string, setting any `*phrase*` in the display italic with a
+ * champagne finish. One accent per heading keeps it a point of emphasis rather
+ * than decoration; plain strings render unchanged.
+ */
+export function Accented({ text, dark = false }: { text: string; dark?: boolean }) {
+  const parts = text.split(/\*([^*]+)\*/);
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <em key={i} className={cn('font-display italic pr-[0.08em]', dark ? 'text-champagne' : 'text-champagne-deep')}>
+            {part}
+          </em>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
+
+/** Small tracked label with a champagne rule, used above section headings. */
+export function Eyebrow({
+  children,
+  dark = false,
+  align = 'center',
+  className,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+  align?: 'left' | 'center';
+  className?: string;
+}) {
+  return (
+    <p
+      className={cn(
+        'flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.32em]',
+        align === 'center' && 'justify-center',
+        dark ? 'text-gold-300' : 'text-gold-600',
+        className,
+      )}
+    >
+      <span className={cn('h-px w-8', dark ? 'bg-gold-300/50' : 'bg-gold-500/50')} aria-hidden />
+      {children}
+      {align === 'center' ? (
+        <span className={cn('h-px w-8', dark ? 'bg-gold-300/50' : 'bg-gold-500/50')} aria-hidden />
+      ) : null}
+    </p>
   );
 }
 
@@ -53,22 +105,28 @@ export function SectionHeading({
   dark?: boolean;
 }) {
   return (
-    <div className={cn('reveal max-w-2xl', align === 'center' && 'mx-auto text-center')}>
+    <div className={cn('reveal max-w-3xl', align === 'center' && 'mx-auto text-center')}>
       {eyebrow ? (
-        <p className={cn('font-mono text-[11px] uppercase tracking-[0.2em]', dark ? 'text-ink-500' : 'text-ink-400')}>
+        <Eyebrow dark={dark} align={align}>
           {eyebrow}
-        </p>
+        </Eyebrow>
       ) : null}
       <h2
         className={cn(
-          'mt-4 text-balance text-[2rem] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[2.5rem]',
+          'mt-6 text-balance font-display text-[2.6rem] font-normal leading-[1.02] tracking-[-0.02em] sm:text-[3.5rem]',
           dark ? 'text-white' : 'text-ink-950',
         )}
       >
-        {title}
+        <Accented text={title} dark={dark} />
       </h2>
       {body ? (
-        <p className={cn('mt-4 text-pretty text-[16px] leading-relaxed', dark ? 'text-ink-400' : 'text-ink-500')}>
+        <p
+          className={cn(
+            'mx-auto mt-6 max-w-2xl text-pretty text-[16px] leading-[1.75] sm:text-[17px]',
+            align === 'left' && 'mx-0',
+            dark ? 'text-white/55' : 'text-ink-500',
+          )}
+        >
           {body}
         </p>
       ) : null}

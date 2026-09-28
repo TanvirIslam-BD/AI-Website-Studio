@@ -60,7 +60,7 @@ export function GeneratedSites({ signedIn }: { signedIn: boolean }) {
       <Container>
         <SectionHeading
           eyebrow="Generated, not designed"
-          title="Real websites, built from one sentence."
+          title="Real websites, built from *one sentence.*"
           body="Each of these came out of the brief printed underneath it. Nothing was touched afterwards - this is the first draft the generator returns."
         />
 
@@ -124,7 +124,7 @@ export function GeneratedSites({ signedIn }: { signedIn: boolean }) {
         <div className="reveal mt-10 flex flex-col items-center gap-3 text-center">
           <Link
             href={signedIn ? '/dashboard' : '/signin?mode=register'}
-            className="focus-ring group inline-flex h-11 items-center gap-2 rounded-lg bg-ink-950 px-6 text-[14px] font-medium text-white transition-colors hover:bg-ink-800"
+            className="focus-ring group inline-flex h-12 items-center gap-2 rounded-full bg-ink-950 px-7 text-[14px] font-medium text-white transition-colors hover:bg-ink-800"
           >
             Generate yours
             <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

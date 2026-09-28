@@ -57,7 +57,7 @@ export function VercelIntegration() {
         <SectionHeading
           dark
           eyebrow="Vercel integration"
-          title="Your websites, on your own Vercel account."
+          title="Your websites, on your *own Vercel account.*"
           body="Connect your account once and everything this studio builds publishes into it - your project, your domain, your plan. Nothing is parked on our infrastructure, so nothing is ours to hold."
         />
 
@@ -135,7 +135,7 @@ export function VercelIntegration() {
               href={`https://vercel.com/marketplace/${slug}`}
               target="_blank"
               rel="noreferrer"
-              className="focus-ring group inline-flex h-11 items-center gap-2 rounded-lg border border-white/15 px-5 text-[14px] font-medium text-white transition-colors hover:border-white/35"
+              className="focus-ring group inline-flex h-12 items-center gap-2 rounded-full border border-white/15 px-6 text-[14px] font-medium text-white transition-colors duration-300 hover:border-gold-300/50"
             >
               <VercelMark className="h-3.5 w-3.5" />
               Find us on the Vercel Marketplace

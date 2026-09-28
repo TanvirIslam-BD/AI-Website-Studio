@@ -76,7 +76,7 @@ export function StudioGallery() {
         <SectionHeading
           dark
           eyebrow="Inside the studio"
-          title="This is the actual product."
+          title="This is the *actual product.*"
           body="Not an illustration of an editor - the editor. Every frame below is a capture of the running app."
         />
 
