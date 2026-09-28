@@ -312,3 +312,26 @@
     transition: none;
   }
 }
+
+/* Dashboard generation: an indeterminate sweep across the progress bar. */
+@keyframes progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+.progress-sweep {
+  animation: progress-sweep 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-sweep {
+    animation: none;
+    transform: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+}
