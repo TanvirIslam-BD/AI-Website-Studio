@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { ExternalLink, Eye, FileText, Pencil, Rocket, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ExternalLink, Eye, FileText, Pencil, Rocket, Search, Trash2, X } from 'lucide-react';
 import type { ProjectStatus } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { ProjectStatusBadge } from '@/components/ui/misc';
-import { errorMessage, formatRelative } from '@/lib/utils';
+import { cn, errorMessage, formatRelative } from '@/lib/utils';
 
 export type ProjectSummary = {
   id: string;
@@ -18,6 +18,18 @@ export type ProjectSummary = {
   updatedAt: string;
   _count: { pages: number; deployments: number };
 };
+
+type Filter = 'all' | 'live' | 'unpublished' | 'error';
+type Sort = 'recent' | 'name';
+
+const isLive = (project: ProjectSummary) => Boolean(project.productionUrl) || project.status === 'DEPLOYED';
+
+const FILTERS: Array<{ id: Filter; label: string; test: (project: ProjectSummary) => boolean }> = [
+  { id: 'all', label: 'All', test: () => true },
+  { id: 'live', label: 'Live', test: isLive },
+  { id: 'unpublished', label: 'Not published', test: (project) => !isLive(project) },
+  { id: 'error', label: 'Needs attention', test: (project) => project.status === 'ERROR' },
+];
 
 export function ProjectGrid({
   projects,
@@ -30,6 +42,27 @@ export function ProjectGrid({
   const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
+  const [sort, setSort] = useState<Sort>('recent');
+
+  // Filtering is client-side: the list is already here, and a workspace's
+  // projects number in the tens, not thousands.
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const test = FILTERS.find((f) => f.id === filter)?.test ?? (() => true);
+    const list = projects.filter(
+      (project) =>
+        test(project) &&
+        (!needle ||
+          project.name.toLowerCase().includes(needle) ||
+          (project.description ?? '').toLowerCase().includes(needle) ||
+          (project.productionUrl ?? '').toLowerCase().includes(needle)),
+    );
+    return sort === 'name'
+      ? list.slice().sort((a, b) => a.name.localeCompare(b.name))
+      : list; // Already newest first from the server.
+  }, [projects, query, filter, sort]);
 
   async function remove(project: ProjectSummary) {
     const confirmed = window.confirm(
@@ -55,10 +88,87 @@ export function ProjectGrid({
 
   return (
     <div>
+      {/* ------------------------------------------------------- toolbar */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1 sm:max-w-xs">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-400" aria-hidden />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search websites"
+            aria-label="Search websites"
+            className="focus-ring h-9 w-full rounded-xl border border-ink-200 bg-white pl-9 pr-8 text-[13px] text-ink-900 placeholder:text-ink-400 [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              className="focus-ring absolute right-2 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-full text-ink-400 hover:bg-ink-100 hover:text-ink-700"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          ) : null}
+        </div>
+
+        <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-ink-200 bg-white p-1" role="group" aria-label="Filter websites">
+          {FILTERS.map((f) => {
+            const count = projects.filter(f.test).length;
+            if (f.id === 'error' && count === 0) return null;
+            const active = filter === f.id;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setFilter(f.id)}
+                className={cn(
+                  'focus-ring inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 text-[12px] font-medium transition-colors',
+                  active ? 'bg-ink-950 text-white' : 'text-ink-500 hover:bg-ink-50 hover:text-ink-900',
+                )}
+              >
+                {f.label}
+                <span className={cn('tabular-nums', active ? 'text-white/60' : 'text-ink-400')}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <label className="flex items-center gap-2 text-[12px] text-ink-500 sm:ml-auto">
+          Sort
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value as Sort)}
+            className="focus-ring h-9 rounded-xl border border-ink-200 bg-white px-2.5 text-[13px] text-ink-900"
+          >
+            <option value="recent">Recently edited</option>
+            <option value="name">Name A-Z</option>
+          </select>
+        </label>
+      </div>
+
       {error ? <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">{error}</p> : null}
 
+      {visible.length === 0 ? (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-ink-300 bg-white px-6 py-14 text-center">
+          <p className="text-[14px] font-medium text-ink-900">No websites match</p>
+          <p className="mt-1 text-[13px] text-ink-500">Try a different search, or show all websites.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery('');
+              setFilter('all');
+            }}
+            className="focus-ring mt-4 rounded-lg border border-ink-200 px-3 py-1.5 text-[12px] font-medium text-ink-800 hover:bg-ink-50"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : null}
+
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => {
+        {visible.map((project) => {
           const thumb = thumbs[project.id];
           const host = project.productionUrl?.replace(/^https?:\/\//, '') ?? null;
           return (
