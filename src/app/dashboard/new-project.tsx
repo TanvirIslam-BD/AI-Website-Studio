@@ -1,12 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertCircle, FilePlus2, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { errorMessage } from '@/lib/utils';
 import { MAX_BRIEF_LENGTH } from '@/lib/limits';
 import type { GenerationProgress } from '@/lib/ai/progress';
-import { GenerationProgressList } from './generation-progress';
+import { GenerationPanel } from './generation-progress';
 
 const EXAMPLES = [
   'A modern website for a photography business',
@@ -74,106 +74,120 @@ export function NewProjectPanel({ initialPrompt }: { initialPrompt?: string }) {
   }
 
   const over = prompt.trim().length > MAX_BRIEF_LENGTH;
-
   const working = busy !== null;
+  const generating = busy === 'generate';
+
+  // Leaving mid-generation drops the progress stream and the redirect to the
+  // editor, so ask first. Browsers show their own wording for this prompt.
+  useEffect(() => {
+    if (!generating) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [generating]);
 
   return (
     <div className="relative">
       {/* A lit halo behind the composer, stronger while it is working. */}
       <div
         className={`pointer-events-none absolute -inset-px rounded-[22px] bg-gradient-to-r from-indigo-400/40 via-sky-300/30 to-fuchsia-400/30 blur-lg transition-opacity duration-700 ${
-          busy === 'generate' ? 'animate-pulse opacity-90' : 'opacity-50'
+          generating ? 'animate-pulse opacity-90' : 'opacity-50'
         }`}
         aria-hidden
       />
       <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[#0c0c11]/95 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-        <div className="p-4 sm:p-5">
-          <label htmlFor="brief" className="flex items-center gap-2 text-[13px] font-medium text-white/80">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-gradient-to-br from-indigo-400 to-sky-400 text-[#07070a]">
-              <Sparkles className="h-3.5 w-3.5" />
-            </span>
-            Describe the website you want
-          </label>
-          <textarea
-            id="brief"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-            rows={4}
-            disabled={working}
-            placeholder="Create a modern website for a photography business, with a portfolio gallery and a contact form..."
-            className="mt-3 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[16px] leading-relaxed text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/25 focus:bg-white/[0.05] disabled:opacity-60"
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) void create('generate');
-            }}
-          />
+        {generating ? (
+          // While it builds, the editing controls give way to what is being built.
+          <div className="p-4 sm:p-5">
+            <GenerationPanel events={events} brief={prompt.trim()} />
+          </div>
+        ) : (
+          <>
+          <div className="p-4 sm:p-5">
+            <label htmlFor="brief" className="flex items-center gap-2 text-[13px] font-medium text-white/80">
+              <span className="grid h-6 w-6 place-items-center rounded-lg bg-gradient-to-br from-indigo-400 to-sky-400 text-[#07070a]">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              Describe the website you want
+            </label>
+            <textarea
+              id="brief"
+              value={prompt}
+              onChange={(event) => setPrompt(event.target.value)}
+              rows={4}
+              disabled={working}
+              autoFocus={Boolean(initialPrompt)}
+              placeholder="Create a modern website for a photography business, with a portfolio gallery and a contact form..."
+              className="mt-3 max-h-80 min-h-[7.5rem] w-full resize-none rounded-2xl [field-sizing:content] border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[16px] leading-relaxed text-white outline-none transition-colors placeholder:text-white/30 focus:border-white/25 focus:bg-white/[0.05] disabled:opacity-60"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) void create('generate');
+              }}
+            />
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {EXAMPLES.map((example, index) => (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {EXAMPLES.map((example, index) => (
+                <button
+                  key={example}
+                  type="button"
+                  disabled={working}
+                  onClick={() => setPrompt(example)}
+                  className={`focus-ring rounded-full border px-3 py-1.5 text-[12px] transition-colors disabled:opacity-40 ${
+                    index >= 3 ? 'max-sm:hidden ' : ''
+                  }${
+                    prompt === example
+                      ? 'border-white/40 bg-white/10 text-white'
+                      : 'border-white/10 text-white/50 hover:border-white/25 hover:text-white'
+                  }`}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+
+            {prompt.length > MAX_BRIEF_LENGTH / 4 ? (
+              <p className={`mt-2 text-right text-[11px] tabular-nums ${over ? 'font-semibold text-red-400' : 'text-white/35'}`}>
+                {prompt.length.toLocaleString()} / {MAX_BRIEF_LENGTH.toLocaleString()}
+              </p>
+            ) : null}
+
+            {error ? (
+              <p className="mt-4 flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3.5 py-2.5 text-[13px] text-red-200">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {error}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] bg-white/[0.02] px-4 py-3 sm:px-5">
+            <p className="text-[12px] text-white/40">
+              Pages, sections, copy, imagery and a brand kit.{' '}
+              <span className="hidden font-mono text-[11px] text-white/30 sm:inline">Ctrl + Enter</span>
+            </p>
+            <div className="flex w-full items-center gap-2 sm:w-auto">
               <button
-                key={example}
                 type="button"
                 disabled={working}
-                onClick={() => setPrompt(example)}
-                className={`focus-ring rounded-full border px-3 py-1.5 text-[12px] transition-colors disabled:opacity-40 ${
-                  index >= 3 ? 'max-sm:hidden ' : ''
-                }${
-                  prompt === example
-                    ? 'border-white/40 bg-white/10 text-white'
-                    : 'border-white/10 text-white/50 hover:border-white/25 hover:text-white'
-                }`}
+                onClick={() => void create('blank')}
+                className="focus-ring inline-flex h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/15 px-3 sm:px-4 text-[13px] font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white disabled:opacity-40 sm:flex-none"
               >
-                {example}
+                {busy === 'blank' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FilePlus2 className="h-3.5 w-3.5" />}
+                Start blank
               </button>
-            ))}
+              <button
+                type="button"
+                disabled={working || over}
+                onClick={() => void create('generate')}
+                className="focus-ring group inline-flex h-10 flex-[1.4] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-3 sm:px-5 text-[13px] font-semibold text-[#07070a] shadow-[0_0_30px_-6px_rgba(165,180,252,0.7)] transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+              >
+                <Wand2 className="h-3.5 w-3.5" />
+                Generate website
+              </button>
+            </div>
           </div>
-
-          {prompt.length > MAX_BRIEF_LENGTH / 4 ? (
-            <p className={`mt-2 text-right text-[11px] tabular-nums ${over ? 'font-semibold text-red-400' : 'text-white/35'}`}>
-              {prompt.length.toLocaleString()} / {MAX_BRIEF_LENGTH.toLocaleString()}
-            </p>
-          ) : null}
-
-          {busy === 'generate' ? <GenerationProgressList events={events} /> : null}
-
-          {error ? (
-            <p className="mt-4 flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3.5 py-2.5 text-[13px] text-red-200">
-              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {error}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] bg-white/[0.02] px-4 py-3 sm:px-5">
-          <p className="text-[12px] text-white/40">
-            {busy === 'generate'
-              ? 'Planning pages, writing copy and picking a brand kit. This usually takes 20-40 seconds.'
-              : (
-                <>
-                  Pages, sections, copy, imagery and a brand kit.{' '}
-                  <span className="hidden font-mono text-[11px] text-white/30 sm:inline">Ctrl + Enter</span>
-                </>
-              )}
-          </p>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <button
-              type="button"
-              disabled={working}
-              onClick={() => void create('blank')}
-              className="focus-ring inline-flex h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-white/15 px-3 sm:px-4 text-[13px] font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white disabled:opacity-40 sm:flex-none"
-            >
-              {busy === 'blank' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FilePlus2 className="h-3.5 w-3.5" />}
-              Start blank
-            </button>
-            <button
-              type="button"
-              disabled={working || over}
-              onClick={() => void create('generate')}
-              className="focus-ring group inline-flex h-10 flex-[1.4] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-3 sm:px-5 text-[13px] font-semibold text-[#07070a] shadow-[0_0_30px_-6px_rgba(165,180,252,0.7)] transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
-            >
-              {busy === 'generate' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-              {busy === 'generate' ? 'Generating…' : 'Generate website'}
-            </button>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -144,6 +144,11 @@ export function describeProgress(event: GenerationProgress): string {
   }
 }
 
+/** Human name for a section type, as the progress UI shows it. */
+export function sectionLabel(type: string): string {
+  return SECTION_LABELS[type] ?? type;
+}
+
 const SECTION_LABELS: Record<string, string> = {
   header: 'navigation',
   hero: 'hero',
